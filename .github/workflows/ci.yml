@@ -35,12 +35,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build and sign APK with Gradle
-        run: ./gradlew assembleRelease
-        env:
-          HA1_KEYSTORE_PASSWORD: ${{ secrets.HA1_KEYSTORE_PASSWORD }}
-          HA1_GITHUB_TOKEN: ${{ secrets.HA1_GITHUB_TOKEN }}
-          HA1_VERSION_SOURCE: 'ci'
+      - name: Build unsigned release APK
+        # Skip signing to make unsigned APK
+        run: ./gradlew assembleRelease -x signingReport
 
       - name: Upload Artifacts(arm32)
         uses: actions/upload-artifact@v4
