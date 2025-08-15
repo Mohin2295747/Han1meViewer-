@@ -1,51 +1,51 @@
-# Han1meViewer 技术相关
+l# Han1meViewer Technology Related
 
-> 抄是程序员进步的阶梯。
+> Copying is the ladder of programmer progress.
 
-## 概括
+## Summary
 
-本软件使用 MVVM 架构，Material 3 视觉风格，Jetpack 不用问肯定用，但未使用 Compose（有一说一不用 Compose
-写 xml 真是写到吐）。网络请求使用 Retrofit，图片加载使用 Coil，视频播放使用 Jiaozi，Json 解析使用
-Serialization，部分弹窗使用的 Xpopup。未使用 LiveData，全部改用功能更强大的 Flow。
+This software uses MVVM architecture, Material 3 visual style, Jetpack is definitely used, but Compose is not used (there is a saying that Compose is not used
+I was really tired of writing XML. I used Retrofit for network requests, Coil for image loading, Jiaozi for video playback, and Json parsing.
+Serialization, Xpopup is used for some pop-ups. LiveData is not used, and all are replaced by the more powerful Flow.
 
-## 受众人群
+## Target Audience
 
-这篇文章主要给谁看的呢？一是那些刚学习 Android 的同学，想看看本项目是怎么写的，或者对其中某个功能很感兴趣，想学习一下并且快速集成于自己的
-App 中；二是普通开发者感兴趣来捧个场，能学到东西更好，写的不对的来发 discussion 拷打我。
+Who is this article mainly for? First, those who are new to Android and want to see how this project is written, or are very interested in a certain function and want to learn it and quickly integrate it into their own
+In the App; secondly, ordinary developers are interested and can come to support me. It would be better if they can learn something. If they write something wrong, they can post a discussion and criticize me.
 
-## 功能解析
+## Functional Analysis
 
-### 断点续传下载
+### Resumable download
 
-#### 你可以学到
+#### You can learn
 
-1. WorkManager 使用，如何在 WorkManager 中对下载任务进行基础管理？
-2. RecyclerView 使用，DiffUtil 使用，如何充分利用 `payload` 参数对某个特定的控件进行刷新？
-3. Room 使用，如何通过数据库实现回调？
+1. How do I use WorkManager and perform basic management of download tasks in WorkManager?
+2. When using RecyclerView and DiffUtil, how can we make full use of the `payload` parameter to refresh a specific control?
+3. When using Room, how do I implement callbacks through the database?
 
-#### 关键文件
+#### Key Files
 
-- [HanimeDownloadWorker.kt](app/src/main/java/com/yenaly/han1meviewer/worker/HanimeDownloadWorker.kt) - 关键作业类
-- [HanimeDownloadEntity.kt](app/src/main/java/com/yenaly/han1meviewer/logic/entity/HanimeDownloadEntity.kt) - 下载 实体类
+- [HanimeDownloadWorker.kt](app/src/main/java/com/yenaly/han1meviewer/worker/HanimeDownloadWorker.kt) - Key job class
+- [HanimeDownloadEntity.kt](app/src/main/java/com/yenaly/han1meviewer/logic/entity/HanimeDownloadEntity.kt) - Download entity class
 - [HanimeDownloadDao.kt](app/src/main/java/com/yenaly/han1meviewer/logic/dao/HanimeDownloadDao.kt) - 下载 Dao 类
-- [DownloadDatabase.kt](app/src/main/java/com/yenaly/han1meviewer/logic/dao/DownloadDatabase.kt) - 下载 数据库类
+- [DownloadDatabase.kt](app/src/main/java/com/yenaly/han1meviewer/logic/dao/DownloadDatabase.kt) - Download database class
 - [HanimeDownloadingRvAdapter.kt](app/src/main/java/com/yenaly/han1meviewer/ui/adapter/HanimeDownloadingRvAdapter.kt) - 下载界面的 RecyclerView Adapter
 
-#### 解释
+#### explain
 
-你可能问我你就这几个文件就实现了？我接口呢，没接口你怎么回调的？
+You may ask me, you have implemented it with just a few files? Where is my interface? How do you call back without an interface?
 
-**先去看**我写的 [小白如何快速实现简单的可保存状态断点续传后台下载？一个 Jetpack 库搞定一切！](https://juejin.cn/post/7278929337067225149)，看完再看下面。
+**First,** read my article [How can a newbie quickly implement simple, save-state, resumable downloads with background downloading? A Jetpack library handles it all! ](https://juejin.cn/post/7278929337067225149), then read the following.
 
-但是不要照搬，使用前要注意这么几点：
+But don't copy it. Pay attention to the following points before using it:
 
-1. 你所下载的东西是否可以断点续传？对于视频类 App 来说，视频基本都是可以断点续传的，毕竟要播放嘛！所以我在实现下载的时候不必考虑那么多。
-2. 是否要对每个下载任务进行很粒度的操作？不是说不行，但可能实现起来有点麻烦。
-3. 一次性下载数目是否很多？如果使用上述文章的做法去下载极多文件可能会对手机性能造成一定压力，一会细说。
+1. Can the download you're trying to download be resumed? For video apps, most videos are resumable, since they need to be played after all! So I didn't have to worry about that much when implementing the download.
+2. Do you need to perform very granular operations on each download task? It's not impossible, but it might be a bit cumbersome to implement.
+3. Are you downloading a large number of files at once? If you use the method in the above article to download a large number of files, it may put some pressure on your phone's performance. I will explain this in detail later.
 
-为什么说下载数目过多会造成一定压力？
+Why does too many downloads cause a certain amount of pressure?
 
-聚焦于 [HanimeDownloadWorker.kt](app/src/main/java/com/yenaly/han1meviewer/worker/HanimeDownloadWorker.kt) 第 180 行左右：
+Focus on around line 180 of [HanimeDownloadWorker.kt](app/src/main/java/com/yenaly/han1meviewer/worker/HanimeDownloadWorker.kt):
 
 ```kotlin
 const val RESPONSE_INTERVAL = 500L
@@ -59,27 +59,27 @@ if (System.currentTimeMillis() - delayTime > RESPONSE_INTERVAL) {
 }
 ```
 
-我在 App 里设置的是 500 ms 一更新，相当于 `2 次数据库更新操作/s/job`，加上通过 Flow/LiveData 回调，当数据库检测到数据更新，会立即返回全新的、拥有最新数据的列表，相当于又有 `回调 2 次/s/job`。如果一次性下载极多个文件，并且调低了 `RESPONSE_INTERVAL`，可能会对数据库造成一定负担。这个时候这种方法就不太好用了。
+In my app, I've set an update interval of 500ms, which is equivalent to two database update operations/s/job. In addition, through Flow/LiveData callbacks, when the database detects a data update, it immediately returns a new list with the latest data, which is equivalent to another two callbacks/s/job. If you download a large number of files at once and set the RESPONSE_INTERVAL setting low, this may put a certain amount of strain on the database. In this case, this method is not very effective.
 
-配置好了 RecyclerView，那刷新闪烁问题该如何解决？我在原文章中提供的方法并不好：
+Now that RecyclerView is configured, how do I solve the refresh flickering problem? The method I provided in the original article is not good:
 
 ```kotlin
 rv.itemAnimator?.changeDuration = 0
 ```
 
-这句代码只是解决了表面问题，实际上背后还是接着“闪”。因为即使是通过了 DiffUtil 进行了差分刷新，但还仍是全局更新，这只是自我欺骗罢了。不信你可以试试 `holder.binding.pbProgress.setProgress(item.progress, true)` 能不能正常出现动态效果。那怎么实现，`isDownloading` 字段发生修改，就单独对暂停按钮修改；`downloadedLength` 字段发生修改，就单独对进度条修改？这时候就需要 `payload` 出场了。
+This code only solves the problem superficially, but the underlying issue persists. Even with a differential refresh using DiffUtil, the update is still global, which is self-deceptive. To see if `holder.binding.pbProgress.setProgress(item.progress, true)` works correctly, try it out. So, how can we achieve this? When the `isDownloading` field changes, the pause button is updated separately; when the `downloadedLength` field changes, the progress bar is updated separately? This is where `payload` comes in.
 
-与 `payload` 相关的文章真的挺多，StackOverflow 甚至 掘金 上不少介绍这个的文章，自己去搜一搜马上就能看懂，我就不赘述了。关键就是 `DiffUtil.ItemCallback` 中的 `getChangePayload` 方法和 `onBindViewHolder` 中的 `payloads` 参数。
+There are tons of articles on payload, including on StackOverflow and even on Nuggets. A quick search will easily explain it, so I won't go into detail. The key is the getChangePayload method in DiffUtil.ItemCallback and the payloads parameter in onBindViewHolder .
 
-**先去看** `payload` 使用相关文章，再看下面。
+**First** read the article about `payload` usage, then read the following.
 
-但我发现，很多人确实介绍了这种方法，但鲜少有人去介绍如何高效率实现一次性去处理多个字段。你可能想到了 `List<Int>` 或 `IntArray`，通过遍历对应去处理每一种情况。这样的话，时间复杂度和空间复杂度都是 `O(n)`，`n` 是你需要监听的数目；再聪明点也可以想到使用 `Set<Int>`，在 `onBindViewHolder` 中分别查询 set 中是否含有某个情况来对应处理，这时候时间复杂度降到了 `O(1)`。如果在刷新不频繁的情况下，这样做确实没什么不妥，但是高强度下，每次 new 一个数据结构确实是一个小负担，那应该怎么样做呢？
+I've discovered that while many people have introduced this approach, few have addressed how to efficiently handle multiple fields at once. You might consider using `List<Int>` or `IntArray`, and iterating through each case to handle each situation. In this case, both the time and space complexity are `O(n)`, where `n` is the number of fields you need to monitor. A more clever approach might be to use `Set<Int>` and query each set in `onBindViewHolder` to see if it contains a specific case, reducing the time complexity to `O(1)`. This is fine for infrequent refreshes, but creating a new data structure each time is a burden under high-intensity conditions. So, what should be done?
 
-这时候可以选择简单的 Bitmap 数据结构。你可能刚听说，但它确实很常见，你在使用 `Intent#addFlags` 打开新 Activity 的时候，大概率会接触到这种数据结构。我们可以利用一个仅 4 个字节的 32-bit 整数值去实现查找 (`find`)、判空 (`isEmpty`)、添加 (`add`) 的功能（我们只需要这些功能，而且不同情况数量大概率不超过 32 个）。
+A simple Bitmap data structure is a good choice. You might have just heard of it, but it's quite common. You'll likely encounter it when opening a new Activity using `Intent#addFlags`. We can use a 32-bit integer value, which only takes four bytes, to implement find (`find`), isEmpty (`isEmpty`), and add (`add`) functions (we only need these functions, and the number of different cases will likely be no more than 32).
 
 聚焦于 [HanimeDownloadingRvAdapter.kt](app/src/main/java/com/yenaly/han1meviewer/ui/adapter/HanimeDownloadingRvAdapter.kt)
 
-> 注意：我使用了 BRVAH 作为 RecyclerView 的代替，所以具体方法和 RecyclerView 不一定一致，但使用方法基本一致。
+> Note: I used BRVAH as a replacement for RecyclerView, so the specific method may not be the same as RecyclerView, but the usage is basically the same.
 
 ```kotlin
 companion object {
@@ -105,15 +105,15 @@ companion object {
             oldItem: HanimeDownloadEntity,
             newItem: HanimeDownloadEntity,
         ): Any {
-            // 假设当前只有 progress 和原来不一样
-            var bitset = 0
+            // Assume that only progress is different from the original
+            where bitset = 0
             // bitset == 0000 0000
             if (oldItem.progress != newItem.progress || oldItem.downloadedLength != newItem.downloadedLength)
                 bitset = bitset or DOWNLOADING
             	// bitset == 0000 0001
             if (oldItem.isDownloading != newItem.isDownloading)
                 bitset = bitset or PAUSE
-            	// 不经过这里
+            	// Do not pass here
             return bitset
             // return 0000 0001
         }
@@ -128,13 +128,13 @@ override fun onBindViewHolder(
     item: HanimeDownloadEntity?,
     payloads: List<Any>,
 ) {
-    // 如果 payloads 列表为空，或者为 0000 0000，说明不需要修改
+    // If the payloads list is empty or 0000 0000, no modification is required
     if (payloads.isEmpty() || payloads.first() == 0)
         return super.onBindViewHolder(holder, position, item, payloads)
     item.notNull()
     val bitset = payloads.first() as Int
     // 0000 0001 & 0000 0001 = 0000 0001 != 0000 0000
-    // 对进度相关控件进行修改
+    // Modify progress related controls
     if (bitset and DOWNLOADING != 0) {
         holder.binding.tvSize.text = spannable {
             item.downloadedLength.formatFileSize().text()
@@ -145,82 +145,82 @@ override fun onBindViewHolder(
         holder.binding.pbProgress.setProgress(item.progress, true)
     }
     // 0000 0001 & 0000 0010 = 0000 0000 == 0000 0000
-    // 不经过下面
+    // Do not pass below
     if (bitset and PAUSE != 0) {
         holder.binding.btnStart.handleStartButton(item.isDownloading)
     }
 }
 ```
 
-就这样实现了效率比较高的差分刷新。
+In this way, a relatively efficient differential refresh is achieved.
 
-### CI 更新渠道
+### CI Update Channel
 
-#### 你可以学到
+#### You can learn
 
-#### 关键文件
+#### Key Files
 
-#### 解释
+#### explain
 
-当你的软件拓展性比较高，但受限于题材内容或者单纯懒，不方便自建服务器去读取这些拓展文件。但你又希望能让用户通过其他渠道实时的获取到更新（比如好心人上传了拓展文件，我合并到主分支之后，几分钟后用户就可以获得更新，而不用我自己做包），但又不是所有人需要这些拓展功能（要是人家不愿用你那功能，又一会一个 Release，用户也会烦；你自己一会发一个包你也会烦）。所以能不能给用户提供两种渠道？一个是稳定更新渠道，自己发版本；另一个是开发版，GitHub 自动构建，保证最新功能（最新拓展功能立即集成）但不保证稳定性。
+Your software is highly extensible, but due to limitations in the subject matter or sheer laziness, it's inconvenient to build your own server to read these extension files. You'd also like to allow users to get real-time updates through other channels (for example, if someone uploads an extension file, I merge it into the main branch, and users get the update a few minutes later, without having to build a package myself). However, not everyone needs these extensions (and if they don't want to use your feature, the constant releases will annoy users; if you keep releasing packages yourself, you'll also be annoyed). So, can you provide users with two channels? One is a stable update channel, where you release your own versions; the other is a development version, automatically built by GitHub, which guarantees the latest features (with the latest extensions integrated immediately) but not stability.
 
-答案是肯定的。其实我之前也不知道怎么做，但是 @NekoOuO 给我发了 [Foolbar/EhViewer](https://github.com/FooIbar/EhViewer/) 的做法，我想都没想就抄过来了。但没人详细教怎么做，我今天就来讲讲。
+The answer is yes. Actually, I had no idea how to do it before, but @NekoOuO sent me the recipe for [Foolbar/EhViewer](https://github.com/FooIbar/EhViewer/), and I copied it without a second thought. But no one has explained how to do it in detail, so I'm going to explain it today.
 
-**先去看** GitHub CI 基础用法。
+First, read the basics of GitHub CI.
 
-谷歌、掘金上全是教程。你先去查一查用法然后配置一下，刚开始的要求不多，你上传 commit 之后，GitHub CI 开始工作并成功 Build，就算入门了，先不用管 Build 之后干什么或者别的。如果你操作非常顺利，再看以下步骤。
+Google and Nuggets are full of tutorials. Start by looking up how to use it and configuring it. Initially, the requirements aren't too complicated. Once you've uploaded a commit, GitHub CI starts working and successfully builds. That's enough to get you started. Don't worry about what happens after the build or anything else. If everything goes smoothly, move on to the following steps.
 
-待更...
+To be updated...
 
-### 共享关键H帧
+### Shared key H frame
 
-#### 你可以学到
+#### You can learn
 
-1. 如何充分利用 Kotlin 的集合操作函数，将一个个单独的 JSON 文件进行排序、分类甚至扁平化？
+1. How to make full use of Kotlin's collection operation functions to sort, classify, and even flatten individual JSON files?
 
-   相关函数：`groupBy`、`flatMap`、`sortedWith` `=>` `compareBy`、`thenBy`
+   Related functions: `groupBy`, `flatMap`, `sortedWith` `=>` `compareBy`, `thenBy`
 
-#### 关键文件
+#### Key Files
 
-- [HKeyframes 文件夹](app/src/main/assets/h_keyframes) - 存放所有共享关键H帧
-- [DatabaseRepo.kt](app/src/main/java/com/yenaly/han1meviewer/logic/DatabaseRepo.kt) - 处理共享关键H帧
+- [HKeyframes folder](app/src/main/assets/h_keyframes) - stores all shared key H frames
+- [DatabaseRepo.kt](app/src/main/java/com/yenaly/han1meviewer/logic/DatabaseRepo.kt) - Handles shared key H frames
 - [SharedHKeyframesRvAdapter.kt](app/src/main/java/com/yenaly/han1meviewer/ui/adapter/SharedHKeyframesRvAdapter.kt) - 界面 Adapter
-- [HKeyframeEntity.kt](app/src/main/java/com/yenaly/han1meviewer/logic/entity/HKeyframeEntity.kt) - 相关实体类
+- [HKeyframeEntity.kt](app/src/main/java/com/yenaly/han1meviewer/logic/entity/HKeyframeEntity.kt) - Related entity class
 
-#### 解释
+#### explain
 
-很多人看到 [HKeyframes 文件夹](app/src/main/assets/h_keyframes) 先笑了，所有 JSON 文件都放一块，作者是个傻宝吧，这都不知道分文件夹来分类？
+Many people laughed when they saw the [HKeyframes folder](app/src/main/assets/h_keyframes). All the JSON files are put together. The author must be a fool. He doesn’t even know how to classify them into folders?
 
-你以为我没想到吗？首先分文件夹为什么不太行：
+Do you think I didn't think of this? First of all, why is it not working well to divide folders:
 
-1. 分文件夹无法一次性读取到对应影片的关键H帧。比如你正在看 `videoCode` 为 `114514` 的影片，我不分文件夹直接读取文件夹下的对应文件即可，不需要遍历各个文件夹去寻找，相当于 List 和 Map 的区别。
-2. 假设分文件夹后，在根目录创建 JSON 来写好哪个文件夹包含哪些影片的代号，也不是不行，但是会增加其他想提供共享H帧的人的负担。
+1. Folder-based access doesn't allow for all key H-frames to be retrieved all at once. For example, if you're watching a video with `videoCode` set to `114514`, I can directly retrieve the corresponding file in that folder, without searching through all the folders. This is similar to the difference between a List and a Map.
+2. Assuming that after the folders are divided, create a JSON in the root directory to write the code of which folder contains which movie. This is not impossible, but it will increase the burden on others who want to provide shared H-frames.
 
-主要还是历史遗留问题，我懒得改了😄。Kotlin 这么多集合操作函数，分个组排个序不轻轻松松？
+This is mainly a historical issue, I'm too lazy to fix it. Kotlin has so many collection operation functions, isn't it easy to sort by group?
 
-我现在给你一个关键H帧的 JSON，你来考虑考虑怎么转化为以下格式：
+I'll give you a key H-frame JSON file and ask you to figure out how to convert it into the following format:
 
-格式：
+Format:
 
 ```
-- 系列 1
-	- 系列 1 第一集
-	- 系列 1 第二集
-	- 系列 1 第三集
-- 系列 2
-	- 系列 2 第一集
-	- 系列 2 第二集
+- Series 1
+	- Series 1 Episode 1
+	- Series 1 Episode 2
+	- Series 1 Episode 3
+- Series 2
+	- Series 2 Episode 1
+	- Series 2 Episode 2
 ```
 
-随机一段关键H帧：
+Random key H frame:
 
-> 你要注意，该网站的 `videoCode` 不是按照顺序排列的，第一集和第二集中间可能会夹带一个其他系列的影片。
+> Please note that the `videoCode` on this website is not arranged in sequence, and there may be a video from another series between the first and second episodes.
 
 ```json
 {
   "videoCode": "114514",
-  "group": "系列 2",
-  "title": "系列 2 第二集",
+  "group": "Series 2",
+  "title": "Series 2 Episode 2",
   "episode": 2,
   "author": "Bekki Chen",
   "keyframes": [
@@ -244,7 +244,7 @@ override fun onBindViewHolder(
 }
 ```
 
-你可能想用 Map 分类，但是 RecyclerView 可是传不了 Map 的，那怎么才能扁平化成一个 List，并且能实现  RecyclerView 多布局呢？如果是两种截然不同的两个数据去实现 RecyclerView 多布局，不得不依靠接口，比如说本 App 中共享关键H帧界面中数据不一样的标题和内容。
+You might want to use a Map for classification, but RecyclerView can't pass Maps. So how can you flatten it into a List and still implement multiple RecyclerView layouts? If you need to implement multiple RecyclerView layouts with two completely different data types, you'll have to rely on APIs. For example, in this app, the shared key H-frame interface has different data for the title and content.
 
 聚焦于 [HKeyframeEntity.kt](app/src/main/java/com/yenaly/han1meviewer/logic/entity/HKeyframeEntity.kt)
 
@@ -261,43 +261,43 @@ interface HKeyframeType : MultiItemEntity {
 }
 ```
 
-然后 HKeyframeEntity 和 HKeyframeHeader 我就不多说了，把正确的 `itemType` override 给对应的 `itemType` 字段就好。
+Then I won’t say much about HKeyframeEntity and HKeyframeHeader. Just give the correct `itemType` override to the corresponding `itemType` field.
 
-现在问题是怎么读取那些共享关键H帧并将其扁平化？
+Now the question is how to read those shared key H frames and flatten them?
 
-聚焦于 [DatabaseRepo.kt](app/src/main/java/com/yenaly/han1meviewer/logic/DatabaseRepo.kt)
+Focus on [DatabaseRepo.kt](app/src/main/java/com/yenaly/han1meviewer/logic/DatabaseRepo.kt)
 
 ```kotlin
 @OptIn(ExperimentalSerializationApi::class)
 fun loadAllShared(): Flow<List<HKeyframeType>> = flow {
     val res = applicationContext.assets.let { assets ->
-        // assets.list 方法获取到文件夹所有文件的 List
-        assets.list("h_keyframes")?.asSequence() // 将其转化为一个序列
-            ?.filter { it.endsWith(".json") } // 把其中结尾为 json 的挑出来
-            ?.mapNotNull { fileName -> // 将 文件名 映射 为 文件，再通过 文件 转化为 实体
+        // The assets.list method gets a list of all files in the folder
+        assets.list("h_keyframes")?.asSequence() // Convert it to a sequence
+            ?.filter { it.endsWith(".json") } // Pick out the ones ending with json
+            ?.mapNotNull { fileName -> // Map the file name to a file, and then convert the file into an entity
                 try {
-                    // assets.open 方法打开文件
+                    // assets.open method opens the file
                     assets.open("h_keyframes/$fileName").use { inputStream ->
                         Json.decodeFromStream<HKeyframeEntity>(inputStream)
                     }
-                } catch (e: Exception) { // 出现问题返回 null
+                } catch (e: Exception) { // Return null if a problem occurs
                     e.printStackTrace()
                     null
                 }
             }
             ?.sortedWith(
                 compareBy<HKeyframeEntity> { it.group }.thenBy { it.episode }
-            ) // 排序，先以 group 进行排序，然后对 episode 进行排序
-            ?.groupBy { it.group ?: "???" } // 分组，以 group 为 key，以 group 下的所有影片的列表为 value 建立 Map，若 group 为 null，加入组 ??? 里
-            ?.flatMap { (group, entities) -> // 提供两个参数，分别为 key 和 value
+            ) // Sort by group first, then by episode
+            ?.groupBy { it.group ?: "???" } // Group, create a Map with group as key and a list of all videos under group as value. If group is null, add it to group ???
+            ?.flatMap { (group, entities) -> // Provide two parameters, key and value
                 listOf(HKeyframeHeader(title = group, attached = entities)) + entities
-            } // 关键：扁平化，group 与 entities 由主从关系变为并列关系
-            .orEmpty() // 若 list 为 null，返回一个长度为 0 的空列表
+            } // Key: Flattening, changing the relationship between groups and entities from master-slave to parallel
+            .orEmpty() // If list is null, return an empty list of length 0
     }
     emit(res)
 }
 ```
 
-然后在对应 RecyclerView 中设置好 `itemType`，再分 `itemType` 配置相关函数就可以了。
+Then set `itemType` in the corresponding RecyclerView, and then configure related functions according to `itemType`.
 
-具体查看 [SharedHKeyframesRvAdapter.kt](app/src/main/java/com/yenaly/han1meviewer/ui/adapter/SharedHKeyframesRvAdapter.kt) 
+具体查看 [SharedHKeyframesRvAdapter.kt](app/src/main/java/com/yenaly/han1meviewer/ui/adapter/SharedHKeyframesRvAdapter.kt)
