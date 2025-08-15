@@ -30,7 +30,10 @@ jobs:
       - name: Load Google Services File
         env:
           DATA: ${{ secrets.HA1_GOOGLE_SERVICES_JSON_BASE64 }}
-        run: echo $DATA | base64 -di > app/google-services.json
+        run: |
+          mkdir -p app
+          echo "$DATA" | base64 --decode > app/google-services.json
+          echo "google-services.json created successfully"
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -39,19 +42,19 @@ jobs:
         # Skip signing to make unsigned APK
         run: ./gradlew assembleRelease -x signingReport
 
-      - name: Upload Artifacts(arm32)
+      - name: Upload Artifacts (armeabi-v7a)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_armeabi-v7a.apk
           name: Han1meViewer-ci-${{ github.sha }}-armeabi-v7a
 
-      - name: Upload Artifacts(arm64)
+      - name: Upload Artifacts (arm64-v8a)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_arm64-v8a.apk
           name: Han1meViewer-ci-${{ github.sha }}-arm64-v8a
 
-      - name: Upload Artifacts(universal)
+      - name: Upload Artifacts (universal)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_universal.apk
