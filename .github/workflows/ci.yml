@@ -31,8 +31,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build unsigned release APK
-        run: ./gradlew assembleRelease -x signingReport -Pandroid.injected.signing.store.file=
-
+        run: ./gradlew assembleRelease -x processReleaseGoogleServices -x signingReport -Pandroid.injected.signing.store.file=
       - name: Upload Artifacts (armeabi-v7a)
         uses: actions/upload-artifact@v4
         with:
