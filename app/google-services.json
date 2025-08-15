@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "778323069486",
+    "project_id": "han1me-e7c55",
+    "storage_bucket": "han1me-e7c55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:778323069486:android:ab524760cf1d9ff5e6edbf",
+        "android_client_info": {
+          "package_name": "com.yenaly.han1meviewer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOw-tz2uFFW_DYhk_yVeo0rcLUXtx8fgQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
