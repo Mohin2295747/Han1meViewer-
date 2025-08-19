@@ -95,7 +95,7 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
                 holder.getView<TextView>(R.id.views).apply {
                     if (item.views != null) {
                         holder.getView<View>(R.id.icon_views).isGone = false
-                        text = item.views
+                        text = formatViews(item.views!!)
                     } else {
                         holder.getView<View>(R.id.icon_views).isGone = true
                     }
@@ -223,5 +223,28 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
             return
         }
         activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
+    }
+    
+    private fun formatViews(raw: String): String {
+        return when {
+            raw.contains("萬") -> {
+                val num = raw.replace("萬次", "").toFloatOrNull() ?: return raw
+                val views = (num * 10_000).toInt()
+                formatNumber(views)
+            }
+            raw.contains("次") -> {
+               val num = raw.replace("次", "").toIntOrNull() ?: return raw
+               formatNumber(num)
+            }
+        else -> raw
+        }
+    }
+    
+    private fun formatNumber(num: Int): String {
+        return when {
+            num >= 1_000_000 -> "%.1fM".format(num / 1_000_000f)
+            num >= 1_000 -> "%.1fK".format(num / 1_000f)
+            else -> num.toString()
+        }
     }
 }
