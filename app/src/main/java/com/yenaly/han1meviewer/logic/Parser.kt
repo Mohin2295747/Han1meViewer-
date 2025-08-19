@@ -300,7 +300,9 @@ object Parser {
         tags.forEach { tag ->
             val child = tag.childOrNull(0)
             if (child != null && child.hasAttr("href")) {
-                tagList.add(child.ownText())
+                val rawText = child.ownText().trim()
+                val translated = TagDictionary.dict[rawText] ?: rawText
+                tagList.add(translated)
             }
         }
 
