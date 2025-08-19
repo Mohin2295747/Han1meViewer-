@@ -531,7 +531,11 @@ object Parser {
             val tagClass = secondPart?.select("div[class=single-video-tag] > a")
             val tags = mutableListOf<String>()
             tagClass?.forEach { tag: Element? ->
-                tag?.let { tags.add(tag.text()) }
+                tag?.let {
+                    val rawText = tag.text().trim()
+                    val translated = TagDictionary.dict[rawText] ?: rawText
+                    tags.add(translated)
+                }
             }
             val relatedPicClass = secondPart?.select("img[class=preview-image-modal-trigger]")
             val relatedPics = mutableListOf<String>()
