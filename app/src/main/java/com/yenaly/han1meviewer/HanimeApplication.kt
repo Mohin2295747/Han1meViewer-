@@ -47,6 +47,7 @@ class HanimeApplication : YenalyApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        TagDictionary.init(this)
         DynamicColors.applyToActivitiesIfAvailable(this)
         HProxySelector.rebuildNetwork()
 
