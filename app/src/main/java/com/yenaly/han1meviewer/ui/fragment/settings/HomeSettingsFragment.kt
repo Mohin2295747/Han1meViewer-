@@ -38,6 +38,7 @@ import com.yenaly.han1meviewer.util.setSummaryConverter
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.han1meviewer.util.showUpdateDialog
 import com.yenaly.han1meviewer.util.showWithBlurEffect
+import com.yenaly.han1meviewer.util.TranslationCache
 import com.yenaly.yenaly_libs.ActivityManager
 import com.yenaly.yenaly_libs.base.settings.YenalySettingsFragment
 import com.yenaly.yenaly_libs.utils.browse
