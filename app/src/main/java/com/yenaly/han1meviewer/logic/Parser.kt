@@ -333,7 +333,10 @@ object Parser {
             val videoDetailWrapper = parseBody.selectFirst("div[class=video-details-wrapper]")
             val videoCaptionText = videoDetailWrapper?.selectFirst("div[class^=video-caption-text]")
             val chineseTitle = videoCaptionText?.previousElementSibling()?.ownText()
-            val introduction = videoCaptionText?.ownText()
+            var introduction = videoCaptionText?.ownText()
+            introduction?.let { raw ->
+                introduction = runBlocking { MLKitTranslator.translate(raw) }
+            }
             val uploadTimeWithViews = videoDetailWrapper?.selectFirst("div > div > div")?.text()
             val uploadTimeWithViewsGroups = uploadTimeWithViews?.let {
                 Regex.viewAndUploadTime.find(it)?.groups
