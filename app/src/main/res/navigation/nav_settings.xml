@@ -31,5 +31,9 @@
     <fragment
         android:id="@+id/downloadSettingsFragment"
         android:name="com.yenaly.han1meviewer.ui.fragment.settings.DownloadSettingsFragment" />
+    
+    <fragment
+        android:id="@+id/otherSettingsFragment"
+        android:name="com.yenaly.han1meviewer.ui.fragment.settings.OtherSettingsFragment" />
 
 </navigation>
