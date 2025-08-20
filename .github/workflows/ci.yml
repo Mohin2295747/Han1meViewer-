@@ -2,17 +2,9 @@ name: CI(release)
 
 on:
   workflow_dispatch:
-    inputs:
-      manual_tag:
-        description: "Set a specific tag (e.g. v1.0.0). Used for first run or custom version."
-        required: false
-      bump_type:
-        description: "Choose how to bump version if no manual_tag is provided (patch | minor | major)."
-        required: false
-        default: "patch"
   push:
     tags:
-      - "v*.*.*"
+      - "v*"
 
 permissions:
   contents: write
@@ -47,63 +39,43 @@ jobs:
       - name: Build and sign APK with Gradle
         run: |
           ./gradlew assembleRelease
-          echo "VERSION_CODE=$(find app/build/outputs/apk/release -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')" >> $GITHUB_ENV
+          VERSION_CODE=$(find app/build/outputs/apk/release -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
         env:
           HA1_KEYSTORE_PASSWORD: ${{ secrets.HA1_KEYSTORE_PASSWORD }}
           HA1_GITHUB_TOKEN: ${{ secrets.HA1_GITHUB_TOKEN }}
-          HA1_VERSION_SOURCE: 'release'
 
-      # 🔹 Tagging logic with bump support
-      - name: Determine Tag
-        id: tag
+      - name: Create Git tag from APK version code
         run: |
-          manual_tag="${{ github.event.inputs.manual_tag }}"
-          bump_type="${{ github.event.inputs.bump_type }}"
-
-          if [[ -n "$manual_tag" ]]; then
-            TAG="$manual_tag"
-          else
-            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-            if [[ -z "$LAST_TAG" ]]; then
-              echo "❌ No existing tag found. Please provide manual_tag input for the first run."
-              exit 1
-            fi
-
-            base="${LAST_TAG#v}"
-            major=$(echo $base | cut -d. -f1)
-            minor=$(echo $base | cut -d. -f2)
-            patch=$(echo $base | cut -d. -f3)
-
-            case "$bump_type" in
-              major)
-                major=$((major + 1))
-                minor=0
-                patch=0
-                ;;
-              minor)
-                minor=$((minor + 1))
-                patch=0
-                ;;
-              patch|*)
-                patch=$((patch + 1))
-                ;;
-            esac
-
-            TAG="v${major}.${minor}.${patch}"
-          fi
-
-          echo "Using tag: $TAG"
+          TAG="v${VERSION_CODE}"
+          echo "TAG=$TAG" >> $GITHUB_ENV
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag $TAG
           git push origin $TAG
 
-          echo "TAG=$TAG" >> $GITHUB_ENV
+      - name: Upload Artifacts (arm32)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/outputs/apk/release/Han1meViewer-v*_armeabi-v7a.apk
+          name: Han1meViewer-${{ env.TAG }}-armeabi-v7a
 
-      - name: Create release
+      - name: Upload Artifacts (arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/outputs/apk/release/Han1meViewer-v*_arm64-v8a.apk
+          name: Han1meViewer-${{ env.TAG }}-arm64-v8a
+
+      - name: Upload Artifacts (universal)
+        uses: actions/upload-artifact@v4
+        with:
+          path: app/build/outputs/apk/release/Han1meViewer-v*_universal.apk
+          name: Han1meViewer-${{ env.TAG }}-universal
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.0.4
         with:
-          name: Han1meViewer ${{ env.TAG }}+${{ env.VERSION_CODE }}
+          name: Han1meViewer ${{ env.TAG }}
           tag_name: ${{ env.TAG }}
           files: app/build/outputs/apk/release/Han1meViewer-v*.apk
 
@@ -126,5 +98,5 @@ jobs:
         uses: softprops/action-gh-release@v2.0.4
         with:
           body: ${{ steps.generate_changelog.outputs.changelog }}
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ needs.build.outputs.TAG || github.ref_name }}
           make_latest: true
