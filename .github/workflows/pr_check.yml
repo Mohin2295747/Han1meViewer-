@@ -1,20 +1,22 @@
-name: Pull Request Check
+name: Full Compile Check
 
 on:
-  pull_request:
-    branches: [ "master" ]
-    paths-ignore:
-      - "**.md"
+  # Manually trigger workflow
+  workflow_dispatch:
+
+  # Also run automatically on any push
+  push:
 
 jobs:
-  check:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # Step 1: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Set up JDK 21
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -22,13 +24,18 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Load Google Services File
-        env:
-          DATA: ${{ secrets.HA1_GOOGLE_SERVICES_JSON_BASE64 }}
-        run: echo $DATA | base64 -di > app/google-services.json
-
+      # Step 3: Grant execute permission for gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build
-        run: ./gradlew build
+      # Step 4: Clean and compile the project
+      - name: Build project (check syntax & compile errors)
+        run: ./gradlew clean assembleDebug --stacktrace --info
+
+      # Optional: Run lint to catch warnings
+      - name: Run lint
+        run: ./gradlew lint
+
+      # Optional: Run unit tests
+      - name: Run unit tests
+        run: ./gradlew test
