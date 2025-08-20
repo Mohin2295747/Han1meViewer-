@@ -1,14 +1,23 @@
 name: CI(release)
 
 on:
-  workflow_dispatch:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v1.7.2)'
+        required: true
+        default: 'v1.7.2'
+        type: string
 
 permissions:
   contents: write
   actions: write
+
+env:
+  RELEASE_TAG: ${{ github.ref_name != '' && github.ref_name || inputs.tag }}
 
 jobs:
   build:
@@ -18,8 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          fetch-tags: true
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -39,44 +47,17 @@ jobs:
       - name: Build and sign APK with Gradle
         run: |
           ./gradlew assembleRelease
-          VERSION_CODE=$(find app/build/outputs/apk/release -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')
-          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_CODE=$(find app/build/outputs/apk/release -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')" >> $GITHUB_ENV
         env:
           HA1_KEYSTORE_PASSWORD: ${{ secrets.HA1_KEYSTORE_PASSWORD }}
           HA1_GITHUB_TOKEN: ${{ secrets.HA1_GITHUB_TOKEN }}
+          HA1_VERSION_SOURCE: 'release'
 
-      - name: Create Git tag from APK version code
-        run: |
-          TAG="v${VERSION_CODE}"
-          echo "TAG=$TAG" >> $GITHUB_ENV
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG
-          git push origin $TAG
-
-      - name: Upload Artifacts (arm32)
-        uses: actions/upload-artifact@v4
-        with:
-          path: app/build/outputs/apk/release/Han1meViewer-v*_armeabi-v7a.apk
-          name: Han1meViewer-${{ env.TAG }}-armeabi-v7a
-
-      - name: Upload Artifacts (arm64)
-        uses: actions/upload-artifact@v4
-        with:
-          path: app/build/outputs/apk/release/Han1meViewer-v*_arm64-v8a.apk
-          name: Han1meViewer-${{ env.TAG }}-arm64-v8a
-
-      - name: Upload Artifacts (universal)
-        uses: actions/upload-artifact@v4
-        with:
-          path: app/build/outputs/apk/release/Han1meViewer-v*_universal.apk
-          name: Han1meViewer-${{ env.TAG }}-universal
-
-      - name: Create GitHub Release
+      - name: Create release
         uses: softprops/action-gh-release@v2.0.4
         with:
-          name: Han1meViewer ${{ env.TAG }}
-          tag_name: ${{ env.TAG }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Han1meViewer ${{ env.RELEASE_TAG }}+${{ env.VERSION_CODE }}
           files: app/build/outputs/apk/release/Han1meViewer-v*.apk
 
   changelog:
@@ -85,10 +66,11 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: Generate Changelog
         id: generate_changelog
@@ -97,6 +79,6 @@ jobs:
       - name: Update Changelog
         uses: softprops/action-gh-release@v2.0.4
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           body: ${{ steps.generate_changelog.outputs.changelog }}
-          tag_name: ${{ needs.build.outputs.TAG || github.ref_name }}
           make_latest: true
