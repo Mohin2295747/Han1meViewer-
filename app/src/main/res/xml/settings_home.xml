@@ -114,6 +114,13 @@
             app:summary="@string/hanime_app_name"
             app:title="@string/about" />
 
+        <Preference
+            app:icon="@drawable/ic_baseline_clear_all_24"
+            app:key="translation_cache"
+            app:title="@string/pref_translation_cache"
+            app:summary="@string/pref_translation_cache_summary"
+            app:persistent="false" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
