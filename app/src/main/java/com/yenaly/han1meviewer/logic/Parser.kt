@@ -2,6 +2,7 @@ package com.yenaly.han1meviewer.logic
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
 import com.yenaly.han1meviewer.EMPTY_STRING
