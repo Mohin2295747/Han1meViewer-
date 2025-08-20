@@ -62,6 +62,23 @@ class HanimeApplication : YenalyApplication() {
         if (AnimeShaders.copyShaderAssets(applicationContext) <= 0) {
             Log.w(TAG, "Shader 复制失败")
         }
+        val zhOptions = TranslatorOptions.Builder()
+        .setSourceLanguage(TranslateLanguage.CHINESE)
+        .setTargetLanguage(TranslateLanguage.ENGLISH)
+        .build()
+    val zhTranslator = Translation.getClient(zhOptions)
+    zhTranslator.downloadModelIfNeeded()
+
+    // Japanese → English
+    val jaOptions = TranslatorOptions.Builder()
+        .setSourceLanguage(TranslateLanguage.JAPANESE)
+        .setTargetLanguage(TranslateLanguage.ENGLISH)
+        .build()
+    val jaTranslator = Translation.getClient(jaOptions)
+    jaTranslator.downloadModelIfNeeded()
+
+    TranslatorProvider.zhTranslator = zhTranslator
+    TranslatorProvider.jaTranslator = jaTranslator
     }
 
     private fun initFirebase() {
