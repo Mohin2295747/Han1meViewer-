@@ -155,6 +155,7 @@ dependencies {
     // mlkit
 
     implementation("com.google.mlkit:translate:17.0.2")
+    implementation("com.jakewharton:disklrucache:2.0.2")
 
     // popup
 
