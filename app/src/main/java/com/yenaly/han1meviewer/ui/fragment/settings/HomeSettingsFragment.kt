@@ -69,6 +69,7 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
         const val UPDATE = "update"
         const val ABOUT = "about"
         const val CLEAR_CACHE = "clear_cache"
+        const val TRANSLATION_CACHE = "translation_cache"
         const val SUBMIT_BUG = "submit_bug"
         const val FORUM = "forum"
         const val NETWORK_SETTINGS = "network_settings"
@@ -102,6 +103,8 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
             by safePreference<Preference>(ABOUT)
     private val clearCache
             by safePreference<Preference>(CLEAR_CACHE)
+    private val translationCache
+        by safePreference<Preference>(TRANSLATION_CACHE)
     private val submitBug
             by safePreference<Preference>(SUBMIT_BUG)
     private val forum
@@ -204,6 +207,26 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
                         setNegativeButton(R.string.cancel, null)
                     }
                 } else showShortToast(R.string.cache_empty)
+                return@setOnPreferenceClickListener true
+            }
+        }
+        translationCache.apply {
+            summary = generateTranslationCacheSummary()
+            setOnPreferenceClickListener {
+                requireContext().showAlertDialog {
+                    setTitle(R.string.sure_to_clear)
+                    setMessage(R.string.sure_to_clear_translation_cache)
+                    setPositiveButton(R.string.confirm) { _, _ ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            TranslationCache.clear()
+                            withContext(Dispatchers.Main) {
+                                showShortToast(R.string.pref_translation_cache_cleared)
+                                summary = generateTranslationCacheSummary()
+                            }
+                        }
+                    }
+                    setNegativeButton(R.string.cancel, null)
+                }
                 return@setOnPreferenceClickListener true
             }
         }
