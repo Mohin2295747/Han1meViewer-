@@ -59,7 +59,7 @@ object TranslationCache {
     }
 
     fun clear() {
-        diskCache?.trimToSize(0)
+        diskCache?.delete()
         memoryCache.clear()
     }
 }
