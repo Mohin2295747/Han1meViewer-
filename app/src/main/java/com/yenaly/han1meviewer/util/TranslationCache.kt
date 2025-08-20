@@ -52,4 +52,14 @@ object TranslationCache {
         }
         editor.commit()
     }
+
+    fun sizeInMB(): Double {
+        val sizeBytes = diskCache?.size() ?: 0L
+        return sizeBytes / (1024.0 * 1024.0)
+    }
+
+    fun clear() {
+        diskCache?.evictAll()
+        memoryCache.clear()
+    }
 }
