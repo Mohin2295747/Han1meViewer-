@@ -1,10 +1,7 @@
-name: CI(release)
+name: CI
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
 
 permissions:
   contents: write
@@ -13,13 +10,20 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_STORE_FILE: keystore.jks
+      RELEASE_KEY_ALIAS: ${{ secrets.HA1_KEY_ALIAS }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
+
+      - name: Load Google Services File
+        env:
+          DATA: ${{ secrets.HA1_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          mkdir -p app
+          echo $DATA | base64 -di > app/google-services.json
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -28,75 +32,45 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Load Google Services File
+      - name: Set up signing keystore
         env:
-          DATA: ${{ secrets.HA1_GOOGLE_SERVICES_JSON_BASE64 }}
-        run: echo $DATA | base64 -di > app/google-services.json
+          KEYSTORE_DATA: ${{ secrets.HA1_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_DATA" | base64 -di > $RELEASE_STORE_FILE
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Pre-process Google Services
+        run: ./gradlew :app:processReleaseGoogleServices
+
       - name: Build and sign APK with Gradle
         run: |
-          ./gradlew assembleRelease
-          VERSION_CODE=$(find app/build/outputs/apk/release -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')
-          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          ./gradlew clean
+          ./gradlew assembleRelease \
+            -Pha1KeystorePassword="$HA1_KEYSTORE_PASSWORD" \
+            -Pha1GithubToken="$HA1_GITHUB_TOKEN" \
+            -Pha1VersionSource="ci" \
+            -PreleaseStoreFile="$RELEASE_STORE_FILE" \
+            -PreleaseKeyAlias="$RELEASE_KEY_ALIAS"
         env:
           HA1_KEYSTORE_PASSWORD: ${{ secrets.HA1_KEYSTORE_PASSWORD }}
           HA1_GITHUB_TOKEN: ${{ secrets.HA1_GITHUB_TOKEN }}
 
-      - name: Create Git tag from APK version code
-        run: |
-          TAG="v${VERSION_CODE}"
-          echo "TAG=$TAG" >> $GITHUB_ENV
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG
-          git push origin $TAG
-
-      - name: Upload Artifacts (arm32)
+      - name: Upload Artifacts(arm32)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_armeabi-v7a.apk
-          name: Han1meViewer-${{ env.TAG }}-armeabi-v7a
+          name: Han1meViewer-ci-${{ github.sha }}-armeabi-v7a
 
-      - name: Upload Artifacts (arm64)
+      - name: Upload Artifacts(arm64)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_arm64-v8a.apk
-          name: Han1meViewer-${{ env.TAG }}-arm64-v8a
+          name: Han1meViewer-ci-${{ github.sha }}-arm64-v8a
 
-      - name: Upload Artifacts (universal)
+      - name: Upload Artifacts(universal)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_universal.apk
-          name: Han1meViewer-${{ env.TAG }}-universal
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.0.4
-        with:
-          name: Han1meViewer ${{ env.TAG }}
-          tag_name: ${{ env.TAG }}
-          files: app/build/outputs/apk/release/Han1meViewer-v*.apk
-
-  changelog:
-    name: Generate Changelog
-    runs-on: windows-latest
-    needs: build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Generate Changelog
-        id: generate_changelog
-        uses: Night-stars-1/changelog-generator-action@main
-
-      - name: Update Changelog
-        uses: softprops/action-gh-release@v2.0.4
-        with:
-          body: ${{ steps.generate_changelog.outputs.changelog }}
-          tag_name: ${{ needs.build.outputs.TAG || github.ref_name }}
-          make_latest: true
+          name: Han1meViewer-ci-${{ github.sha }}-universal
