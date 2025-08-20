@@ -30,6 +30,9 @@ object MLKitTranslator {
             zhToEn = Translation.getClient(zhOptions)
             zhToEn!!.downloadModelIfNeeded()
         }
+
+        // ✅ Initialize cache
+        TranslationCache.init(context)
     }
 
     private fun detectLanguage(text: String): Translator? {
@@ -42,6 +45,12 @@ object MLKitTranslator {
 
     suspend fun translate(text: String): String =
         suspendCancellableCoroutine { cont ->
+            // ✅ Check cache first (memory + disk)
+            TranslationCache.get(text)?.let {
+                cont.resume(it)
+                return@suspendCancellableCoroutine
+            }
+
             val translator = detectLanguage(text)
             if (translator == null) {
                 cont.resume(text)
@@ -49,7 +58,11 @@ object MLKitTranslator {
             }
 
             translator.translate(text)
-                .addOnSuccessListener { cont.resume(it) }
+                .addOnSuccessListener { translated ->
+                    // ✅ Save to cache
+                    TranslationCache.put(text, translated)
+                    cont.resume(translated)
+                }
                 .addOnFailureListener { cont.resume(text) }
         }
 }
