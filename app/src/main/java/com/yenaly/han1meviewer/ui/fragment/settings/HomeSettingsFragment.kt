@@ -399,6 +399,12 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
 //        }
     }
 
+    private fun generateTranslationCacheSummary(): CharSequence {
+        val usedMB = TranslationCache.sizeInMB()
+        return getString(R.string.pref_translation_cache_summary, usedMB)
+    }
+
+
     private fun toIntervalDaysPrettyString(value: Int): String {
         val lastUpdatePopupTime = Preferences.lastUpdatePopupTime
         val msg = if (lastUpdatePopupTime == 0L) {
