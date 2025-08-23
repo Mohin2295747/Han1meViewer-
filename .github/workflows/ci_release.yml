@@ -17,7 +17,9 @@ permissions:
   actions: write
 
 env:
-  RELEASE_TAG: ${{ github.ref_name != '' && github.ref_name || inputs.tag }}
+  # For tag push: github.ref_name contains just the tag name (e.g., "v1.7.2")
+  # For manual trigger: use the input tag value
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
 jobs:
   build:
