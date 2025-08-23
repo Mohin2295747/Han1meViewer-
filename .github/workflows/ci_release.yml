@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g., v1.8.0)'
+        description: 'Release tag (e.g., v1.7.2)'
         required: true
-        default: 'v1.8.0'
+        default: 'v1.7.2'
         type: string
 
 permissions:
@@ -27,11 +27,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # For tag push events, use the full git ref that triggered the workflow
-          # For manual triggers, use the input tag
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          # For tag pushes: don't specify ref, let GitHub handle it automatically
+          # For manual triggers: use the specific tag
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
           fetch-depth: 0
-          # Force fetch all tags for both scenarios
+          # This is crucial - fetch all tags
           fetch-tags: true
 
       - name: Set up JDK 21
@@ -73,7 +73,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
           fetch-depth: 0
           fetch-tags: true
 
