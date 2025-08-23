@@ -27,7 +27,7 @@ jobs:
       - name: Checkout main branch first
         uses: actions/checkout@v4
         with:
-          ref: main  # or 'master' depending on your default branch
+          ref: master # or 'master' depending on your default branch
           fetch-depth: 0
 
       - name: Fetch the specific tag
