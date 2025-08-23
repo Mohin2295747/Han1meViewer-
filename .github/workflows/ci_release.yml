@@ -24,17 +24,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the commit that was tagged
+      - name: Checkout master branch
         uses: actions/checkout@v4
         with:
-          # Checkout the commit SHA that the tag points to
-          ref: ${{ github.sha }}
+          ref: master
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Create the tag locally
+      - name: Handle tag for manual runs
+        if: github.event_name == 'workflow_dispatch'
         run: |
+          # Delete tag if it exists (for manual re-runs)
+          git tag -d ${{ env.RELEASE_TAG }} 2>/dev/null || true
+          # Create the tag from current commit
           git tag ${{ env.RELEASE_TAG }}
-          echo "Created tag ${{ env.RELEASE_TAG }} locally"
+          echo "Created tag ${{ env.RELEASE_TAG }} for manual run"
+
+      - name: Checkout the tagged commit
+        run: |
+          # For tag pushes, checkout the specific commit
+          # For manual runs, we're already on the right commit with the tag
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            git checkout ${{ github.sha }}
+          fi
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -72,15 +84,14 @@ jobs:
     runs-on: windows-latest
     needs: build
     steps:
-      - name: Checkout the commit that was tagged
+      - name: Checkout the tagged commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          # For tag pushes, use the commit SHA
+          # For manual runs, use the tag that was created in build job
+          ref: ${{ github.event_name == 'workflow_dispatch' && env.RELEASE_TAG || github.sha }}
           fetch-depth: 0
-
-      - name: Create the tag locally
-        run: |
-          git tag ${{ env.RELEASE_TAG }}
+          fetch-tags: true
 
       - name: Generate Changelog
         id: generate_changelog
