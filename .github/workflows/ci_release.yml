@@ -27,7 +27,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: refs/tags/${{ env.RELEASE_TAG }}
+          # Let GitHub handle ref automatically for tag pushes, use input for manual triggers
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
           fetch-depth: 0
           fetch-tags: true
 
@@ -70,7 +71,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
-          ref: refs/tags/${{ env.RELEASE_TAG }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
           fetch-depth: 0
           fetch-tags: true
 
