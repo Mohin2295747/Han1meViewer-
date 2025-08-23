@@ -49,31 +49,16 @@ object Parser {
         val videoSource = Regex("""const source = '(.+)'""")
         val viewAndUploadTime = Regex("""觀看次數：(.+)次 *(\d{4}-\d{2}-\d{2})""")
     }
-
-    private var translator: Translator? = null
-
-    private fun getTranslator(): Translator {
-        if (translator == null) {
-            val options = TranslatorOptions.Builder()
-                .setSourceLanguage(com.google.mlkit.nl.translate.TranslateLanguage.CHINESE)
-                .setTargetLanguage(com.google.mlkit.nl.translate.TranslateLanguage.ENGLISH)
-                .build()
-            translator = com.google.mlkit.nl.translate.Translation.getClient(options)
+    
+    private suspend fun translateTag(rawText: String): String {
+        // First priority: dictionary lookup
+        val dictTranslation = TagDictionary.dict[rawText] as? String
+        if (dictTranslation != null) {
+            return dictTranslation
         }
-        return translator!!
-    }
-
-    private suspend fun translateText(text: String): String {
-        return suspendCancellableCoroutine { continuation ->
-            getTranslator().translate(text)
-                .addOnSuccessListener { translatedText ->
-                    continuation.resume(translatedText)
-                }
-                .addOnFailureListener { exception ->
-                    // fallback to original if failed
-                    continuation.resume(text)
-                }
-        }
+    
+        // Second priority: ML Kit translation (which uses your cache)
+        return MLKitTranslator.translate(rawText)
     }
 
     fun extractTokenFromLoginPage(body: String): String {
@@ -353,7 +338,7 @@ object Parser {
                 val child = tag.childOrNull(0)
                 if (child != null && child.hasAttr("href")) {
                     val rawText = child.ownText().trim()
-                    val translated = TagDictionary.dict[rawText] as? String ?: rawText
+                    val translated = translateTag(rawText)
                     tagList.add(translated)
                 }
             }
@@ -577,7 +562,7 @@ object Parser {
                 val videoCode = firstPart?.id()
                 var title = firstPart?.selectFirst("h4")?.text()
                 title?.let { raw ->
-                    title = translateText(raw)
+                    title = runBlocking { MLKitTranslator.translate(raw) }
                 }
                 val coverUrl =
                     firstPart?.selectFirst("div[class=preview-info-cover] > img")?.absUrl("src")
@@ -595,9 +580,9 @@ object Parser {
                 val tags = mutableListOf<String>()
                 tagClass?.forEach { tag: Element? ->
                     tag?.let {
-                        val rawText = tag.text().trim()
-                        val translated = TagDictionary.dict[rawText] as? String ?: rawText
-                        tags.add(translated)
+                    val rawText = tag.text().trim()
+                    val translated = translateTag(rawText)
+                    tags.add(translated)
                     }
                 }
                 val relatedPicClass = secondPart?.select("img[class=preview-image-modal-trigger]")
@@ -713,7 +698,7 @@ object Parser {
                     var title = artistElement.selectFirst("div[class$=search-artist-title]")?.text()
                         .logIfParseNull(Parser::subscriptionItems.name, "title", loginNeeded = true)
                     title?.let { raw ->
-                        title = translateText(raw)
+                        title = runBlocking { MLKitTranslator.translate(raw) }
                     }
                     val avatarUrl = artistElement.select("img").let {
                         it.getOrNull(1) ?: it.firstOrNull()
