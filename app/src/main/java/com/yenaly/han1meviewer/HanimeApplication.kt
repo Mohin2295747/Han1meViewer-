@@ -22,6 +22,7 @@ import com.yenaly.han1meviewer.ui.viewmodel.AppViewModel
 import com.yenaly.han1meviewer.util.AnimeShaders
 import com.yenaly.han1meviewer.util.MLKitTranslator
 import com.yenaly.han1meviewer.util.TagDictionary
+import com.yenaly.han1meviewer.util.TranslationCache
 import com.yenaly.han1meviewer.util.TranslatorProvider
 import com.yenaly.yenaly_libs.base.YenalyApplication
 import com.yenaly.yenaly_libs.utils.LanguageHelper
