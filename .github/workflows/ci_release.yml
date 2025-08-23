@@ -27,9 +27,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Let GitHub handle ref automatically for tag pushes, use input for manual triggers
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
+          # For tag push events, use the full git ref that triggered the workflow
+          # For manual triggers, use the input tag
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
           fetch-depth: 0
+          # Force fetch all tags for both scenarios
           fetch-tags: true
 
       - name: Set up JDK 21
@@ -71,7 +73,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.1.1
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
           fetch-depth: 0
           fetch-tags: true
 
