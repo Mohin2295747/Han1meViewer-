@@ -54,6 +54,7 @@ class HanimeApplication : YenalyApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        TranslationCache.init(this)
         MLKitTranslator.init(this)
         TagDictionary.init(this)
         DynamicColors.applyToActivitiesIfAvailable(this)
