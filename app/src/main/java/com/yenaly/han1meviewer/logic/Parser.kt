@@ -51,17 +51,6 @@ object Parser {
         val viewAndUploadTime = Regex("""觀看次數：(.+)次 *(\d{4}-\d{2}-\d{2})""")
     }
     
-    private suspend fun translateTag(rawText: String): String {
-        // First priority: dictionary lookup
-        val dictTranslation = TagDictionary.dict[rawText] as? String
-        if (dictTranslation != null) {
-            return dictTranslation
-        }
-    
-        // Second priority: ML Kit translation (which uses your cache)
-        return MLKitTranslator.translate(rawText)
-    }
-
     fun extractTokenFromLoginPage(body: String): String {
         val parseBody = Jsoup.parse(body).body()
         return parseBody.selectFirst("input[name=_token]")?.attr("value")
