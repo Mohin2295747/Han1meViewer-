@@ -26,6 +26,7 @@ import com.yenaly.han1meviewer.ui.activity.PreviewActivity
 import com.yenaly.han1meviewer.ui.activity.SearchActivity
 import com.yenaly.han1meviewer.ui.activity.VideoActivity
 import com.yenaly.han1meviewer.ui.fragment.home.HomePageFragment
+import com.yenaly.han1meviewer.util.SmartTranslator
 import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.copyTextToClipboard
 import com.yenaly.yenaly_libs.utils.dp
@@ -34,10 +35,10 @@ import com.yenaly.yenaly_libs.utils.startActivity
 
 /**
  * @project Han1meViewer
- * @author Yenaly Liew
- * @time 2023/11/26 026 17:15
+ * @author Yenaly
+ * Updated with SmartTranslator integration
  */
-class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidthType is VIDEO_LAYOUT_MATCH_PARENT or VIDEO_LAYOUT_WRAP_CONTENT or nothing
+class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYOUT_MATCH_PARENT or VIDEO_LAYOUT_WRAP_CONTENT or none
     BaseDifferAdapter<HanimeInfo, QuickViewHolder>(COMPARATOR) {
 
     init {
@@ -68,22 +69,32 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
 
     override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HanimeInfo?) {
         item ?: return
-        // stackoverflow-64362192
+
         when (getItemViewType(position)) {
             HanimeInfo.SIMPLIFIED -> {
                 holder.getView<ImageView>(R.id.cover).load(item.coverUrl) {
                     crossfade(true)
                 }
-                holder.getView<TextView>(R.id.title).text = item.title
+                // Translate title
+                holder.getView<TextView>(R.id.title).text =
+                    SmartTranslator.translateAsync(item, item.title) {
+                        holder.getView<TextView>(R.id.title).text = it
+                    } { notifyItemChanged(position) }
             }
 
             HanimeInfo.NORMAL -> {
-                holder.getView<TextView>(R.id.title).text = item.title
+                // Translate title
+                holder.getView<TextView>(R.id.title).text =
+                    SmartTranslator.translateAsync(item, item.title) {
+                        holder.getView<TextView>(R.id.title).text = it
+                    } { notifyItemChanged(position) }
+
                 holder.getView<ImageView>(R.id.cover).load(item.coverUrl) {
                     crossfade(true)
                 }
                 holder.getView<TextView>(R.id.is_playing).isVisible = item.isPlaying
                 holder.getView<TextView>(R.id.duration).text = item.duration
+
                 holder.getView<TextView>(R.id.time).apply {
                     if (item.uploadTime != null) {
                         holder.getView<View>(R.id.icon_time).isGone = false
@@ -92,6 +103,7 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
                         holder.getView<View>(R.id.icon_time).isGone = true
                     }
                 }
+
                 holder.getView<TextView>(R.id.views).apply {
                     if (item.views != null) {
                         holder.getView<View>(R.id.icon_views).isGone = false
@@ -100,6 +112,8 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
                         holder.getView<View>(R.id.icon_views).isGone = true
                     }
                 }
+
+                // Genre + uploader with translation
                 holder.getView<TextView>(R.id.genre_and_uploader).apply {
                     if (item.genre == null && item.uploader == null) {
                         isGone = true
@@ -107,16 +121,42 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
                     }
                     isGone = false
                     text = spannable {
-                        item.genre.span {
-                            margin(4.dp)
-                            when (item.genre) {
-                                "3D" -> color(Color.rgb(245, 171, 53))
-                                "COS" -> color(Color.rgb(165, 55, 253))
-                                "同人" -> color(Color.rgb(241, 130, 141))
-                                else -> color(Color.RED)
+                        item.genre?.let { rawGenre ->
+                            val translatedGenre = SmartTranslator.translateAsync(item, rawGenre) {
+                                // Rebuild spannable when genre translated
+                                text = spannable {
+                                    it.span {
+                                        margin(4.dp)
+                                        when (it) {
+                                            "3D" -> color(Color.rgb(245, 171, 53))
+                                            "COS" -> color(Color.rgb(165, 55, 253))
+                                            "同人" -> color(Color.rgb(241, 130, 141))
+                                            else -> color(Color.RED)
+                                        }
+                                    }
+                                    SmartTranslator.translateAsync(item, item.uploader ?: "") { up ->
+                                        append(up)
+                                    }
+                                }
+                            }
+                            translatedGenre.span {
+                                margin(4.dp)
+                                when (rawGenre) {
+                                    "3D" -> color(Color.rgb(245, 171, 53))
+                                    "COS" -> color(Color.rgb(165, 55, 253))
+                                    "同人" -> color(Color.rgb(241, 130, 141))
+                                    else -> color(Color.RED)
+                                }
                             }
                         }
-                        item.uploader.text()
+                        item.uploader?.let { rawUploader ->
+                            append(
+                                SmartTranslator.translateAsync(item, rawUploader) { up ->
+                                    holder.getView<TextView>(R.id.genre_and_uploader).text =
+                                        text.toString().replace(rawUploader, up)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -224,7 +264,7 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
         }
         activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
     }
-    
+
     private fun formatViews(raw: String): String {
         return when {
             raw.contains("萬") -> {
@@ -232,14 +272,16 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // videoWidth
                 val views = (num * 10_000).toInt()
                 formatNumber(views)
             }
+
             raw.contains("次") -> {
-               val num = raw.replace("次", "").toIntOrNull() ?: return raw
-               formatNumber(num)
+                val num = raw.replace("次", "").toIntOrNull() ?: return raw
+                formatNumber(num)
             }
-        else -> raw
+
+            else -> raw
         }
     }
-    
+
     private fun formatNumber(num: Int): String {
         return when {
             num >= 1_000_000 -> "%.1fM".format(num / 1_000_000f)
