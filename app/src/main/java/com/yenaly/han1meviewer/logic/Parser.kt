@@ -23,6 +23,7 @@ import com.yenaly.han1meviewer.logic.state.VideoLoadingState
 import com.yenaly.han1meviewer.logic.state.WebsiteState
 import com.yenaly.han1meviewer.toVideoCode
 import com.yenaly.han1meviewer.util.MLKitTranslator
+import com.yenaly.han1meviewer.util.SmartTranslator
 import com.yenaly.han1meviewer.util.TagDictionary
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -121,7 +122,7 @@ object Parser {
                     .throwIfParseNull(Parser::homePageVer2.name, "coverUrl")
                 var title = latestHanimeItem.selectFirst("div[class$=title]")?.text()
                     .throwIfParseNull(Parser::homePageVer2.name, "title")
-                title = runBlocking { MLKitTranslator.translate(title) }
+                title = SmartTranslator.translateAsync(this, title) { title = it }
                 val videoCode = latestHanimeItem.parent()?.absUrl("href")?.toVideoCode()
                     .throwIfParseNull(Parser::homePageVer2.name, "videoCode")
                 latestHanimeList.add(
@@ -222,7 +223,7 @@ object Parser {
             hanimeSearchItem.selectFirst("div[class=card-mobile-title]")?.text()
                 .logIfParseNull(Parser::hanimeNormalItemVer2.name, "title") // title
         title?.let { raw ->
-            title = runBlocking { MLKitTranslator.translate(raw) }
+            title = SmartTranslator.translateAsync(this, title) { title = it }
         }
         val coverUrl =
             hanimeSearchItem.select("img").getOrNull(1)?.absUrl("src")
@@ -256,7 +257,7 @@ object Parser {
         var title = hanimeSearchItem.selectFirst("div[class=home-rows-videos-title]")?.text()
             .logIfParseNull(Parser::hanimeSimplifiedItem.name, "title")
         title?.let { raw ->
-            title = runBlocking { MLKitTranslator.translate(raw) }
+            title = SmartTranslator.translateAsync(this, title) { title = it }
         }
         if (videoCode == null || coverUrl == null || title == null) return null
         return HanimeInfo(
@@ -309,7 +310,7 @@ object Parser {
 
             var title = parseBody.getElementById("shareBtn-title")?.text()
                 .throwIfParseNull(Parser::hanimeVideoVer2.name, "title")
-            title = runBlocking { MLKitTranslator.translate(title) }
+            title = SmartTranslator.translateAsync(this, title) { title = it }
 
             val likeStatus = parseBody.selectFirst("#video-like-btn .material-icons")
             val likesCount = parseBody.selectFirst("input[name=likes-count]")
@@ -320,7 +321,7 @@ object Parser {
             val chineseTitle = videoCaptionText?.previousElementSibling()?.ownText()
             var introduction = videoCaptionText?.ownText()
             introduction?.let { raw ->
-                introduction = runBlocking { MLKitTranslator.translate(raw) }
+                introduction = SmartTranslator.translateAsync(this, introduction) { introduction = it }
             }
             val uploadTimeWithViews = videoDetailWrapper?.selectFirst("div > div > div")?.text()
             val uploadTimeWithViewsGroups = uploadTimeWithViews?.let {
@@ -385,7 +386,7 @@ object Parser {
                         .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachCoverUrl")
                     var playlistEachTitle = eachTitleCover?.attr("alt")
                         .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachTitle")
-                    playlistEachTitle = runBlocking { MLKitTranslator.translate(playlistEachTitle) }
+                    playlistEachTitle = SmartTranslator.translateAsync(this, playlistEachTitle) { playlistEachTitle = it }
                     playlistVideoList.add(
                         HanimeInfo(
                             title = playlistEachTitle, coverUrl = playlistEachCoverUrl,
@@ -428,7 +429,7 @@ object Parser {
                             var eachTitle =
                                 homeRowsVideosDiv.selectFirst("div[class$=title]")?.text()
                                     .throwIfParseNull(Parser::hanimeVideoVer2.name, "eachTitle")
-                            eachTitle = runBlocking { MLKitTranslator.translate(eachTitle) }
+                            eachTitle = SmartTranslator.translateAsync(this, eachTitle) { eachTitle = it }
                             relatedAnimeList.add(
                                 HanimeInfo(
                                     title = eachTitle, coverUrl = eachCoverUrl,
@@ -540,7 +541,7 @@ object Parser {
                         .throwIfParseNull(Parser::hanimePreview.name, "coverUrl")
                     var title = latestHanimeItem.selectFirst("div[class$=title]")?.text()
                         .throwIfParseNull(Parser::hanimePreview.name, "title")
-                    title = runBlocking { MLKitTranslator.translate(title) }
+                    title = SmartTranslator.translateAsync(this, title) { title = it }
                     latestHanimeList.add(
                         HanimeInfo(
                             coverUrl = coverUrl,
@@ -562,7 +563,7 @@ object Parser {
                 val videoCode = firstPart?.id()
                 var title = firstPart?.selectFirst("h4")?.text()
                 title?.let { raw ->
-                    title = runBlocking { MLKitTranslator.translate(raw) }
+                    title = SmartTranslator.translateAsync(this, title) { title = it }
                 }
                 val coverUrl =
                     firstPart?.selectFirst("div[class=preview-info-cover] > img")?.absUrl("src")
@@ -570,7 +571,7 @@ object Parser {
                     firstPart?.getElementsByClass("preview-info-content-padding")?.firstOrNull()
                 var videoTitle = previewInfoContentClass?.selectFirst("h4")?.text()
                 videoTitle?.let { raw ->
-                    videoTitle = runBlocking { MLKitTranslator.translate(raw) }
+                    videoTitle = SmartTranslator.translateAsync(this, videoTitle) { videoTitle = it }
                 }
                 val brand = previewInfoContentClass?.selectFirst("h5")?.selectFirst("a")?.text()
                 val releaseDate = previewInfoContentClass?.select("h5")?.getOrNull(1)?.ownText()
@@ -654,7 +655,7 @@ object Parser {
                         videoElement.getElementsByClass("home-rows-videos-title")
                             .firstOrNull()?.text()
                             .throwIfParseNull(Parser::myListItems.name, "title")
-                    title = runBlocking { MLKitTranslator.translate(title) }
+                    title = SmartTranslator.translateAsync(this, title) { title = it }
                     val coverUrl =
                         videoElement.select("img").let {
                             it.getOrNull(1) ?: it.firstOrNull()
@@ -698,7 +699,7 @@ object Parser {
                     var title = artistElement.selectFirst("div[class$=search-artist-title]")?.text()
                         .logIfParseNull(Parser::subscriptionItems.name, "title", loginNeeded = true)
                     title?.let { raw ->
-                        title = runBlocking { MLKitTranslator.translate(raw) }
+                        title = SmartTranslator.translateAsync(this, title) { title = it }
                     }
                     val avatarUrl = artistElement.select("img").let {
                         it.getOrNull(1) ?: it.firstOrNull()
@@ -739,7 +740,7 @@ object Parser {
                     .throwIfParseNull(Parser::playlists.name, "listCode")
                 var listTitle = it.selectFirst("div[class=card-mobile-title]")?.ownText()
                     .throwIfParseNull(Parser::playlists.name, "listTitle")
-                listTitle = runBlocking { MLKitTranslator.translate(listTitle) }
+                listTitle = SmartTranslator.translateAsync(this, listTitle) { listTitle = it }
                 val listTotal = it.selectFirst("div[style]")?.text()?.toIntOrNull()
                     .throwIfParseNull(Parser::playlists.name, "listName")
                 playlists += Playlists.Playlist(
@@ -776,7 +777,7 @@ object Parser {
                     .throwIfParseNull(Parser::comments.name, "date")
                 var content = textClass.getOrNull(1)?.text()
                     .throwIfParseNull(Parser::comments.name, "content")
-                content = runBlocking { MLKitTranslator.translate(content) }
+                content = SmartTranslator.translateAsync(this, content) { content = it }
                 val hasMoreReplies = child.selectFirst("div[class^=load-replies-btn]") != null
                 val thumbUp = child.getElementById("comment-like-form-wrapper")
                     ?.select("span[style]")?.getOrNull(1)
@@ -854,7 +855,7 @@ object Parser {
                         .throwIfParseNull(Parser::commentReply.name, "date")
                     var content = textClass?.getOrNull(1)?.text()
                         .throwIfParseNull(Parser::commentReply.name, "content")
-                    content = runBlocking { MLKitTranslator.translate(content) }
+                    content = SmartTranslator.translateAsync(this, content) { content = it }
                     val thumbUp = postClass
                         ?.select("span[style]")?.getOrNull(1)
                         ?.text()?.toIntOrNull()
