@@ -1,5 +1,6 @@
 package com.yenaly.han1meviewer.util
 
+import com.yenaly.han1meviewer.logic.Parser.translateTag
 import kotlinx.coroutines.*
 
 object SmartTranslator {
