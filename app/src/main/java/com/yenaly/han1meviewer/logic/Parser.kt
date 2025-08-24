@@ -328,7 +328,7 @@ object Parser {
                 val child = tag.childOrNull(0)
                 if (child != null && child.hasAttr("href")) {
                     val rawText = child.ownText().trim()
-                    val translated = translateTag(rawText)
+                    val translated = SmartTranslator.translateTag(rawText))
                     tagList.add(translated)
                 }
             }
@@ -571,7 +571,7 @@ object Parser {
                 tagClass?.forEach { tag: Element? ->
                     tag?.let {
                     val rawText = tag.text().trim()
-                    val translated = translateTag(rawText)
+                    val translated = SmartTranslator.translateTag(rawText)
                     tags.add(translated)
                     }
                 }
