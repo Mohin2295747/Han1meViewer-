@@ -8,7 +8,7 @@ object SmartTranslator {
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
 
     /* 1️⃣  Make translateTag available here */
-    private suspend fun translateTag(rawText: String): String {
+    suspend fun translateTag(rawText: String): String {
         val dictTranslation = TagDictionary.dict[rawText] as? String
         if (dictTranslation != null) return dictTranslation
         return MLKitTranslator.translate(rawText)
