@@ -2,7 +2,6 @@ package com.yenaly.han1meviewer.ui.adapter
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.DiffUtil
 import coil.load
 import com.chad.library.adapter4.BaseDifferAdapter
 import com.chad.library.adapter4.viewholder.QuickViewHolder
-import com.itxca.spannablex.spannable
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.VIDEO_CODE
 import com.yenaly.han1meviewer.VIDEO_LAYOUT_MATCH_PARENT
@@ -29,16 +27,14 @@ import com.yenaly.han1meviewer.ui.fragment.home.HomePageFragment
 import com.yenaly.han1meviewer.util.SmartTranslator
 import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.copyTextToClipboard
-import com.yenaly.yenaly_libs.utils.dp
 import com.yenaly.yenaly_libs.utils.showShortToast
 import com.yenaly.yenaly_libs.utils.startActivity
 
 /**
- * @project Han1meViewer
- * @author Yenaly
- * Updated with SmartTranslator integration
+ * Hanime video list adapter
+ * Updated to support live translation updates
  */
-class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYOUT_MATCH_PARENT or VIDEO_LAYOUT_WRAP_CONTENT or none
+class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) :
     BaseDifferAdapter<HanimeInfo, QuickViewHolder>(COMPARATOR) {
 
     init {
@@ -72,29 +68,34 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYO
 
         when (getItemViewType(position)) {
             HanimeInfo.SIMPLIFIED -> {
+                // Cover
                 holder.getView<ImageView>(R.id.cover).load(item.coverUrl) {
                     crossfade(true)
                 }
-                // Translate title
-                holder.getView<TextView>(R.id.title).text =
-                    SmartTranslator.translateAsync(item, item.title) {
-                        holder.getView<TextView>(R.id.title).text = it
-                    } { notifyItemChanged(position) }
+                // Title
+                val titleView = holder.getView<TextView>(R.id.title)
+                titleView.text = item.title
+                SmartTranslator.translateAsync(item, item.title) { translated ->
+                    titleView.post { titleView.text = translated }
+                }
             }
 
             HanimeInfo.NORMAL -> {
-                // Translate title
-                holder.getView<TextView>(R.id.title).text =
-                    SmartTranslator.translateAsync(item, item.title) {
-                        holder.getView<TextView>(R.id.title).text = it
-                    } { notifyItemChanged(position) }
+                // Title
+                val titleView = holder.getView<TextView>(R.id.title)
+                titleView.text = item.title
+                SmartTranslator.translateAsync(item, item.title) { translated ->
+                    titleView.post { titleView.text = translated }
+                }
 
+                // Cover
                 holder.getView<ImageView>(R.id.cover).load(item.coverUrl) {
                     crossfade(true)
                 }
                 holder.getView<TextView>(R.id.is_playing).isVisible = item.isPlaying
                 holder.getView<TextView>(R.id.duration).text = item.duration
 
+                // Upload time
                 holder.getView<TextView>(R.id.time).apply {
                     if (item.uploadTime != null) {
                         holder.getView<View>(R.id.icon_time).isGone = false
@@ -104,6 +105,7 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYO
                     }
                 }
 
+                // Views
                 holder.getView<TextView>(R.id.views).apply {
                     if (item.views != null) {
                         holder.getView<View>(R.id.icon_views).isGone = false
@@ -113,49 +115,37 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYO
                     }
                 }
 
-                // Genre + uploader with translation
-                holder.getView<TextView>(R.id.genre_and_uploader).apply {
-                    if (item.genre == null && item.uploader == null) {
-                        isGone = true
-                        return@apply
+                // Genre + uploader
+                val genreUploaderView = holder.getView<TextView>(R.id.genre_and_uploader)
+                if (item.genre == null && item.uploader == null) {
+                    genreUploaderView.isGone = true
+                } else {
+                    genreUploaderView.isVisible = true
+
+                    // Show raw first
+                    val rawText = buildString {
+                        item.genre?.let { append("$it  ") }
+                        item.uploader?.let { append(it) }
                     }
-                    isGone = false
-                    text = spannable {
-                        item.genre?.let { rawGenre ->
-                            val translatedGenre = SmartTranslator.translateAsync(item, rawGenre) {
-                                // Rebuild spannable when genre translated
-                                text = spannable {
-                                    it.span {
-                                        margin(4.dp)
-                                        when (it) {
-                                            "3D" -> color(Color.rgb(245, 171, 53))
-                                            "COS" -> color(Color.rgb(165, 55, 253))
-                                            "同人" -> color(Color.rgb(241, 130, 141))
-                                            else -> color(Color.RED)
-                                        }
-                                    }
-                                    SmartTranslator.translateAsync(item, item.uploader ?: "") { up ->
-                                        append(up)
-                                    }
-                                }
-                            }
-                            translatedGenre.span {
-                                margin(4.dp)
-                                when (rawGenre) {
-                                    "3D" -> color(Color.rgb(245, 171, 53))
-                                    "COS" -> color(Color.rgb(165, 55, 253))
-                                    "同人" -> color(Color.rgb(241, 130, 141))
-                                    else -> color(Color.RED)
-                                }
+                    genreUploaderView.text = rawText
+
+                    // Translate genre
+                    item.genre?.let { rawGenre ->
+                        SmartTranslator.translateAsync(item, rawGenre) { translated ->
+                            genreUploaderView.post {
+                                val current = genreUploaderView.text.toString()
+                                genreUploaderView.text = current.replace(rawGenre, translated)
                             }
                         }
-                        item.uploader?.let { rawUploader ->
-                            append(
-                                SmartTranslator.translateAsync(item, rawUploader) { up ->
-                                    holder.getView<TextView>(R.id.genre_and_uploader).text =
-                                        text.toString().replace(rawUploader, up)
-                                }
-                            )
+                    }
+
+                    // Translate uploader
+                    item.uploader?.let { rawUploader ->
+                        SmartTranslator.translateAsync(item, rawUploader) { translated ->
+                            genreUploaderView.post {
+                                val current = genreUploaderView.text.toString()
+                                genreUploaderView.text = current.replace(rawUploader, translated)
+                            }
                         }
                     }
                 }
@@ -179,11 +169,9 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYO
                         is SearchActivity -> {
                             viewHolder.getView<View>(R.id.frame).widthMatchParent()
                         }
-
                         is VideoActivity -> when (videoWidthType) {
                             VIDEO_LAYOUT_MATCH_PARENT ->
                                 viewHolder.getView<View>(R.id.frame).widthMatchParent()
-
                             VIDEO_LAYOUT_WRAP_CONTENT ->
                                 viewHolder.getView<View>(R.id.frame).widthWrapContent()
                         }
@@ -198,7 +186,6 @@ class HanimeVideoRvAdapter(private val videoWidthType: Int = -1) : // VIDEO_LAYO
                         is VideoActivity -> when (videoWidthType) {
                             VIDEO_LAYOUT_MATCH_PARENT ->
                                 viewHolder.getView<View>(R.id.frame).widthMatchParent()
-
                             VIDEO_LAYOUT_WRAP_CONTENT ->
                                 viewHolder.getView<View>(R.id.frame).widthWrapContent()
                         }
