@@ -62,6 +62,7 @@ import com.yenaly.han1meviewer.util.requestExternalStoragePermission
 import com.yenaly.han1meviewer.util.requestPostNotificationPermission
 import com.yenaly.han1meviewer.util.setDrawableTop
 import com.yenaly.han1meviewer.util.showAlertDialog
+import com.yenaly.han1meviewer.util.SmartTranslator
 import com.yenaly.han1meviewer.worker.HanimeDownloadManagerV2
 import com.yenaly.han1meviewer.worker.HanimeDownloadWorker
 import com.yenaly.yenaly_libs.base.YenalyFragment
@@ -505,8 +506,18 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
         }
 
         private fun ItemVideoIntroductionBinding.initTitle(info: HanimeVideo) {
+            // Show raw title first
             title.text = info.title.also { initShareButton(it) }
             chineseTitle.text = info.chineseTitle
+
+            // 🔹 Kick off async translation and update the UI automatically
+            SmartTranslator.translateAsync(info, info.title) { translated ->
+                title.post { title.text = translated }
+            }
+            SmartTranslator.translateAsync(info, info.chineseTitle ?: "") { translated ->
+                chineseTitle.post { chineseTitle.text = translated }
+            }
+
             // #issue-80: 长按复制功能请求
             title.setOnLongClickListener {
                 title.text.copyToClipboard()
@@ -520,32 +531,36 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
             }
         }
 
-        private fun ItemVideoIntroductionBinding.initTitle(info: HanimeVideo) {
-    // Show raw title first
-    title.text = info.title.also { initShareButton(it) }
-    chineseTitle.text = info.chineseTitle
-
-    // 🔹 Kick off async translation and update the UI automatically
-    SmartTranslator.translateAsync(info, info.title) { translated ->
-        title.post { title.text = translated }
-    }
-    SmartTranslator.translateAsync(info, info.chineseTitle ?: "") { translated ->
-        chineseTitle.post { chineseTitle.text = translated }
-    }
-
-    // #issue-80: 长按复制功能请求
-    title.setOnLongClickListener {
-        title.text.copyToClipboard()
-        showShortToast(R.string.copy_to_clipboard)
-        return@setOnLongClickListener true
-    }
-    chineseTitle.setOnLongClickListener {
-        chineseTitle.text.copyToClipboard()
-        showShortToast(R.string.copy_to_clipboard)
-        return@setOnLongClickListener true
-    }
-}
-
+        private fun ItemVideoIntroductionBinding.initFavButton(info: HanimeVideo) {
+            if (info.isFav) {
+                btnAddToFav.setDrawableTop(R.drawable.ic_baseline_favorite_24)
+                btnAddToFav.setText(R.string.liked)
+            } else {
+                btnAddToFav.setDrawableTop(R.drawable.ic_baseline_favorite_border_24)
+                btnAddToFav.setText(R.string.add_to_fav)
+            }
+            // #issue-204: 收藏可能会导致重复
+            // reason: 1. 在收藏时，可能会多次点击，导致多次请求
+            //         2. payload 后没有重新绑定新 videoData，点击事件未更新
+            btnAddToFav.clickWithCondition(viewLifecycleOwner.lifecycle, R.id.click_condition) {
+                if (isAlreadyLogin) {
+                    it.setTag(R.id.click_condition, false)
+                    if (info.isFav) {
+                        viewModel.removeFromFavVideo(
+                            viewModel.videoCode,
+                            info.currentUserId,
+                        )
+                    } else {
+                        viewModel.addToFavVideo(
+                            viewModel.videoCode,
+                            info.currentUserId,
+                        )
+                    }
+                } else {
+                    showShortToast(R.string.login_first)
+                }
+            }
+        }
         private fun ItemVideoIntroductionBinding.initArtist(artist: HanimeVideo.Artist?) {
             if (artist == null) {
                 vgArtist.isGone = true
