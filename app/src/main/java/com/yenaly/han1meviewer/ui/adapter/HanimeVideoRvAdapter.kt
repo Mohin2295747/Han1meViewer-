@@ -38,210 +38,209 @@ import com.yenaly.yenaly_libs.utils.startActivity
  * @time 2023/11/26 026 17:15
  */
 class HanimeVideoRvAdapter(
-    private val videoWidthType: Int = -1
+  private val videoWidthType: Int = -1
 ) : // videoWidthType is VIDEO_LAYOUT_MATCH_PARENT or VIDEO_LAYOUT_WRAP_CONTENT or nothing
-    BaseDifferAdapter<HanimeInfo, QuickViewHolder>(COMPARATOR) {
+  BaseDifferAdapter<HanimeInfo, QuickViewHolder>(COMPARATOR) {
 
-    init {
-        isStateViewEnable = true
-    }
+  init {
+    isStateViewEnable = true
+  }
 
-    companion object {
-        val COMPARATOR =
-            object : DiffUtil.ItemCallback<HanimeInfo>() {
-                override fun areItemsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
-                    return oldItem.videoCode == newItem.videoCode
-                }
-
-                override fun areContentsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
-                    return oldItem == newItem
-                }
-            }
-    }
-
-    override fun getItemViewType(position: Int, list: List<HanimeInfo>): Int {
-        return list[position].itemType
-    }
-
-    override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HanimeInfo?) {
-        item ?: return
-        // stackoverflow-64362192
-        when (getItemViewType(position)) {
-            HanimeInfo.SIMPLIFIED -> {
-                holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
-                holder.getView<TextView>(R.id.title).text = item.title
-            }
-
-            HanimeInfo.NORMAL -> {
-                holder.getView<TextView>(R.id.title).text = item.title
-                holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
-                holder.getView<TextView>(R.id.is_playing).isVisible = item.isPlaying
-                holder.getView<TextView>(R.id.duration).text = item.duration
-                holder.getView<TextView>(R.id.time).apply {
-                    if (item.uploadTime != null) {
-                        holder.getView<View>(R.id.icon_time).isGone = false
-                        text = item.uploadTime
-                    } else {
-                        holder.getView<View>(R.id.icon_time).isGone = true
-                    }
-                }
-                holder.getView<TextView>(R.id.views).apply {
-                    if (item.views != null) {
-                        holder.getView<View>(R.id.icon_views).isGone = false
-                        text = formatViews(item.views!!)
-                    } else {
-                        holder.getView<View>(R.id.icon_views).isGone = true
-                    }
-                }
-                holder.getView<TextView>(R.id.genre_and_uploader).apply {
-                    if (item.genre == null && item.uploader == null) {
-                        isGone = true
-                        return@apply
-                    }
-                    isGone = false
-                    text = spannable {
-                        item.genre.span {
-                            margin(4.dp)
-                            when (item.genre) {
-                                "3D" -> color(Color.rgb(245, 171, 53))
-                                "COS" -> color(Color.rgb(165, 55, 253))
-                                "同人" -> color(Color.rgb(241, 130, 141))
-                                else -> color(Color.RED)
-                            }
-                        }
-                        item.uploader.text()
-                    }
-                }
-            }
+  companion object {
+    val COMPARATOR =
+      object : DiffUtil.ItemCallback<HanimeInfo>() {
+        override fun areItemsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
+          return oldItem.videoCode == newItem.videoCode
         }
-    }
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): QuickViewHolder {
-        return if (viewType == HanimeInfo.NORMAL) {
-                QuickViewHolder(R.layout.item_hanime_video, parent)
-            } else {
-                QuickViewHolder(R.layout.item_hanime_video_simplified, parent)
+        override fun areContentsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
+          return oldItem == newItem
+        }
+      }
+  }
+
+  override fun getItemViewType(position: Int, list: List<HanimeInfo>): Int {
+    return list[position].itemType
+  }
+
+  override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HanimeInfo?) {
+    item ?: return
+    // stackoverflow-64362192
+    when (getItemViewType(position)) {
+      HanimeInfo.SIMPLIFIED -> {
+        holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
+        holder.getView<TextView>(R.id.title).text = item.title
+      }
+
+      HanimeInfo.NORMAL -> {
+        holder.getView<TextView>(R.id.title).text = item.title
+        holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
+        holder.getView<TextView>(R.id.is_playing).isVisible = item.isPlaying
+        holder.getView<TextView>(R.id.duration).text = item.duration
+        holder.getView<TextView>(R.id.time).apply {
+          if (item.uploadTime != null) {
+            holder.getView<View>(R.id.icon_time).isGone = false
+            text = item.uploadTime
+          } else {
+            holder.getView<View>(R.id.icon_time).isGone = true
+          }
+        }
+        holder.getView<TextView>(R.id.views).apply {
+          if (item.views != null) {
+            holder.getView<View>(R.id.icon_views).isGone = false
+            text = formatViews(item.views!!)
+          } else {
+            holder.getView<View>(R.id.icon_views).isGone = true
+          }
+        }
+        holder.getView<TextView>(R.id.genre_and_uploader).apply {
+          if (item.genre == null && item.uploader == null) {
+            isGone = true
+            return@apply
+          }
+          isGone = false
+          text = spannable {
+            item.genre.span {
+              margin(4.dp)
+              when (item.genre) {
+                "3D" -> color(Color.rgb(245, 171, 53))
+                "COS" -> color(Color.rgb(165, 55, 253))
+                "同人" -> color(Color.rgb(241, 130, 141))
+                else -> color(Color.RED)
+              }
             }
-            .also { viewHolder ->
-                when (viewType) {
-                    HanimeInfo.SIMPLIFIED -> {
-                        when (context) {
-                            is SearchActivity -> {
-                                viewHolder.getView<View>(R.id.frame).widthMatchParent()
-                            }
+            item.uploader.text()
+          }
+        }
+      }
+    }
+  }
 
-                            is VideoActivity ->
-                                when (videoWidthType) {
-                                    VIDEO_LAYOUT_MATCH_PARENT ->
-                                        viewHolder.getView<View>(R.id.frame).widthMatchParent()
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): QuickViewHolder {
+    return if (viewType == HanimeInfo.NORMAL) {
+        QuickViewHolder(R.layout.item_hanime_video, parent)
+      } else {
+        QuickViewHolder(R.layout.item_hanime_video_simplified, parent)
+      }
+      .also { viewHolder ->
+        when (viewType) {
+          HanimeInfo.SIMPLIFIED -> {
+            when (context) {
+              is SearchActivity -> {
+                viewHolder.getView<View>(R.id.frame).widthMatchParent()
+              }
 
-                                    VIDEO_LAYOUT_WRAP_CONTENT ->
-                                        viewHolder.getView<View>(R.id.frame).widthWrapContent()
-                                }
-                        }
-                        with(VideoCoverSize.Simplified) {
-                            viewHolder.getView<ViewGroup>(R.id.cover_wrapper).resizeForVideoCover()
-                        }
-                    }
+              is VideoActivity ->
+                when (videoWidthType) {
+                  VIDEO_LAYOUT_MATCH_PARENT ->
+                    viewHolder.getView<View>(R.id.frame).widthMatchParent()
 
-                    HanimeInfo.NORMAL -> {
-                        when (context) {
-                            is VideoActivity ->
-                                when (videoWidthType) {
-                                    VIDEO_LAYOUT_MATCH_PARENT ->
-                                        viewHolder.getView<View>(R.id.frame).widthMatchParent()
-
-                                    VIDEO_LAYOUT_WRAP_CONTENT ->
-                                        viewHolder.getView<View>(R.id.frame).widthWrapContent()
-                                }
-
-                            is MainActivity -> {
-                                val activity = context
-                                val fragment = activity.currentFragment
-                                if (fragment is HomePageFragment) {
-                                    viewHolder.getView<View>(R.id.frame).widthWrapContent()
-                                }
-                            }
-                        }
-                        with(VideoCoverSize.Normal) {
-                            viewHolder.getView<ViewGroup>(R.id.cover_wrapper).resizeForVideoCover()
-                        }
-                    }
+                  VIDEO_LAYOUT_WRAP_CONTENT ->
+                    viewHolder.getView<View>(R.id.frame).widthWrapContent()
                 }
-                viewHolder.itemView.apply {
-                    if (context !is PreviewActivity) {
-                        setOnClickListener {
-                            val position = viewHolder.bindingAdapterPosition
-                            val item = getItem(position) ?: return@setOnClickListener
-                            if (item.isPlaying) {
-                                showShortToast(R.string.watching_this_video_now)
-                            } else {
-                                val videoCode = item.videoCode
-                                context.startVideoActivity(videoCode)
-                            }
-                        }
-                        setOnLongClickListener {
-                            val position = viewHolder.bindingAdapterPosition
-                            val item = getItem(position) ?: return@setOnLongClickListener true
-                            copyTextToClipboard(getHanimeShareText(item.title, item.videoCode))
-                            showShortToast(R.string.copy_to_clipboard)
-                            return@setOnLongClickListener true
-                        }
-                    }
+            }
+            with(VideoCoverSize.Simplified) {
+              viewHolder.getView<ViewGroup>(R.id.cover_wrapper).resizeForVideoCover()
+            }
+          }
+
+          HanimeInfo.NORMAL -> {
+            when (context) {
+              is VideoActivity ->
+                when (videoWidthType) {
+                  VIDEO_LAYOUT_MATCH_PARENT ->
+                    viewHolder.getView<View>(R.id.frame).widthMatchParent()
+
+                  VIDEO_LAYOUT_WRAP_CONTENT ->
+                    viewHolder.getView<View>(R.id.frame).widthWrapContent()
                 }
+
+              is MainActivity -> {
+                val activity = context
+                val fragment = activity.currentFragment
+                if (fragment is HomePageFragment) {
+                  viewHolder.getView<View>(R.id.frame).widthWrapContent()
+                }
+              }
             }
-    }
-
-    private fun View.widthMatchParent() = apply {
-        layoutParams =
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            )
-    }
-
-    private fun View.widthWrapContent() = apply {
-        layoutParams =
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            )
-    }
-
-    private fun Context.startVideoActivity(videoCode: String) {
-        if (this is SearchActivity) {
-            val intent =
-                Intent(this, VideoActivity::class.java).apply { putExtra(VIDEO_CODE, videoCode) }
-            this.subscribeLauncher.launch(intent)
-            return
-        }
-        activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
-    }
-
-    private fun formatViews(raw: String): String {
-        return when {
-            raw.contains("萬") -> {
-                val num = raw.replace("萬次", "").toFloatOrNull() ?: return raw
-                val views = (num * 10_000).toInt()
-                formatNumber(views)
+            with(VideoCoverSize.Normal) {
+              viewHolder.getView<ViewGroup>(R.id.cover_wrapper).resizeForVideoCover()
             }
-            raw.contains("次") -> {
-                val num = raw.replace("次", "").toIntOrNull() ?: return raw
-                formatNumber(num)
+          }
+        }
+        viewHolder.itemView.apply {
+          if (context !is PreviewActivity) {
+            setOnClickListener {
+              val position = viewHolder.bindingAdapterPosition
+              val item = getItem(position) ?: return@setOnClickListener
+              if (item.isPlaying) {
+                showShortToast(R.string.watching_this_video_now)
+              } else {
+                val videoCode = item.videoCode
+                context.startVideoActivity(videoCode)
+              }
             }
-            else -> raw
+            setOnLongClickListener {
+              val position = viewHolder.bindingAdapterPosition
+              val item = getItem(position) ?: return@setOnLongClickListener true
+              copyTextToClipboard(getHanimeShareText(item.title, item.videoCode))
+              showShortToast(R.string.copy_to_clipboard)
+              return@setOnLongClickListener true
+            }
+          }
         }
-    }
+      }
+  }
 
-    private fun formatNumber(num: Int): String {
-        return when {
-            num >= 1_000_000 -> "%.1fM".format(num / 1_000_000f)
-            num >= 1_000 -> "%.1fK".format(num / 1_000f)
-            else -> num.toString()
-        }
+  private fun View.widthMatchParent() = apply {
+    layoutParams =
+      ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      )
+  }
+
+  private fun View.widthWrapContent() = apply {
+    layoutParams =
+      ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+      )
+  }
+
+  private fun Context.startVideoActivity(videoCode: String) {
+    if (this is SearchActivity) {
+      val intent = Intent(this, VideoActivity::class.java).apply { putExtra(VIDEO_CODE, videoCode) }
+      this.subscribeLauncher.launch(intent)
+      return
     }
+    activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
+  }
+
+  private fun formatViews(raw: String): String {
+    return when {
+      raw.contains("萬") -> {
+        val num = raw.replace("萬次", "").toFloatOrNull() ?: return raw
+        val views = (num * 10_000).toInt()
+        formatNumber(views)
+      }
+      raw.contains("次") -> {
+        val num = raw.replace("次", "").toIntOrNull() ?: return raw
+        formatNumber(num)
+      }
+      else -> raw
+    }
+  }
+
+  private fun formatNumber(num: Int): String {
+    return when {
+      num >= 1_000_000 -> "%.1fM".format(num / 1_000_000f)
+      num >= 1_000 -> "%.1fK".format(num / 1_000f)
+      else -> num.toString()
+    }
+  }
 }

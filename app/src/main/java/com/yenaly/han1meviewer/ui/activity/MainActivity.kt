@@ -68,332 +68,331 @@ import kotlinx.datetime.Clock
  */
 class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
 
-    val viewModel by viewModels<MainViewModel>()
+  val viewModel by viewModels<MainViewModel>()
 
-    lateinit var navHostFragment: NavHostFragment
-    lateinit var navController: NavController
+  lateinit var navHostFragment: NavHostFragment
+  lateinit var navController: NavController
 
-    val currentFragment
-        get() = navHostFragment.childFragmentManager.primaryNavigationFragment
+  val currentFragment
+    get() = navHostFragment.childFragmentManager.primaryNavigationFragment
 
-    // 登錄完了後讓activity刷新主頁
-    private val loginDataLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                viewModel.getHomePage()
-                initHeaderView()
-                initMenu()
-            }
-        }
-
-    override fun getViewBinding(layoutInflater: LayoutInflater): ActivityMainBinding =
-        ActivityMainBinding.inflate(layoutInflater)
-
-    override fun setUiStyle() {
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-        )
-    }
-
-    override val onFragmentResumedListener: (Fragment) -> Unit = { fragment ->
-        logScreenViewEvent(fragment)
-    }
-
-    /** 初始化数据 */
-    override fun initData(savedInstanceState: Bundle?) {
-        navHostFragment = supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment
-        navController = navHostFragment.navController
-        if (binding.nvMain is NavigationView) {
-            (binding.nvMain as NavigationView).setupWithNavController(navController)
-        }
-        if (binding.nvMain is NavigationRailView) {
-            val nvMain = binding.nvMain as NavigationRailView
-            nvMain.labelVisibilityMode = NavigationRailView.LABEL_VISIBILITY_LABELED
-            nvMain.itemActiveIndicatorExpandedWidth = ACTIVE_INDICATOR_WIDTH_MATCH_PARENT
-        }
-        if (binding.dlMain is DrawerLayout) {
-            (binding.dlMain as DrawerLayout).addDrawerListener(this)
-        }
-
+  // 登錄完了後讓activity刷新主頁
+  private val loginDataLauncher =
+    registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+      if (result.resultCode == RESULT_OK) {
+        viewModel.getHomePage()
         initHeaderView()
-        initNavActivity()
         initMenu()
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.nvMain) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+      }
     }
 
-    override fun onStart() {
-        super.onStart()
-        binding.root.post {
-            textFromClipboard?.let {
-                videoUrlRegex.find(it)?.groupValues?.get(1)?.let { videoCode ->
-                    showFindRelatedLinkSnackBar(videoCode)
-                }
+  override fun getViewBinding(layoutInflater: LayoutInflater): ActivityMainBinding =
+    ActivityMainBinding.inflate(layoutInflater)
+
+  override fun setUiStyle() {
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+    )
+  }
+
+  override val onFragmentResumedListener: (Fragment) -> Unit = { fragment ->
+    logScreenViewEvent(fragment)
+  }
+
+  /** 初始化数据 */
+  override fun initData(savedInstanceState: Bundle?) {
+    navHostFragment = supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment
+    navController = navHostFragment.navController
+    if (binding.nvMain is NavigationView) {
+      (binding.nvMain as NavigationView).setupWithNavController(navController)
+    }
+    if (binding.nvMain is NavigationRailView) {
+      val nvMain = binding.nvMain as NavigationRailView
+      nvMain.labelVisibilityMode = NavigationRailView.LABEL_VISIBILITY_LABELED
+      nvMain.itemActiveIndicatorExpandedWidth = ACTIVE_INDICATOR_WIDTH_MATCH_PARENT
+    }
+    if (binding.dlMain is DrawerLayout) {
+      (binding.dlMain as DrawerLayout).addDrawerListener(this)
+    }
+
+    initHeaderView()
+    initNavActivity()
+    initMenu()
+
+    ViewCompat.setOnApplyWindowInsetsListener(binding.nvMain) { v, insets ->
+      val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+      v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+      WindowInsetsCompat.CONSUMED
+    }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    binding.root.post {
+      textFromClipboard?.let {
+        videoUrlRegex.find(it)?.groupValues?.get(1)?.let { videoCode ->
+          showFindRelatedLinkSnackBar(videoCode)
+        }
+      }
+    }
+  }
+
+  override fun bindDataObservers() {
+    lifecycleScope.launch {
+      repeatOnLifecycle(Lifecycle.State.CREATED) {
+        AppViewModel.versionFlow.collect { state ->
+          if (state is WebsiteState.Success && Preferences.isUpdateDialogVisible) {
+            state.info?.let { release ->
+              Preferences.lastUpdatePopupTime = Clock.System.now().epochSeconds
+              showUpdateDialog(release)
             }
+          }
         }
+      }
     }
-
-    override fun bindDataObservers() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                AppViewModel.versionFlow.collect { state ->
-                    if (state is WebsiteState.Success && Preferences.isUpdateDialogVisible) {
-                        state.info?.let { release ->
-                            Preferences.lastUpdatePopupTime = Clock.System.now().epochSeconds
-                            showUpdateDialog(release)
-                        }
-                    }
-                }
+    lifecycleScope.launch {
+      repeatOnLifecycle(Lifecycle.State.CREATED) {
+        viewModel.homePageFlow.collect { state ->
+          if (state is WebsiteState.Error) {
+            if (state.throwable is CloudFlareBlockedException) {
+              // TODO: 被屏蔽时的处理
             }
+          }
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.homePageFlow.collect { state ->
-                    if (state is WebsiteState.Error) {
-                        if (state.throwable is CloudFlareBlockedException) {
-                            // TODO: 被屏蔽时的处理
-                        }
-                    }
-                }
-            }
-        }
-
-        fun setAvatar(header: View) {
-            val headerAvatar = header.findViewById<ImageView>(R.id.header_avatar)
-            val headerUsername = header.findViewById<TextView>(R.id.header_username)
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    viewModel.homePageFlow.collect { state ->
-                        if (state is WebsiteState.Success) {
-                            if (isAlreadyLogin) {
-                                if (state.info.username == null) {
-                                    headerAvatar.load(R.mipmap.ic_launcher) {
-                                        crossfade(true)
-                                        transformations(CircleCropTransformation())
-                                    }
-                                    headerUsername.setText(R.string.refresh_page_or_login_expired)
-                                } else {
-                                    headerAvatar.load(state.info.avatarUrl) {
-                                        crossfade(true)
-                                        transformations(CircleCropTransformation())
-                                    }
-                                    headerUsername.text = state.info.username
-                                }
-                            } else {
-                                initHeaderView()
-                            }
-                        } else {
-                            headerAvatar.load(R.mipmap.ic_launcher) {
-                                crossfade(true)
-                                transformations(CircleCropTransformation())
-                            }
-                            headerUsername.setText(R.string.loading)
-                        }
-                    }
-                }
-            }
-        }
-        if (binding.nvMain is NavigationView) {
-            (binding.nvMain as NavigationView).getHeaderView(0)?.let { header ->
-                setAvatar(header)
-                val collapse = header.findViewById<ImageView>(R.id.collapse)
-                collapse.isVisible = false
-            }
-        }
-        if (binding.nvMain is NavigationRailView) {
-            val nvMain = binding.nvMain as NavigationRailView
-            nvMain.headerView?.let { header ->
-                val headerAvatar = header.findViewById<ImageView>(R.id.header_avatar)
-                setAvatar(header)
-                setHeaderAvatarSize(headerAvatar, false)
-            }
-        }
+      }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
-    }
-
-    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (slideOffset > 0f) {
-                binding.fcvMain.setRenderEffect(
-                    RenderEffect.createBlurEffect(
-                        6.dp * slideOffset,
-                        6.dp * slideOffset,
-                        Shader.TileMode.CLAMP,
-                    )
-                )
-            }
-        }
-    }
-
-    override fun onDrawerClosed(drawerView: View) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            binding.fcvMain.setRenderEffect(null)
-        }
-    }
-
-    override fun onDrawerOpened(drawerView: View) {}
-
-    override fun onDrawerStateChanged(newState: Int) {}
-
-    private fun showFindRelatedLinkSnackBar(videoCode: String) {
-        showSnackBar(R.string.detect_ha1_related_link_in_clipboard, Snackbar.LENGTH_LONG) {
-            setAction(R.string.enter) { startActivity<VideoActivity>(VIDEO_CODE to videoCode) }
-        }
-    }
-
-    fun setHeaderAvatarSize(headerAvatar: ImageView, isExpanded: Boolean) {
-        if (isExpanded) {
-            val widthInPx = resources.getDimensionPixelSize(R.dimen.main_expanded_avatar_size)
-            val params = headerAvatar.layoutParams
-            params.width = widthInPx
-            params.height = widthInPx
-            headerAvatar.layoutParams = params
-        } else {
-            val widthInPx = resources.getDimensionPixelSize(R.dimen.main_avatar_size)
-            val params = headerAvatar.layoutParams
-            params.width = widthInPx
-            params.height = widthInPx
-            headerAvatar.layoutParams = params
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun initHeaderView() {
-        fun setAvatar(view: View) {
-            val headerAvatar = view.findViewById<ImageView>(R.id.header_avatar)
-            val headerUsername = view.findViewById<TextView>(R.id.header_username)
-            if (isAlreadyLogin) {
-                headerAvatar.setOnClickListener {
-                    showAlertDialog {
-                        setTitle(R.string.sure_to_logout)
-                        setPositiveButton(R.string.sure) { _, _ -> logoutWithRefresh() }
-                        setNegativeButton(R.string.no, null)
-                    }
-                }
-            } else {
-                headerAvatar.load(R.mipmap.ic_launcher) {
+    fun setAvatar(header: View) {
+      val headerAvatar = header.findViewById<ImageView>(R.id.header_avatar)
+      val headerUsername = header.findViewById<TextView>(R.id.header_username)
+      lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.CREATED) {
+          viewModel.homePageFlow.collect { state ->
+            if (state is WebsiteState.Success) {
+              if (isAlreadyLogin) {
+                if (state.info.username == null) {
+                  headerAvatar.load(R.mipmap.ic_launcher) {
                     crossfade(true)
                     transformations(CircleCropTransformation())
+                  }
+                  headerUsername.setText(R.string.refresh_page_or_login_expired)
+                } else {
+                  headerAvatar.load(state.info.avatarUrl) {
+                    crossfade(true)
+                    transformations(CircleCropTransformation())
+                  }
+                  headerUsername.text = state.info.username
                 }
-                headerUsername.setText(R.string.not_logged_in)
-                headerAvatar.setOnClickListener { gotoLoginActivity() }
+              } else {
+                initHeaderView()
+              }
+            } else {
+              headerAvatar.load(R.mipmap.ic_launcher) {
+                crossfade(true)
+                transformations(CircleCropTransformation())
+              }
+              headerUsername.setText(R.string.loading)
             }
+          }
         }
-        if (binding.nvMain is NavigationView) {
-            (binding.nvMain as NavigationView).getHeaderView(0)?.let { view -> setAvatar(view) }
+      }
+    }
+    if (binding.nvMain is NavigationView) {
+      (binding.nvMain as NavigationView).getHeaderView(0)?.let { header ->
+        setAvatar(header)
+        val collapse = header.findViewById<ImageView>(R.id.collapse)
+        collapse.isVisible = false
+      }
+    }
+    if (binding.nvMain is NavigationRailView) {
+      val nvMain = binding.nvMain as NavigationRailView
+      nvMain.headerView?.let { header ->
+        val headerAvatar = header.findViewById<ImageView>(R.id.header_avatar)
+        setAvatar(header)
+        setHeaderAvatarSize(headerAvatar, false)
+      }
+    }
+  }
+
+  override fun onSupportNavigateUp(): Boolean {
+    return navController.navigateUp() || super.onSupportNavigateUp()
+  }
+
+  override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      if (slideOffset > 0f) {
+        binding.fcvMain.setRenderEffect(
+          RenderEffect.createBlurEffect(
+            6.dp * slideOffset,
+            6.dp * slideOffset,
+            Shader.TileMode.CLAMP,
+          )
+        )
+      }
+    }
+  }
+
+  override fun onDrawerClosed(drawerView: View) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      binding.fcvMain.setRenderEffect(null)
+    }
+  }
+
+  override fun onDrawerOpened(drawerView: View) {}
+
+  override fun onDrawerStateChanged(newState: Int) {}
+
+  private fun showFindRelatedLinkSnackBar(videoCode: String) {
+    showSnackBar(R.string.detect_ha1_related_link_in_clipboard, Snackbar.LENGTH_LONG) {
+      setAction(R.string.enter) { startActivity<VideoActivity>(VIDEO_CODE to videoCode) }
+    }
+  }
+
+  fun setHeaderAvatarSize(headerAvatar: ImageView, isExpanded: Boolean) {
+    if (isExpanded) {
+      val widthInPx = resources.getDimensionPixelSize(R.dimen.main_expanded_avatar_size)
+      val params = headerAvatar.layoutParams
+      params.width = widthInPx
+      params.height = widthInPx
+      headerAvatar.layoutParams = params
+    } else {
+      val widthInPx = resources.getDimensionPixelSize(R.dimen.main_avatar_size)
+      val params = headerAvatar.layoutParams
+      params.width = widthInPx
+      params.height = widthInPx
+      headerAvatar.layoutParams = params
+    }
+  }
+
+  @SuppressLint("SetTextI18n")
+  private fun initHeaderView() {
+    fun setAvatar(view: View) {
+      val headerAvatar = view.findViewById<ImageView>(R.id.header_avatar)
+      val headerUsername = view.findViewById<TextView>(R.id.header_username)
+      if (isAlreadyLogin) {
+        headerAvatar.setOnClickListener {
+          showAlertDialog {
+            setTitle(R.string.sure_to_logout)
+            setPositiveButton(R.string.sure) { _, _ -> logoutWithRefresh() }
+            setNegativeButton(R.string.no, null)
+          }
         }
-        if (binding.nvMain is NavigationRailView) {
-            val nvMain = (binding.nvMain as NavigationRailView)
-            nvMain.headerView?.let { view ->
-                setAvatar(view)
-
-                val collapse = view.findViewById<ImageView>(R.id.collapse)
-                val headerAvatar = view.findViewById<ImageView>(R.id.header_avatar)
-                collapse.setOnClickListener {
-                    setHeaderAvatarSize(headerAvatar, !nvMain.isExpanded)
-                    if (nvMain.isExpanded) {
-                        nvMain.collapse()
-                        val params = nvMain.layoutParams
-                        params.width = 80.dpToPx()
-                        nvMain.layoutParams = params
-                    } else {
-                        nvMain.expand()
-                        val params = nvMain.layoutParams
-                        params.width = 300.dpToPx()
-                        nvMain.layoutParams = params
-                    }
-                }
-            }
+      } else {
+        headerAvatar.load(R.mipmap.ic_launcher) {
+          crossfade(true)
+          transformations(CircleCropTransformation())
         }
+        headerUsername.setText(R.string.not_logged_in)
+        headerAvatar.setOnClickListener { gotoLoginActivity() }
+      }
     }
+    if (binding.nvMain is NavigationView) {
+      (binding.nvMain as NavigationView).getHeaderView(0)?.let { view -> setAvatar(view) }
+    }
+    if (binding.nvMain is NavigationRailView) {
+      val nvMain = (binding.nvMain as NavigationRailView)
+      nvMain.headerView?.let { view ->
+        setAvatar(view)
 
-    // #issue-225: 侧滑选单双重点击异常，不能从 xml 里直接定义 activity 块，需要在代码里初始化
-    private fun initNavActivity() {
-        val menu =
-            when (binding.nvMain) {
-                is NavigationView -> {
-                    (binding.nvMain as NavigationView).menu
-                }
-                else -> {
-                    (binding.nvMain as NavigationRailView).menu
-                }
-            }
-        menu.apply {
-            findItem(R.id.nv_settings).setOnMenuItemClickListener {
-                SettingsRouter.with(navController).toSettingsActivity()
-                return@setOnMenuItemClickListener false
-            }
-            findItem(R.id.nv_h_keyframe_settings).setOnMenuItemClickListener {
-                SettingsRouter.with(navController)
-                    .toSettingsActivity(R.id.hKeyframeSettingsFragment)
-                return@setOnMenuItemClickListener false
-            }
-            findItem(R.id.nv_download).setOnMenuItemClickListener {
-                startActivity<DownloadActivity>()
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    @Suppress("DEPRECATION")
-                    overridePendingTransition(R.anim.slide_in_from_bottom, R.anim.fade_out)
-                }
-                return@setOnMenuItemClickListener false
-            }
+        val collapse = view.findViewById<ImageView>(R.id.collapse)
+        val headerAvatar = view.findViewById<ImageView>(R.id.header_avatar)
+        collapse.setOnClickListener {
+          setHeaderAvatarSize(headerAvatar, !nvMain.isExpanded)
+          if (nvMain.isExpanded) {
+            nvMain.collapse()
+            val params = nvMain.layoutParams
+            params.width = 80.dpToPx()
+            nvMain.layoutParams = params
+          } else {
+            nvMain.expand()
+            val params = nvMain.layoutParams
+            params.width = 300.dpToPx()
+            nvMain.layoutParams = params
+          }
         }
+      }
     }
+  }
 
-    private val loginNeededFragmentList =
-        intArrayOf(R.id.nv_fav_video, R.id.nv_watch_later, R.id.nv_playlist)
-
-    private fun initMenu() {
-        val menu =
-            when (binding.nvMain) {
-                is NavigationView -> {
-                    (binding.nvMain as NavigationView).menu
-                }
-                else -> {
-                    (binding.nvMain as NavigationRailView).menu
-                }
-            }
-        if (isAlreadyLogin) {
-            loginNeededFragmentList.forEach { menu.findItem(it).setOnMenuItemClickListener(null) }
-        } else {
-            loginNeededFragmentList.forEach {
-                menu.findItem(it).setOnMenuItemClickListener {
-                    showShortToast(R.string.login_first)
-                    return@setOnMenuItemClickListener false
-                }
-            }
+  // #issue-225: 侧滑选单双重点击异常，不能从 xml 里直接定义 activity 块，需要在代码里初始化
+  private fun initNavActivity() {
+    val menu =
+      when (binding.nvMain) {
+        is NavigationView -> {
+          (binding.nvMain as NavigationView).menu
         }
-    }
-
-    private fun gotoLoginActivity() {
-        val intent = Intent(this, LoginActivity::class.java)
-        loginDataLauncher.launch(intent)
-    }
-
-    private fun logoutWithRefresh() {
-        logout()
-        initHeaderView()
-        initMenu()
-    }
-
-    /**
-     * 设置toolbar与navController关联
-     *
-     * 必须最后调用！先设置好toolbar！
-     */
-    fun Toolbar.setupWithMainNavController() {
-        supportActionBar!!.title = hanimeSpannedTitle
-        if (binding.dlMain is DrawerLayout) {
-            val appBarConfiguration =
-                AppBarConfiguration(setOf(R.id.nv_home_page), binding.dlMain as Openable?)
-            this.setupWithNavController(navController, appBarConfiguration)
+        else -> {
+          (binding.nvMain as NavigationRailView).menu
         }
+      }
+    menu.apply {
+      findItem(R.id.nv_settings).setOnMenuItemClickListener {
+        SettingsRouter.with(navController).toSettingsActivity()
+        return@setOnMenuItemClickListener false
+      }
+      findItem(R.id.nv_h_keyframe_settings).setOnMenuItemClickListener {
+        SettingsRouter.with(navController).toSettingsActivity(R.id.hKeyframeSettingsFragment)
+        return@setOnMenuItemClickListener false
+      }
+      findItem(R.id.nv_download).setOnMenuItemClickListener {
+        startActivity<DownloadActivity>()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+          @Suppress("DEPRECATION")
+          overridePendingTransition(R.anim.slide_in_from_bottom, R.anim.fade_out)
+        }
+        return@setOnMenuItemClickListener false
+      }
     }
+  }
+
+  private val loginNeededFragmentList =
+    intArrayOf(R.id.nv_fav_video, R.id.nv_watch_later, R.id.nv_playlist)
+
+  private fun initMenu() {
+    val menu =
+      when (binding.nvMain) {
+        is NavigationView -> {
+          (binding.nvMain as NavigationView).menu
+        }
+        else -> {
+          (binding.nvMain as NavigationRailView).menu
+        }
+      }
+    if (isAlreadyLogin) {
+      loginNeededFragmentList.forEach { menu.findItem(it).setOnMenuItemClickListener(null) }
+    } else {
+      loginNeededFragmentList.forEach {
+        menu.findItem(it).setOnMenuItemClickListener {
+          showShortToast(R.string.login_first)
+          return@setOnMenuItemClickListener false
+        }
+      }
+    }
+  }
+
+  private fun gotoLoginActivity() {
+    val intent = Intent(this, LoginActivity::class.java)
+    loginDataLauncher.launch(intent)
+  }
+
+  private fun logoutWithRefresh() {
+    logout()
+    initHeaderView()
+    initMenu()
+  }
+
+  /**
+   * 设置toolbar与navController关联
+   *
+   * 必须最后调用！先设置好toolbar！
+   */
+  fun Toolbar.setupWithMainNavController() {
+    supportActionBar!!.title = hanimeSpannedTitle
+    if (binding.dlMain is DrawerLayout) {
+      val appBarConfiguration =
+        AppBarConfiguration(setOf(R.id.nv_home_page), binding.dlMain as Openable?)
+      this.setupWithNavController(navController, appBarConfiguration)
+    }
+  }
 }

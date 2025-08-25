@@ -9,12 +9,12 @@ import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
 
 fun Activity.logScreenViewEvent(fragment: Fragment) {
-    Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
-        // example: MainActivity-HomePageFragment
-        val screenName =
-            this@logScreenViewEvent.javaClass.simpleName + "-" + fragment.javaClass.simpleName
-        Log.d("logScreenViewEvent", "screenName: $screenName")
-        param(FirebaseAnalytics.Param.SCREEN_NAME, screenName)
-        param(FirebaseAnalytics.Param.SCREEN_CLASS, fragment.javaClass.simpleName)
-    }
+  Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+    // example: MainActivity-HomePageFragment
+    val screenName =
+      this@logScreenViewEvent.javaClass.simpleName + "-" + fragment.javaClass.simpleName
+    Log.d("logScreenViewEvent", "screenName: $screenName")
+    param(FirebaseAnalytics.Param.SCREEN_NAME, screenName)
+    param(FirebaseAnalytics.Param.SCREEN_CLASS, fragment.javaClass.simpleName)
+  }
 }

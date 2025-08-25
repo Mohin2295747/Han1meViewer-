@@ -15,12 +15,12 @@ import com.yenaly.yenaly_libs.utils.applicationContext
  */
 open class YenalyInitializer : Initializer<Unit> {
 
-    @CallSuper
-    override fun create(context: Context) {
-        applicationContext = context
-    }
+  @CallSuper
+  override fun create(context: Context) {
+    applicationContext = context
+  }
 
-    override fun dependencies(): MutableList<Class<out Initializer<*>>> {
-        return mutableListOf()
-    }
+  override fun dependencies(): MutableList<Class<out Initializer<*>>> {
+    return mutableListOf()
+  }
 }

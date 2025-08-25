@@ -22,91 +22,91 @@ import com.yenaly.yenaly_libs.utils.activity
  */
 class SimpleBottomNavViewMediator
 constructor(
-    private val bottomNavigationView: BottomNavigationView,
-    private val viewPager2: ViewPager2,
-    var smoothScroll: Boolean = true,
+  private val bottomNavigationView: BottomNavigationView,
+  private val viewPager2: ViewPager2,
+  var smoothScroll: Boolean = true,
 ) {
 
-    private val fragmentActivity =
-        bottomNavigationView.context.activity as? FragmentActivity
-            ?: throw IllegalStateException("context cannot be cast to FragmentActivity!")
+  private val fragmentActivity =
+    bottomNavigationView.context.activity as? FragmentActivity
+      ?: throw IllegalStateException("context cannot be cast to FragmentActivity!")
 
-    private var currentFragment: Fragment? = null
-    private var onFragmentChangedListener: OnFragmentChangedListener? = null
+  private var currentFragment: Fragment? = null
+  private var onFragmentChangedListener: OnFragmentChangedListener? = null
 
-    private var attached = false
+  private var attached = false
 
-    private var index = 0
-    private val newFragmentMap = SparseArray<NewFragment>()
-    private val indexMap = SparseIntArray()
-    private val newFragmentList = mutableListOf<Pair<Int, NewFragment>>()
+  private var index = 0
+  private val newFragmentMap = SparseArray<NewFragment>()
+  private val indexMap = SparseIntArray()
+  private val newFragmentList = mutableListOf<Pair<Int, NewFragment>>()
 
-    private var viewPager2Adapter: RecyclerView.Adapter<*>? = null
-    private var onItemSelectedListener: NavigationBarView.OnItemSelectedListener? = null
-    private var onPageChangeCallback: OnPageChangeCallback? = null
+  private var viewPager2Adapter: RecyclerView.Adapter<*>? = null
+  private var onItemSelectedListener: NavigationBarView.OnItemSelectedListener? = null
+  private var onPageChangeCallback: OnPageChangeCallback? = null
 
-    fun attach() = apply {
-        check(!attached) { "${javaClass.simpleName} is already attached" }
-        check(newFragmentMap.isNotEmpty()) { "fragment list could not be empty!" }
+  fun attach() = apply {
+    check(!attached) { "${javaClass.simpleName} is already attached" }
+    check(newFragmentMap.isNotEmpty()) { "fragment list could not be empty!" }
 
-        viewPager2Adapter =
-            object : FragmentStateAdapter(fragmentActivity) {
-                override fun getItemCount(): Int {
-                    return index
-                }
+    viewPager2Adapter =
+      object : FragmentStateAdapter(fragmentActivity) {
+        override fun getItemCount(): Int {
+          return index
+        }
 
-                override fun createFragment(position: Int): Fragment {
-                    return newFragmentList[position].second.invoke()
-                }
-            }
+        override fun createFragment(position: Int): Fragment {
+          return newFragmentList[position].second.invoke()
+        }
+      }
 
-        onItemSelectedListener =
-            NavigationBarView.OnItemSelectedListener { item ->
-                val currentIndex = indexMap[item.itemId]
-                viewPager2.setCurrentItem(currentIndex, smoothScroll)
-                return@OnItemSelectedListener true
-            }
+    onItemSelectedListener =
+      NavigationBarView.OnItemSelectedListener { item ->
+        val currentIndex = indexMap[item.itemId]
+        viewPager2.setCurrentItem(currentIndex, smoothScroll)
+        return@OnItemSelectedListener true
+      }
 
-        onPageChangeCallback =
-            object : OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    bottomNavigationView.selectedItemId = newFragmentList[position].first
-                    onFragmentChangedListener?.onFragmentChanged(
-                        fragmentActivity.supportFragmentManager.fragments.find { it.isResumed }
-                    )
-                }
-            }
+    onPageChangeCallback =
+      object : OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+          bottomNavigationView.selectedItemId = newFragmentList[position].first
+          onFragmentChangedListener?.onFragmentChanged(
+            fragmentActivity.supportFragmentManager.fragments.find { it.isResumed }
+          )
+        }
+      }
 
-        viewPager2.adapter = viewPager2Adapter
-        bottomNavigationView.setOnItemSelectedListener(onItemSelectedListener!!)
-        viewPager2.registerOnPageChangeCallback(onPageChangeCallback!!)
+    viewPager2.adapter = viewPager2Adapter
+    bottomNavigationView.setOnItemSelectedListener(onItemSelectedListener!!)
+    viewPager2.registerOnPageChangeCallback(onPageChangeCallback!!)
 
-        attached = true
-    }
+    attached = true
+  }
 
-    fun detach() = apply { TODO("I am lazy!") }
+  fun detach() = apply { TODO("I am lazy!") }
 
-    /**
-     * For example:
-     *
-     * `R.id.xxx with { XXFragment() }`
-     */
-    infix fun @receiver:IdRes Int.with(newFragment: NewFragment) {
-        newFragmentMap[this] = newFragment
-        indexMap[this] = index
-        newFragmentList += this to newFragment
-        index++
-    }
+  /**
+   * For example:
+   *
+   * `R.id.xxx with { XXFragment() }`
+   */
+  infix fun @receiver:IdRes Int.with(newFragment: NewFragment) {
+    newFragmentMap[this] = newFragment
+    indexMap[this] = index
+    newFragmentList += this to newFragment
+    index++
+  }
 
-    /**
-     * Set on a callback interface that is optionally implemented to listen the latest selected
-     * fragment.
-     */
-    fun setOnFragmentChangedListener(listener: OnFragmentChangedListener) {
-        this.onFragmentChangedListener = listener
-    }
+  /**
+   * Set on a callback interface that is optionally implemented to listen the latest selected
+   * fragment.
+   */
+  fun setOnFragmentChangedListener(listener: OnFragmentChangedListener) {
+    this.onFragmentChangedListener = listener
+  }
 
-    fun interface OnFragmentChangedListener {
-        fun onFragmentChanged(currentFragment: Fragment?)
-    }
+  fun interface OnFragmentChangedListener {
+    fun onFragmentChanged(currentFragment: Fragment?)
+  }
 }

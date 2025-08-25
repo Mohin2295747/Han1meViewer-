@@ -17,10 +17,10 @@ import kotlinx.serialization.json.Json
  * @project Han1meViewer
  */
 interface HKeyframeType : MultiItemEntity {
-    companion object {
-        const val H_KEYFRAME = 0
-        const val HEADER = 1
-    }
+  companion object {
+    const val H_KEYFRAME = 0
+    const val HEADER = 1
+  }
 }
 
 /**
@@ -32,43 +32,41 @@ interface HKeyframeType : MultiItemEntity {
 @Entity
 @TypeConverters(HKeyframeEntity.KeyframeTypeConverter::class)
 data class HKeyframeEntity(
-    @PrimaryKey val videoCode: String,
-    val title: String,
-    /** 关键帧列表 */
-    val keyframes: MutableList<Keyframe>,
-    /** 最后修改时间 */
-    val lastModifiedTime: Long = -1,
-    /** 创建时间 */
-    val createdTime: Long = -1,
-    /** 作者，null 代表本地（自己创建的），非 null 代表共享 */
-    val author: String? = null,
+  @PrimaryKey val videoCode: String,
+  val title: String,
+  /** 关键帧列表 */
+  val keyframes: MutableList<Keyframe>,
+  /** 最后修改时间 */
+  val lastModifiedTime: Long = -1,
+  /** 创建时间 */
+  val createdTime: Long = -1,
+  /** 作者，null 代表本地（自己创建的），非 null 代表共享 */
+  val author: String? = null,
 ) : HKeyframeType {
 
-    /** 分组，一个系列为一组 */
-    @Ignore val group: String? = null
+  /** 分组，一个系列为一组 */
+  @Ignore val group: String? = null
 
-    /** 所在集数 */
-    @Ignore val episode: Int = -1
+  /** 所在集数 */
+  @Ignore val episode: Int = -1
 
-    @Ignore override val itemType: Int = HKeyframeType.H_KEYFRAME
+  @Ignore override val itemType: Int = HKeyframeType.H_KEYFRAME
 
-    @Serializable
-    data class Keyframe(
-        /** 该关键帧的时间戳 */
-        val position: Long,
-        /** 该关键帧的提示 */
-        val prompt: String?,
-    )
+  @Serializable
+  data class Keyframe(
+    /** 该关键帧的时间戳 */
+    val position: Long,
+    /** 该关键帧的提示 */
+    val prompt: String?,
+  )
 
-    class KeyframeTypeConverter {
-        @TypeConverter
-        fun fromKeyframeList(keyframes: MutableList<Keyframe>): String =
-            Json.encodeToString(keyframes)
+  class KeyframeTypeConverter {
+    @TypeConverter
+    fun fromKeyframeList(keyframes: MutableList<Keyframe>): String = Json.encodeToString(keyframes)
 
-        @TypeConverter
-        fun toKeyframeList(keyframes: String): MutableList<Keyframe> =
-            Json.decodeFromString(keyframes)
-    }
+    @TypeConverter
+    fun toKeyframeList(keyframes: String): MutableList<Keyframe> = Json.decodeFromString(keyframes)
+  }
 }
 
 /**
@@ -76,8 +74,8 @@ data class HKeyframeEntity(
  * @project Han1meViewer
  */
 data class HKeyframeHeader(
-    val title: String,
-    /** 附属的关键帧列表 */
-    val attached: List<HKeyframeEntity>,
-    override val itemType: Int = HKeyframeType.HEADER,
+  val title: String,
+  /** 附属的关键帧列表 */
+  val attached: List<HKeyframeEntity>,
+  override val itemType: Int = HKeyframeType.HEADER,
 ) : HKeyframeType

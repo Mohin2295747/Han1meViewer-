@@ -22,40 +22,38 @@ import kotlinx.coroutines.launch
  */
 class DownloadViewModel(application: Application) : YenalyViewModel(application) {
 
-    @IdRes var currentSortOptionId = R.id.sm_sort_by_date_descending
+  @IdRes var currentSortOptionId = R.id.sm_sort_by_date_descending
 
-    private val _downloaded = MutableStateFlow(mutableListOf<VideoWithCategories>())
-    val downloaded = _downloaded.asStateFlow()
+  private val _downloaded = MutableStateFlow(mutableListOf<VideoWithCategories>())
+  val downloaded = _downloaded.asStateFlow()
 
-    fun loadAllDownloadingHanime() =
-        DatabaseRepo.HanimeDownload.loadAllDownloadingHanime()
-            .catch { e -> e.printStackTrace() }
-            .flowOn(Dispatchers.IO)
+  fun loadAllDownloadingHanime() =
+    DatabaseRepo.HanimeDownload.loadAllDownloadingHanime()
+      .catch { e -> e.printStackTrace() }
+      .flowOn(Dispatchers.IO)
 
-    fun loadUpdating() =
-        DatabaseRepo.HanimeDownload.loadloadUpdating()
-            .catch { e -> e.printStackTrace() }
-            .flowOn(Dispatchers.IO)
+  fun loadUpdating() =
+    DatabaseRepo.HanimeDownload.loadloadUpdating()
+      .catch { e -> e.printStackTrace() }
+      .flowOn(Dispatchers.IO)
 
-    fun loadAllDownloadedHanime(
-        sortedBy: HanimeDownloadEntity.SortedBy = HanimeDownloadEntity.SortedBy.ID,
-        ascending: Boolean = false,
-    ) {
-        viewModelScope.launch {
-            DatabaseRepo.HanimeDownload.loadAllDownloadedHanime(sortedBy, ascending)
-                .catch { e -> e.printStackTrace() }
-                .flowOn(Dispatchers.IO)
-                .collect { _downloaded.value = it }
-        }
+  fun loadAllDownloadedHanime(
+    sortedBy: HanimeDownloadEntity.SortedBy = HanimeDownloadEntity.SortedBy.ID,
+    ascending: Boolean = false,
+  ) {
+    viewModelScope.launch {
+      DatabaseRepo.HanimeDownload.loadAllDownloadedHanime(sortedBy, ascending)
+        .catch { e -> e.printStackTrace() }
+        .flowOn(Dispatchers.IO)
+        .collect { _downloaded.value = it }
     }
+  }
 
-    fun updateDownloadHanime(entity: HanimeDownloadEntity) {
-        viewModelScope.launch { DatabaseRepo.HanimeDownload.update(entity) }
-    }
+  fun updateDownloadHanime(entity: HanimeDownloadEntity) {
+    viewModelScope.launch { DatabaseRepo.HanimeDownload.update(entity) }
+  }
 
-    fun deleteDownloadHanimeBy(videoCode: String, quality: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HanimeDownload.delete(videoCode, quality)
-        }
-    }
+  fun deleteDownloadHanimeBy(videoCode: String, quality: String) {
+    viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HanimeDownload.delete(videoCode, quality) }
+  }
 }

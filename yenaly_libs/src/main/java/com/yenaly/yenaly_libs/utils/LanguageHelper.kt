@@ -8,11 +8,11 @@ import java.util.Locale
 @SuppressLint("ObsoleteSdkInt")
 object LanguageHelper {
 
-    val preferredLanguage: Locale
-        get() =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                LocaleList.getDefault()[0]
-            } else {
-                Locale.getDefault()
-            }
+  val preferredLanguage: Locale
+    get() =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        LocaleList.getDefault()[0]
+      } else {
+        Locale.getDefault()
+      }
 }

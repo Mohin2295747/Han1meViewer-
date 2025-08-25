@@ -8,8 +8,8 @@ import com.yenaly.yenaly_libs.R
 open class MaterialSwitchPreference
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null) :
-    SwitchPreferenceCompat(context, attrs) {
-    init {
-        widgetLayoutResource = R.layout.yenaly_preference_switch_widget
-    }
+  SwitchPreferenceCompat(context, attrs) {
+  init {
+    widgetLayoutResource = R.layout.yenaly_preference_switch_widget
+  }
 }

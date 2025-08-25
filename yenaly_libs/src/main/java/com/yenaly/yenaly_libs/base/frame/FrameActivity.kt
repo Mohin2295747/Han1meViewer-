@@ -20,90 +20,90 @@ import androidx.navigation.fragment.NavHostFragment
  */
 abstract class FrameActivity : AppCompatActivity() {
 
-    /** 主题界面风格相关可以在这里设置 (optional) */
-    open fun setUiStyle() {}
+  /** 主题界面风格相关可以在这里设置 (optional) */
+  open fun setUiStyle() {}
 
-    /** 能够监听该 Activity 旗下所有 Fragment 的 onResume 事件 */
-    open val onFragmentResumedListener: ((Fragment) -> Unit)? = null
+  /** 能够监听该 Activity 旗下所有 Fragment 的 onResume 事件 */
+  open val onFragmentResumedListener: ((Fragment) -> Unit)? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        setUiStyle()
-        super.onCreate(savedInstanceState)
-        if (onFragmentResumedListener != null) {
-            supportFragmentManager.registerFragmentLifecycleCallbacks(
-                object : FragmentManager.FragmentLifecycleCallbacks() {
-                    override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
-                        if (f is NavHostFragment) return
-                        onFragmentResumedListener?.invoke(f)
-                        Log.d("FrameActivity", "onFragmentResumed: $f")
-                    }
-                },
-                true,
-            )
+  override fun onCreate(savedInstanceState: Bundle?) {
+    setUiStyle()
+    super.onCreate(savedInstanceState)
+    if (onFragmentResumedListener != null) {
+      supportFragmentManager.registerFragmentLifecycleCallbacks(
+        object : FragmentManager.FragmentLifecycleCallbacks() {
+          override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+            if (f is NavHostFragment) return
+            onFragmentResumedListener?.invoke(f)
+            Log.d("FrameActivity", "onFragmentResumed: $f")
+          }
+        },
+        true,
+      )
+    }
+  }
+
+  /**
+   * 快捷构建 Menu
+   *
+   * 使用了最新 API，创建菜单更简单。
+   *
+   * @param menuRes menuRes。
+   * @param action 和 [onOptionsItemSelected] 用法一致。
+   */
+  open fun addMenu(@MenuRes menuRes: Int, action: (menuItem: MenuItem) -> Boolean) {
+    addMenuProvider(
+      object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+          menuInflater.inflate(menuRes, menu)
         }
-    }
 
-    /**
-     * 快捷构建 Menu
-     *
-     * 使用了最新 API，创建菜单更简单。
-     *
-     * @param menuRes menuRes。
-     * @param action 和 [onOptionsItemSelected] 用法一致。
-     */
-    open fun addMenu(@MenuRes menuRes: Int, action: (menuItem: MenuItem) -> Boolean) {
-        addMenuProvider(
-            object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menuInflater.inflate(menuRes, menu)
-                }
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+          return action.invoke(menuItem)
+        }
+      }
+    )
+  }
 
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return action.invoke(menuItem)
-                }
-            }
-        )
-    }
+  /** 详情 [addMenu] */
+  open fun addMenu(
+    @MenuRes menuRes: Int,
+    owner: LifecycleOwner,
+    action: (menuItem: MenuItem) -> Boolean,
+  ) {
+    addMenuProvider(
+      object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+          menuInflater.inflate(menuRes, menu)
+        }
 
-    /** 详情 [addMenu] */
-    open fun addMenu(
-        @MenuRes menuRes: Int,
-        owner: LifecycleOwner,
-        action: (menuItem: MenuItem) -> Boolean,
-    ) {
-        addMenuProvider(
-            object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menuInflater.inflate(menuRes, menu)
-                }
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+          return action.invoke(menuItem)
+        }
+      },
+      owner,
+    )
+  }
 
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return action.invoke(menuItem)
-                }
-            },
-            owner,
-        )
-    }
+  /** 详情 [addMenu] */
+  open fun addMenu(
+    @MenuRes menuRes: Int,
+    owner: LifecycleOwner,
+    state: Lifecycle.State,
+    action: (menuItem: MenuItem) -> Boolean,
+  ) {
+    addMenuProvider(
+      object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+          menuInflater.inflate(menuRes, menu)
+        }
 
-    /** 详情 [addMenu] */
-    open fun addMenu(
-        @MenuRes menuRes: Int,
-        owner: LifecycleOwner,
-        state: Lifecycle.State,
-        action: (menuItem: MenuItem) -> Boolean,
-    ) {
-        addMenuProvider(
-            object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menuInflater.inflate(menuRes, menu)
-                }
-
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return action.invoke(menuItem)
-                }
-            },
-            owner,
-            state,
-        )
-    }
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+          return action.invoke(menuItem)
+        }
+      },
+      owner,
+      state,
+    )
+  }
 }

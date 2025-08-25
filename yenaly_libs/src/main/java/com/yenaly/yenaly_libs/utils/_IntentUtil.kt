@@ -22,9 +22,9 @@ import androidx.fragment.app.Fragment
  * @param extra 附带的bundle (optional)
  */
 inline fun <reified Ava : Activity> Activity.startActivity(
-    vararg values: Pair<String, Any?>,
-    flag: Int? = null,
-    extra: Bundle? = null,
+  vararg values: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) = startActivity(getIntent<Ava>(flag, extra, *values))
 
 /**
@@ -34,14 +34,14 @@ inline fun <reified Ava : Activity> Activity.startActivity(
  * @param flag flag (optional)
  */
 inline fun <reified Ava : Activity> Activity.startActivity(
-    flag: Int? = null,
-    extra: Bundle? = null,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) =
-    Intent(this, Ava::class.java).apply {
-        flag?.let { flags = it }
-        extra?.let { putExtras(it) }
-        startActivity(this)
-    }
+  Intent(this, Ava::class.java).apply {
+    flag?.let { flags = it }
+    extra?.let { putExtras(it) }
+    startActivity(this)
+  }
 
 /**
  * 快捷启动Service
@@ -52,9 +52,9 @@ inline fun <reified Ava : Activity> Activity.startActivity(
  * @param values 需要传过去的值
  */
 inline fun <reified S : Service> Activity.startService(
-    vararg values: Pair<String, Any?>,
-    flag: Int? = null,
-    extra: Bundle? = null,
+  vararg values: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) = startService(getIntent<S>(flag, extra, *values))
 
 /**
@@ -64,11 +64,11 @@ inline fun <reified S : Service> Activity.startService(
  * @param flag flag (optional)
  */
 inline fun <reified S : Service> Activity.startService(flag: Int? = null, extra: Bundle? = null) =
-    Intent(this, S::class.java).apply {
-        flag?.let { flags = it }
-        extra?.let { putExtras(it) }
-        startService(this)
-    }
+  Intent(this, S::class.java).apply {
+    flag?.let { flags = it }
+    extra?.let { putExtras(it) }
+    startService(this)
+  }
 
 /**
  * 快捷启动Activity
@@ -79,9 +79,9 @@ inline fun <reified S : Service> Activity.startService(flag: Int? = null, extra:
  * @param values 需要传过去的值
  */
 inline fun <reified Bella : Activity> Fragment.startActivity(
-    vararg values: Pair<String, Any?>,
-    flag: Int? = null,
-    extra: Bundle? = null,
+  vararg values: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) = activity?.let { startActivity(it.getIntent<Bella>(flag, extra, *values)) }
 
 /**
@@ -91,16 +91,16 @@ inline fun <reified Bella : Activity> Fragment.startActivity(
  * @param flag flag (optional)
  */
 inline fun <reified Bella : Activity> Fragment.startActivity(
-    flag: Int? = null,
-    extra: Bundle? = null,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) =
-    activity?.let { activity ->
-        Intent(activity, Bella::class.java).apply {
-            flag?.let { flags = it }
-            extra?.let { putExtras(it) }
-            startActivity(this)
-        }
+  activity?.let { activity ->
+    Intent(activity, Bella::class.java).apply {
+      flag?.let { flags = it }
+      extra?.let { putExtras(it) }
+      startActivity(this)
     }
+  }
 
 /**
  * 快捷启动Service
@@ -111,9 +111,9 @@ inline fun <reified Bella : Activity> Fragment.startActivity(
  * @param values 需要传过去的值
  */
 inline fun <reified S : Service> Fragment.startService(
-    vararg values: Pair<String, Any?>,
-    flag: Int? = null,
-    extra: Bundle? = null,
+  vararg values: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) = activity?.let { it.startService(it.getIntent<S>(flag, extra, *values)) }
 
 /**
@@ -123,13 +123,13 @@ inline fun <reified S : Service> Fragment.startService(
  * @param flag flag (optional)
  */
 inline fun <reified S : Service> Fragment.startService(flag: Int? = null, extra: Bundle? = null) =
-    activity?.let { activity ->
-        Intent(activity, S::class.java).apply {
-            flag?.let { flags = it }
-            extra?.let { putExtras(it) }
-            activity.startService(this)
-        }
+  activity?.let { activity ->
+    Intent(activity, S::class.java).apply {
+      flag?.let { flags = it }
+      extra?.let { putExtras(it) }
+      activity.startService(this)
     }
+  }
 
 /**
  * 快捷启动Activity
@@ -140,9 +140,9 @@ inline fun <reified S : Service> Fragment.startService(flag: Int? = null, extra:
  * @param values 需要传过去的值
  */
 inline fun <reified Carol : Activity> Context.startActivity(
-    flag: Int? = null,
-    extra: Bundle? = null,
-    vararg values: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
+  vararg values: Pair<String, Any?>,
 ) = startActivity(getIntent<Carol>(flag, extra, *values))
 
 /**
@@ -153,14 +153,14 @@ inline fun <reified Carol : Activity> Context.startActivity(
  * @param extra 附带的bundle (optional)
  */
 inline fun <reified Carol : Activity> Context.startActivity(
-    flag: Int? = null,
-    extra: Bundle? = null,
+  flag: Int? = null,
+  extra: Bundle? = null,
 ) =
-    Intent(this, Carol::class.java).apply {
-        flag?.let { flags = it }
-        extra?.let { putExtras(it) }
-        startActivity(this)
-    }
+  Intent(this, Carol::class.java).apply {
+    flag?.let { flags = it }
+    extra?.let { putExtras(it) }
+    startActivity(this)
+  }
 
 /**
  * 快捷启动Service
@@ -171,9 +171,9 @@ inline fun <reified Carol : Activity> Context.startActivity(
  * @param values 需要传过去的值
  */
 inline fun <reified S : Service> Context.startService(
-    flag: Int? = null,
-    extra: Bundle? = null,
-    vararg values: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
+  vararg values: Pair<String, Any?>,
 ) = startService(getIntent<S>(flag, extra, *values))
 
 /**
@@ -184,11 +184,11 @@ inline fun <reified S : Service> Context.startService(
  * @param extra 附带的bundle (optional)
  */
 inline fun <reified S : Service> Context.startService(flag: Int? = null, extra: Bundle? = null) =
-    Intent(this, S::class.java).apply {
-        flag?.let { flags = it }
-        extra?.let { putExtras(it) }
-        startService(this)
-    }
+  Intent(this, S::class.java).apply {
+    flag?.let { flags = it }
+    extra?.let { putExtras(it) }
+    startService(this)
+  }
 
 /**
  * 快捷获取一个携带各种参数的intent
@@ -199,17 +199,17 @@ inline fun <reified S : Service> Context.startService(flag: Int? = null, extra: 
  * @param pairs 需要传过去的值
  */
 inline fun <reified Diana : Context> Context.getIntent(
-    flag: Int? = null,
-    extra: Bundle? = null,
-    vararg pairs: Pair<String, Any?>,
+  flag: Int? = null,
+  extra: Bundle? = null,
+  vararg pairs: Pair<String, Any?>,
 ): Intent =
-    Intent(this, Diana::class.java).apply {
-        flag?.let { flags = it }
-        extra?.let { putExtras(it) }
-        if (pairs.isNotEmpty()) {
-            putExtras(bundleOf(*pairs))
-        }
+  Intent(this, Diana::class.java).apply {
+    flag?.let { flags = it }
+    extra?.let { putExtras(it) }
+    if (pairs.isNotEmpty()) {
+      putExtras(bundleOf(*pairs))
     }
+  }
 
 /**
  * 用委托方式获取activity传来的extra， 基本类型涉及装箱拆箱
@@ -219,7 +219,7 @@ inline fun <reified Diana : Context> Context.getIntent(
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Eileen> Activity.intentExtra(name: String) =
-    lazy(LazyThreadSafetyMode.NONE) { intent.extras?.get(name) as? Eileen }
+  lazy(LazyThreadSafetyMode.NONE) { intent.extras?.get(name) as? Eileen }
 
 /**
  * 用委托方式获取activity传来的extra
@@ -230,7 +230,7 @@ fun <Eileen> Activity.intentExtra(name: String) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Eileen> Activity.intentExtra(name: String, default: Eileen) =
-    lazy(LazyThreadSafetyMode.NONE) { intent.extras?.get(name) as? Eileen ?: default }
+  lazy(LazyThreadSafetyMode.NONE) { intent.extras?.get(name) as? Eileen ?: default }
 
 /**
  * 用委托方式获取activity传来的extra， 若空则直接报错
@@ -240,10 +240,10 @@ fun <Eileen> Activity.intentExtra(name: String, default: Eileen) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Eileen> Activity.safeIntentExtra(name: String) =
-    lazy(LazyThreadSafetyMode.NONE) {
-        val extra = intent.extras?.get(name) as? Eileen
-        checkNotNull(extra) { "No intent value for key \"$name\"" }
-    }
+  lazy(LazyThreadSafetyMode.NONE) {
+    val extra = intent.extras?.get(name) as? Eileen
+    checkNotNull(extra) { "No intent value for key \"$name\"" }
+  }
 
 /**
  * 用委托方式获取fragment所属activity传来的extra， 基本类型涉及装箱拆箱
@@ -253,7 +253,7 @@ fun <Eileen> Activity.safeIntentExtra(name: String) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Yoyi> Fragment.activityIntentExtra(name: String) =
-    lazy(LazyThreadSafetyMode.NONE) { activity?.intent?.extras?.get(name) as? Yoyi }
+  lazy(LazyThreadSafetyMode.NONE) { activity?.intent?.extras?.get(name) as? Yoyi }
 
 /**
  * 用委托方式获取fragment所属activity传来的extra
@@ -264,7 +264,7 @@ fun <Yoyi> Fragment.activityIntentExtra(name: String) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Yoyi> Fragment.activityIntentExtra(name: String, default: Yoyi) =
-    lazy(LazyThreadSafetyMode.NONE) { activity?.intent?.extras?.get(name) as? Yoyi ?: default }
+  lazy(LazyThreadSafetyMode.NONE) { activity?.intent?.extras?.get(name) as? Yoyi ?: default }
 
 /**
  * 用委托方式获取fragment所属activity传来的extra， 若空则直接报错
@@ -274,10 +274,10 @@ fun <Yoyi> Fragment.activityIntentExtra(name: String, default: Yoyi) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Yoyi> Fragment.safeActivityIntentExtra(name: String) =
-    lazy(LazyThreadSafetyMode.NONE) {
-        val extra = activity?.intent?.extras?.get(name) as? Yoyi
-        checkNotNull(extra) { "No intent value for key \"$name\"" }
-    }
+  lazy(LazyThreadSafetyMode.NONE) {
+    val extra = activity?.intent?.extras?.get(name) as? Yoyi
+    checkNotNull(extra) { "No intent value for key \"$name\"" }
+  }
 
 /**
  * 用委托方式接收arguments， 基本类型涉及装箱拆箱
@@ -287,7 +287,7 @@ fun <Yoyi> Fragment.safeActivityIntentExtra(name: String) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Bekki> Fragment.arguments(name: String) =
-    lazy(LazyThreadSafetyMode.NONE) { arguments?.get(name) as? Bekki }
+  lazy(LazyThreadSafetyMode.NONE) { arguments?.get(name) as? Bekki }
 
 /**
  * 用委托方式接收arguments
@@ -298,7 +298,7 @@ fun <Bekki> Fragment.arguments(name: String) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Bekki> Fragment.arguments(name: String, default: Bekki) =
-    lazy(LazyThreadSafetyMode.NONE) { arguments?.get(name) as? Bekki ?: default }
+  lazy(LazyThreadSafetyMode.NONE) { arguments?.get(name) as? Bekki ?: default }
 
 /**
  * 用委托方式接收arguments， 若空则直接报错
@@ -308,10 +308,10 @@ fun <Bekki> Fragment.arguments(name: String, default: Bekki) =
  */
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 fun <Bekki> Fragment.safeArguments(name: String) =
-    lazy(LazyThreadSafetyMode.NONE) {
-        val argument = arguments?.get(name) as? Bekki
-        checkNotNull(argument) { "No argument value for key \"$name\"" }
-    }
+  lazy(LazyThreadSafetyMode.NONE) {
+    val argument = arguments?.get(name) as? Bekki
+    checkNotNull(argument) { "No argument value for key \"$name\"" }
+  }
 
 /**
  * 通过uri浏览
@@ -319,9 +319,9 @@ fun <Bekki> Fragment.safeArguments(name: String) =
  * @param uri uri地址
  */
 infix fun Activity.browse(uri: String) {
-    val mUri = Uri.parse(uri)
-    val intent = Intent(Intent.ACTION_VIEW, mUri)
-    startActivity(intent)
+  val mUri = Uri.parse(uri)
+  val intent = Intent(Intent.ACTION_VIEW, mUri)
+  startActivity(intent)
 }
 
 /**
@@ -330,16 +330,16 @@ infix fun Activity.browse(uri: String) {
  * @param uri uri地址
  */
 infix fun Fragment.browse(uri: String) {
-    val mUri = Uri.parse(uri)
-    val intent = Intent(Intent.ACTION_VIEW, mUri)
-    startActivity(intent)
+  val mUri = Uri.parse(uri)
+  val intent = Intent(Intent.ACTION_VIEW, mUri)
+  startActivity(intent)
 }
 
 infix fun Context.browse(uri: String) {
-    val mUri = Uri.parse(uri)
-    val intent = Intent(Intent.ACTION_VIEW, mUri)
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    startActivity(intent)
+  val mUri = Uri.parse(uri)
+  val intent = Intent(Intent.ACTION_VIEW, mUri)
+  intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+  startActivity(intent)
 }
 
 /**
@@ -349,7 +349,7 @@ infix fun Context.browse(uri: String) {
  * @return 带值的本身
  */
 fun <F : Fragment> F.makeBundle(vararg params: Pair<String, Any?>): F {
-    return this.apply { arguments = bundleOf(*params) }
+  return this.apply { arguments = bundleOf(*params) }
 }
 
 /**
@@ -358,19 +358,19 @@ fun <F : Fragment> F.makeBundle(vararg params: Pair<String, Any?>): F {
  * @param packageName default value is current app
  */
 fun Context.openInAppStore(packageName: String = this.packageName) {
-    val intent = Intent(Intent.ACTION_VIEW)
-    try {
-        intent.data = Uri.parse("market://details?id=$packageName")
-        startActivity(intent)
-    } catch (ifPlayStoreNotInstalled: ActivityNotFoundException) {
-        intent.data = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
-        startActivity(intent)
-    }
+  val intent = Intent(Intent.ACTION_VIEW)
+  try {
+    intent.data = Uri.parse("market://details?id=$packageName")
+    startActivity(intent)
+  } catch (ifPlayStoreNotInstalled: ActivityNotFoundException) {
+    intent.data = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+    startActivity(intent)
+  }
 }
 
 /** Open app by [packageName] */
 fun Context.openApp(packageName: String) =
-    packageManager.getLaunchIntentForPackage(packageName)?.run { startActivity(this) }
+  packageManager.getLaunchIntentForPackage(packageName)?.run { startActivity(this) }
 
 /**
  * Send email
@@ -381,22 +381,19 @@ fun Context.openApp(packageName: String) =
  * @param text a constant CharSequence that is associated with the Intent, @see [Intent.EXTRA_TEXT]
  */
 fun Context.sendEmail(email: String, subject: String?, text: String?) {
-    Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$email")).run {
-        subject?.let { putExtra(Intent.EXTRA_SUBJECT, subject) }
-        text?.let { putExtra(Intent.EXTRA_TEXT, text) }
-        startActivity(this)
-    }
+  Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$email")).run {
+    subject?.let { putExtra(Intent.EXTRA_SUBJECT, subject) }
+    text?.let { putExtra(Intent.EXTRA_TEXT, text) }
+    startActivity(this)
+  }
 }
 
 /** Return the Intent with [Settings.ACTION_APPLICATION_DETAILS_SETTINGS] */
 fun Context.getAppInfoIntent(packageName: String = this.packageName): Intent =
-    Intent(
-            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-            Uri.fromParts("package", packageName, null),
-        )
-        .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
+  Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+    .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) }
 
 /** Jump to the app info page */
 fun Context.goToAppInfoPage(packageName: String = this.packageName) {
-    startActivity(getAppInfoIntent(packageName))
+  startActivity(getAppInfoIntent(packageName))
 }

@@ -16,36 +16,36 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(application: Application) : YenalyViewModel(application) {
 
-    fun loadAllHKeyframes(keyword: String? = null) =
-        DatabaseRepo.HKeyframe.loadAll(keyword).flowOn(Dispatchers.IO)
+  fun loadAllHKeyframes(keyword: String? = null) =
+    DatabaseRepo.HKeyframe.loadAll(keyword).flowOn(Dispatchers.IO)
 
-    fun removeHKeyframe(videoCode: String, keyframe: HKeyframeEntity.Keyframe) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.removeKeyframe(videoCode, keyframe)
-        }
+  fun removeHKeyframe(videoCode: String, keyframe: HKeyframeEntity.Keyframe) {
+    viewModelScope.launch(Dispatchers.IO) {
+      DatabaseRepo.HKeyframe.removeKeyframe(videoCode, keyframe)
     }
+  }
 
-    fun modifyHKeyframe(
-        videoCode: String,
-        oldKeyframe: HKeyframeEntity.Keyframe,
-        keyframe: HKeyframeEntity.Keyframe,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, keyframe)
-        }
+  fun modifyHKeyframe(
+    videoCode: String,
+    oldKeyframe: HKeyframeEntity.Keyframe,
+    keyframe: HKeyframeEntity.Keyframe,
+  ) {
+    viewModelScope.launch(Dispatchers.IO) {
+      DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, keyframe)
     }
+  }
 
-    fun insertHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.insert(entity) }
-    }
+  fun insertHKeyframes(entity: HKeyframeEntity) {
+    viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.insert(entity) }
+  }
 
-    fun deleteHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.delete(entity) }
-    }
+  fun deleteHKeyframes(entity: HKeyframeEntity) {
+    viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.delete(entity) }
+  }
 
-    fun updateHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.update(entity) }
-    }
+  fun updateHKeyframes(entity: HKeyframeEntity) {
+    viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.update(entity) }
+  }
 
-    fun loadAllSharedHKeyframes() = DatabaseRepo.HKeyframe.loadAllShared().flowOn(Dispatchers.IO)
+  fun loadAllSharedHKeyframes() = DatabaseRepo.HKeyframe.loadAllShared().flowOn(Dispatchers.IO)
 }

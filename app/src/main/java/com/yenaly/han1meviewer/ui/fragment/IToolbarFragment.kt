@@ -11,6 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
  */
 interface IToolbarFragment<T : AppCompatActivity> {
 
-    /** 設置 Toolbar */
-    fun T.setupToolbar()
+  /** 設置 Toolbar */
+  fun T.setupToolbar()
 }

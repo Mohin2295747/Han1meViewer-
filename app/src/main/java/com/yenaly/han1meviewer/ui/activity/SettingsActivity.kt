@@ -26,61 +26,60 @@ import com.yenaly.yenaly_libs.base.YenalyActivity
  */
 class SettingsActivity : YenalyActivity<ActivitySettingsBinding>() {
 
-    val viewModel by viewModels<SettingsViewModel>()
+  val viewModel by viewModels<SettingsViewModel>()
 
-    private lateinit var navHostFragment: NavHostFragment
-    private lateinit var navController: NavController
+  private lateinit var navHostFragment: NavHostFragment
+  private lateinit var navController: NavController
 
-    val currentFragment
-        get() = navHostFragment.childFragmentManager.primaryNavigationFragment
+  val currentFragment
+    get() = navHostFragment.childFragmentManager.primaryNavigationFragment
 
-    override fun getViewBinding(layoutInflater: LayoutInflater): ActivitySettingsBinding =
-        ActivitySettingsBinding.inflate(layoutInflater)
+  override fun getViewBinding(layoutInflater: LayoutInflater): ActivitySettingsBinding =
+    ActivitySettingsBinding.inflate(layoutInflater)
 
-    override val onFragmentResumedListener: (Fragment) -> Unit = { fragment ->
-        logScreenViewEvent(fragment)
+  override val onFragmentResumedListener: (Fragment) -> Unit = { fragment ->
+    logScreenViewEvent(fragment)
+  }
+
+  override fun setUiStyle() {
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+    )
+  }
+
+  override fun initData(savedInstanceState: Bundle?) {
+    setSupportActionBar(binding.toolbar)
+    supportActionBar?.let {
+      it.setDisplayHomeAsUpEnabled(true)
+      it.setHomeActionContentDescription(R.string.back)
+    }
+    navHostFragment = supportFragmentManager.findFragmentById(R.id.fcv_settings) as NavHostFragment
+    navController = navHostFragment.navController
+    SettingsRouter.with(navController).navigateFromActivity(inclusive = true)
+    binding.toolbar.setNavigationOnClickListener {
+      if (!navController.popBackStack()) {
+        onBackPressedDispatcher.onBackPressed()
+      }
     }
 
-    override fun setUiStyle() {
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-        )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.fade_in, R.anim.fade_out)
+      overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out)
     }
 
-    override fun initData(savedInstanceState: Bundle?) {
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.let {
-            it.setDisplayHomeAsUpEnabled(true)
-            it.setHomeActionContentDescription(R.string.back)
-        }
-        navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.fcv_settings) as NavHostFragment
-        navController = navHostFragment.navController
-        SettingsRouter.with(navController).navigateFromActivity(inclusive = true)
-        binding.toolbar.setNavigationOnClickListener {
-            if (!navController.popBackStack()) {
-                onBackPressedDispatcher.onBackPressed()
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.fade_in, R.anim.fade_out)
-            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out)
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.fcvSettings) { v, insets ->
-            val navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.updatePadding(bottom = navBar.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+    ViewCompat.setOnApplyWindowInsetsListener(binding.fcvSettings) { v, insets ->
+      val navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+      v.updatePadding(bottom = navBar.bottom)
+      WindowInsetsCompat.CONSUMED
     }
+  }
 
-    @Suppress("DEPRECATION")
-    override fun finish() {
-        super.finish()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
+  @Suppress("DEPRECATION")
+  override fun finish() {
+    super.finish()
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
+  }
 }

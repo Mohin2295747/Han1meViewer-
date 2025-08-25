@@ -15,22 +15,22 @@ import com.yenaly.han1meviewer.R
 class Hanidock
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-    FrameLayout(context, attrs, defStyleAttr) {
+  FrameLayout(context, attrs, defStyleAttr) {
 
-    private val recyclerView: RecyclerView
-    private val hanidapter = Hanidapter()
+  private val recyclerView: RecyclerView
+  private val hanidapter = Hanidapter()
 
-    init {
-        inflate(context, R.layout.layout_hanidock, this)
-        recyclerView = findViewById(R.id.rv_func)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = hanidapter
+  init {
+    inflate(context, R.layout.layout_hanidock, this)
+    recyclerView = findViewById(R.id.rv_func)
+    recyclerView.layoutManager = LinearLayoutManager(context)
+    recyclerView.adapter = hanidapter
+  }
+
+  var hanidokitems: List<Hanidokitem>
+    get() = hanidapter.hanidontroller.currentHanidokitems
+    set(value) {
+      hanidapter.hanidontroller.initialize(value)
+      hanidapter.items = value
     }
-
-    var hanidokitems: List<Hanidokitem>
-        get() = hanidapter.hanidontroller.currentHanidokitems
-        set(value) {
-            hanidapter.hanidontroller.initialize(value)
-            hanidapter.items = value
-        }
 }

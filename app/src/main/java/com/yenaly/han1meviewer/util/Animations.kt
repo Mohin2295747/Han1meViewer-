@@ -13,34 +13,34 @@ import androidx.lifecycle.LifecycleOwner
  * destroyed.
  */
 fun ValueAnimator.addUpdateListener(
-    lifecycle: Lifecycle?,
-    listener: ValueAnimator.AnimatorUpdateListener?,
+  lifecycle: Lifecycle?,
+  listener: ValueAnimator.AnimatorUpdateListener?,
 ) {
-    addUpdateListener(listener)
-    lifecycle?.addObserver(
-        object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                this@addUpdateListener.removeUpdateListener(listener)
-            }
-        }
-    )
+  addUpdateListener(listener)
+  lifecycle?.addObserver(
+    object : DefaultLifecycleObserver {
+      override fun onDestroy(owner: LifecycleOwner) {
+        this@addUpdateListener.removeUpdateListener(listener)
+      }
+    }
+  )
 }
 
 fun ValueAnimator.addUpdateListener(
-    fragment: Fragment,
-    listener: ValueAnimator.AnimatorUpdateListener?,
+  fragment: Fragment,
+  listener: ValueAnimator.AnimatorUpdateListener?,
 ) {
-    if (fragment.isDetached || fragment.view == null) return
-    addUpdateListener(fragment.viewLifecycleOwner.lifecycle, listener)
+  if (fragment.isDetached || fragment.view == null) return
+  addUpdateListener(fragment.viewLifecycleOwner.lifecycle, listener)
 }
 
 fun colorTransition(
-    @ColorInt fromColor: Int,
-    @ColorInt toColor: Int,
-    action: (ValueAnimator.() -> Unit)? = null,
+  @ColorInt fromColor: Int,
+  @ColorInt toColor: Int,
+  action: (ValueAnimator.() -> Unit)? = null,
 ) {
-    val colorAnimation: ValueAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fromColor, toColor)
-    action?.invoke(colorAnimation)
+  val colorAnimation: ValueAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fromColor, toColor)
+  action?.invoke(colorAnimation)
 
-    colorAnimation.start()
+  colorAnimation.start()
 }

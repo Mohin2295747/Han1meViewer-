@@ -20,49 +20,49 @@ import kotlinx.coroutines.launch
 
 class WatchLaterSubViewModel(application: Application) : YenalyViewModel(application) {
 
-    var watchLaterPage = 1
+  var watchLaterPage = 1
 
-    private val _watchLaterStateFlow: MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
-        MutableStateFlow(PageLoadingState.Loading)
-    val watchLaterStateFlow = _watchLaterStateFlow.asStateFlow()
+  private val _watchLaterStateFlow: MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
+    MutableStateFlow(PageLoadingState.Loading)
+  val watchLaterStateFlow = _watchLaterStateFlow.asStateFlow()
 
-    private val _watchLaterFlow = MutableStateFlow(emptyList<HanimeInfo>())
-    val watchLaterFlow = _watchLaterFlow.asStateFlow()
+  private val _watchLaterFlow = MutableStateFlow(emptyList<HanimeInfo>())
+  val watchLaterFlow = _watchLaterFlow.asStateFlow()
 
-    fun getMyWatchLaterItems(page: Int) {
-        viewModelScope.launch {
-            NetworkRepo.getMyListItems(page, MyListType.WATCH_LATER).collect { state ->
-                val prev = _watchLaterStateFlow.getAndUpdate { state }
-                if (prev is PageLoadingState.Loading) _watchLaterFlow.value = emptyList()
-                _watchLaterFlow.update { prevList ->
-                    when (state) {
-                        is PageLoadingState.Success -> prevList + state.info.hanimeInfo
-                        is PageLoadingState.Loading -> emptyList()
-                        else -> prevList
-                    }
-                }
-            }
+  fun getMyWatchLaterItems(page: Int) {
+    viewModelScope.launch {
+      NetworkRepo.getMyListItems(page, MyListType.WATCH_LATER).collect { state ->
+        val prev = _watchLaterStateFlow.getAndUpdate { state }
+        if (prev is PageLoadingState.Loading) _watchLaterFlow.value = emptyList()
+        _watchLaterFlow.update { prevList ->
+          when (state) {
+            is PageLoadingState.Success -> prevList + state.info.hanimeInfo
+            is PageLoadingState.Loading -> emptyList()
+            else -> prevList
+          }
+        }
+      }
+    }
+  }
+
+  private val _deleteMyWatchLaterFlow = MutableSharedFlow<WebsiteState<Int>>()
+  val deleteMyWatchLaterFlow = _deleteMyWatchLaterFlow.asSharedFlow()
+
+  fun deleteMyWatchLater(videoCode: String, position: Int) {
+    viewModelScope.launch {
+      NetworkRepo.deleteMyListItems(MyListType.WATCH_LATER, videoCode, position, csrfToken)
+        .collect {
+          _deleteMyWatchLaterFlow.emit(it)
+          _watchLaterFlow.update { list ->
+            if (it is WebsiteState.Success) {
+              list.toMutableList().apply { removeAt(position) }
+            } else list
+          }
         }
     }
+  }
 
-    private val _deleteMyWatchLaterFlow = MutableSharedFlow<WebsiteState<Int>>()
-    val deleteMyWatchLaterFlow = _deleteMyWatchLaterFlow.asSharedFlow()
-
-    fun deleteMyWatchLater(videoCode: String, position: Int) {
-        viewModelScope.launch {
-            NetworkRepo.deleteMyListItems(MyListType.WATCH_LATER, videoCode, position, csrfToken)
-                .collect {
-                    _deleteMyWatchLaterFlow.emit(it)
-                    _watchLaterFlow.update { list ->
-                        if (it is WebsiteState.Success) {
-                            list.toMutableList().apply { removeAt(position) }
-                        } else list
-                    }
-                }
-        }
-    }
-
-    fun clearMyListItems() {
-        _watchLaterStateFlow.value = PageLoadingState.Loading
-    }
+  fun clearMyListItems() {
+    _watchLaterStateFlow.value = PageLoadingState.Loading
+  }
 }

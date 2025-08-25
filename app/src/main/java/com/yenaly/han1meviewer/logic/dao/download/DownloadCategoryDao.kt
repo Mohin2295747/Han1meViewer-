@@ -10,15 +10,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class DownloadCategoryDao {
-    @RewriteQueriesToDropUnusedColumns
-    @Transaction
-    @Query(
-        "SELECT * FROM HanimeDownloadEntity " +
-            "INNER JOIN HanimeCategoryCrossRef ON HanimeDownloadEntity.id = HanimeCategoryCrossRef.videoId " +
-            "WHERE HanimeCategoryCrossRef.categoryId = :categoryId AND HanimeDownloadEntity.downloadedLength == HanimeDownloadEntity.length"
-    )
-    abstract fun getVideosForCategory(categoryId: Int): Flow<List<HanimeDownloadEntity>>
+  @RewriteQueriesToDropUnusedColumns
+  @Transaction
+  @Query(
+    "SELECT * FROM HanimeDownloadEntity " +
+      "INNER JOIN HanimeCategoryCrossRef ON HanimeDownloadEntity.id = HanimeCategoryCrossRef.videoId " +
+      "WHERE HanimeCategoryCrossRef.categoryId = :categoryId AND HanimeDownloadEntity.downloadedLength == HanimeDownloadEntity.length"
+  )
+  abstract fun getVideosForCategory(categoryId: Int): Flow<List<HanimeDownloadEntity>>
 
-    @Query("SELECT * FROM DownloadCategoryEntity")
-    abstract fun getAllCategories(): Flow<MutableList<DownloadCategoryEntity>>
+  @Query("SELECT * FROM DownloadCategoryEntity")
+  abstract fun getAllCategories(): Flow<MutableList<DownloadCategoryEntity>>
 }

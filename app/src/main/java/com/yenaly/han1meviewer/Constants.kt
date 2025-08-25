@@ -17,18 +17,18 @@ const val APP_NAME = "Han1meViewer"
 /* yyyy-MM-dd HH:mm */
 @JvmField
 val LOCAL_DATE_TIME_FORMAT =
-    LocalDateTime.Format {
-        date(LocalDate.Formats.ISO)
-        char(' ')
-        hour()
-        char(':')
-        minute()
-    }
+  LocalDateTime.Format {
+    date(LocalDate.Formats.ISO)
+    char(' ')
+    hour()
+    char(':')
+    minute()
+  }
 
 // 网络基本设置
 
 const val USER_AGENT =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
 
 // intent傳值用名稱
 

@@ -16,12 +16,12 @@ import kotlinx.serialization.json.Json
  * ぴえん化
  */
 val Throwable.pienization: CharSequence
-    get() = "🥺\n$localizedMessage"
+  get() = "🥺\n$localizedMessage"
 
 // base
 
 private const val HANIME_TITLE_HTML =
-    """<span style="color: #FF0000;"><b>H</b></span><b>an1me</b>Viewer"""
+  """<span style="color: #FF0000;"><b>H</b></span><b>an1me</b>Viewer"""
 
 val hanimeSpannedTitle = HANIME_TITLE_HTML.parseAsHtml()
 
@@ -30,9 +30,9 @@ fun getHanimeVideoLink(videoCode: String) = HANIME_BASE_URL + "watch?v=" + video
 
 /** 獲取 Hanime 影片分享文本 */
 fun getHanimeShareText(title: String, videoCode: String): String = buildString {
-    appendLine(title)
-    appendLine(getHanimeVideoLink(videoCode))
-    append("- From Han1meViewer -")
+  appendLine(title)
+  appendLine(getHanimeVideoLink(videoCode))
+  append("- From Han1meViewer -")
 }
 
 /** 獲取 Hanime 影片**官方**下載地址 */
@@ -45,17 +45,17 @@ fun String.toVideoCode() = videoUrlRegex.find(this)?.groupValues?.get(1)
 // log in and log out
 
 fun logout() {
-    isAlreadyLogin = false
-    loginCookie = CookieString(EMPTY_STRING)
-    HCookieJar.cookieMap.clear()
-    CookieManager.getInstance().removeAllCookies(null)
+  isAlreadyLogin = false
+  loginCookie = CookieString(EMPTY_STRING)
+  HCookieJar.cookieMap.clear()
+  CookieManager.getInstance().removeAllCookies(null)
 }
 
 fun login(cookies: String) {
-    isAlreadyLogin = true
-    loginCookie = CookieString(cookies)
+  isAlreadyLogin = true
+  loginCookie = CookieString(cookies)
 }
 
 fun login(cookies: List<String>) {
-    login(cookies.joinToString(";") { it.substringBefore(';') })
+  login(cookies.joinToString(";") { it.substringBefore(';') })
 }

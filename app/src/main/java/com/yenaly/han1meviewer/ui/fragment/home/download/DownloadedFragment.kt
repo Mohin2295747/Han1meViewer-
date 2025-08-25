@@ -38,100 +38,100 @@ import kotlinx.coroutines.launch
  * @time 2022/08/01 001 17:45
  */
 class DownloadedFragment :
-    YenalyFragment<FragmentListOnlyBinding>(), IToolbarFragment<MainActivity>, StateLayoutMixin {
+  YenalyFragment<FragmentListOnlyBinding>(), IToolbarFragment<MainActivity>, StateLayoutMixin {
 
-    val viewModel by activityViewModels<DownloadViewModel>()
+  val viewModel by activityViewModels<DownloadViewModel>()
 
-    private val adapter by unsafeLazy { HanimeDownloadedRvAdapter(this) }
+  private val adapter by unsafeLazy { HanimeDownloadedRvAdapter(this) }
 
-    override fun getViewBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-    ): FragmentListOnlyBinding {
-        return FragmentListOnlyBinding.inflate(inflater, container, false)
+  override fun getViewBinding(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+  ): FragmentListOnlyBinding {
+    return FragmentListOnlyBinding.inflate(inflater, container, false)
+  }
+
+  override fun initData(savedInstanceState: Bundle?) {
+    binding.rvList.layoutManager = LinearLayoutManager(context)
+    binding.rvList.adapter = adapter
+    ViewCompat.setOnApplyWindowInsetsListener(binding.rvList) { v, insets ->
+      val navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+      v.updatePadding(bottom = navBar.bottom)
+      WindowInsetsCompat.CONSUMED
     }
+    adapter.setStateViewLayout(R.layout.layout_empty_view)
+    loadAllSortedDownloadedHanime()
+  }
 
-    override fun initData(savedInstanceState: Bundle?) {
-        binding.rvList.layoutManager = LinearLayoutManager(context)
-        binding.rvList.adapter = adapter
-        ViewCompat.setOnApplyWindowInsetsListener(binding.rvList) { v, insets ->
-            val navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            v.updatePadding(bottom = navBar.bottom)
-            WindowInsetsCompat.CONSUMED
+  override fun bindDataObservers() {
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.downloaded.flowWithLifecycle(viewLifecycleOwner.lifecycle).collect {
+        adapter.submitList(it)
+      }
+    }
+  }
+
+  override fun MainActivity.setupToolbar() {
+    val fv = this@DownloadedFragment.viewModel
+    addMenuProvider(
+      object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+          menu.clear()
+          menuInflater.inflate(R.menu.menu_downloaded_toolbar, menu)
+          menu.findItem(fv.currentSortOptionId)?.isChecked = true
         }
-        adapter.setStateViewLayout(R.layout.layout_empty_view)
-        loadAllSortedDownloadedHanime()
-    }
 
-    override fun bindDataObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.downloaded.flowWithLifecycle(viewLifecycleOwner.lifecycle).collect {
-                adapter.submitList(it)
-            }
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+          fv.currentSortOptionId = menuItem.itemId
+          menuItem.isChecked = true
+          return loadAllSortedDownloadedHanime()
         }
-    }
+      },
+      viewLifecycleOwner,
+      Lifecycle.State.RESUMED,
+    )
+  }
 
-    override fun MainActivity.setupToolbar() {
-        val fv = this@DownloadedFragment.viewModel
-        addMenuProvider(
-            object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menu.clear()
-                    menuInflater.inflate(R.menu.menu_downloaded_toolbar, menu)
-                    menu.findItem(fv.currentSortOptionId)?.isChecked = true
-                }
+  override fun onResume() {
+    super.onResume()
+    activity<AppCompatActivity>().supportActionBar?.setSubtitle(R.string.downloaded)
+  }
 
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    fv.currentSortOptionId = menuItem.itemId
-                    menuItem.isChecked = true
-                    return loadAllSortedDownloadedHanime()
-                }
-            },
-            viewLifecycleOwner,
-            Lifecycle.State.RESUMED,
+  // #issue-18: 添加下载区排序
+  private fun loadAllSortedDownloadedHanime(): Boolean =
+    when (viewModel.currentSortOptionId) {
+      R.id.sm_sort_by_alphabet_ascending -> {
+        viewModel.loadAllDownloadedHanime(
+          sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
+          ascending = true,
         )
+        true
+      }
+
+      R.id.sm_sort_by_alphabet_descending -> {
+        viewModel.loadAllDownloadedHanime(
+          sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
+          ascending = false,
+        )
+        true
+      }
+
+      R.id.sm_sort_by_date_ascending -> {
+        viewModel.loadAllDownloadedHanime(
+          sortedBy = HanimeDownloadEntity.SortedBy.ID,
+          ascending = true,
+        )
+        true
+      }
+
+      R.id.sm_sort_by_date_descending -> {
+        viewModel.loadAllDownloadedHanime(
+          sortedBy = HanimeDownloadEntity.SortedBy.ID,
+          ascending = false,
+        )
+        true
+      }
+
+      else -> false
     }
-
-    override fun onResume() {
-        super.onResume()
-        activity<AppCompatActivity>().supportActionBar?.setSubtitle(R.string.downloaded)
-    }
-
-    // #issue-18: 添加下载区排序
-    private fun loadAllSortedDownloadedHanime(): Boolean =
-        when (viewModel.currentSortOptionId) {
-            R.id.sm_sort_by_alphabet_ascending -> {
-                viewModel.loadAllDownloadedHanime(
-                    sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
-                    ascending = true,
-                )
-                true
-            }
-
-            R.id.sm_sort_by_alphabet_descending -> {
-                viewModel.loadAllDownloadedHanime(
-                    sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
-                    ascending = false,
-                )
-                true
-            }
-
-            R.id.sm_sort_by_date_ascending -> {
-                viewModel.loadAllDownloadedHanime(
-                    sortedBy = HanimeDownloadEntity.SortedBy.ID,
-                    ascending = true,
-                )
-                true
-            }
-
-            R.id.sm_sort_by_date_descending -> {
-                viewModel.loadAllDownloadedHanime(
-                    sortedBy = HanimeDownloadEntity.SortedBy.ID,
-                    ascending = false,
-                )
-                true
-            }
-
-            else -> false
-        }
 }

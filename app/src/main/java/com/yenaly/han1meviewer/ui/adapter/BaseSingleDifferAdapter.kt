@@ -13,77 +13,77 @@ import kotlin.coroutines.suspendCoroutine
  * @time 2024/04/05 005 20:44
  */
 abstract class BaseSingleDifferAdapter<T : Any, VH : RecyclerView.ViewHolder> :
-    BaseDifferAdapter<T, VH> {
+  BaseDifferAdapter<T, VH> {
 
-    private constructor(config: AsyncDifferConfig<T>, items: List<T>) : super(config, items)
+  private constructor(config: AsyncDifferConfig<T>, items: List<T>) : super(config, items)
 
-    constructor(
-        diffCallback: DiffUtil.ItemCallback<T>
-    ) : this(AsyncDifferConfig.Builder(diffCallback).build(), emptyList())
+  constructor(
+    diffCallback: DiffUtil.ItemCallback<T>
+  ) : this(AsyncDifferConfig.Builder(diffCallback).build(), emptyList())
 
-    constructor(
-        diffCallback: DiffUtil.ItemCallback<T>,
-        item: T,
-    ) : this(AsyncDifferConfig.Builder(diffCallback).build(), listOf(item))
+  constructor(
+    diffCallback: DiffUtil.ItemCallback<T>,
+    item: T,
+  ) : this(AsyncDifferConfig.Builder(diffCallback).build(), listOf(item))
 
-    constructor(config: AsyncDifferConfig<T>) : this(config, emptyList())
+  constructor(config: AsyncDifferConfig<T>) : this(config, emptyList())
 
-    constructor(config: AsyncDifferConfig<T>, item: T) : this(config, listOf(item))
+  constructor(config: AsyncDifferConfig<T>, item: T) : this(config, listOf(item))
 
-    var item: T?
-        get() = items.firstOrNull()
-        set(value) {
-            items = if (value != null) listOf(value) else emptyList()
-        }
-
-    suspend fun submit(item: T?) = suspendCoroutine { cont ->
-        val list = item?.let(::listOf).orEmpty()
-        submitList(list) { cont.resume(Unit) }
+  var item: T?
+    get() = items.firstOrNull()
+    set(value) {
+      items = if (value != null) listOf(value) else emptyList()
     }
 
-    protected abstract fun onBindViewHolder(holder: VH, item: T?)
+  suspend fun submit(item: T?) = suspendCoroutine { cont ->
+    val list = item?.let(::listOf).orEmpty()
+    submitList(list) { cont.resume(Unit) }
+  }
 
-    open fun onBindViewHolder(holder: VH, item: T?, payloads: List<Any>) {
-        onBindViewHolder(holder, item)
-    }
+  protected abstract fun onBindViewHolder(holder: VH, item: T?)
 
-    final override fun onBindViewHolder(holder: VH, position: Int, item: T?) {
-        onBindViewHolder(holder, item)
-    }
+  open fun onBindViewHolder(holder: VH, item: T?, payloads: List<Any>) {
+    onBindViewHolder(holder, item)
+  }
 
-    final override fun onBindViewHolder(holder: VH, position: Int, item: T?, payloads: List<Any>) {
-        onBindViewHolder(holder, item, payloads)
-    }
+  final override fun onBindViewHolder(holder: VH, position: Int, item: T?) {
+    onBindViewHolder(holder, item)
+  }
 
-    override fun add(data: T) {
-        throw RuntimeException("Please use setItem()")
-    }
+  final override fun onBindViewHolder(holder: VH, position: Int, item: T?, payloads: List<Any>) {
+    onBindViewHolder(holder, item, payloads)
+  }
 
-    override fun add(position: Int, data: T) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun add(data: T) {
+    throw RuntimeException("Please use setItem()")
+  }
 
-    override fun addAll(collection: Collection<T>) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun add(position: Int, data: T) {
+    throw RuntimeException("Please use setItem()")
+  }
 
-    override fun addAll(position: Int, collection: Collection<T>) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun addAll(collection: Collection<T>) {
+    throw RuntimeException("Please use setItem()")
+  }
 
-    override fun remove(data: T) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun addAll(position: Int, collection: Collection<T>) {
+    throw RuntimeException("Please use setItem()")
+  }
 
-    override fun removeAtRange(range: IntRange) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun remove(data: T) {
+    throw RuntimeException("Please use setItem()")
+  }
 
-    override fun removeAt(position: Int) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun removeAtRange(range: IntRange) {
+    throw RuntimeException("Please use setItem()")
+  }
 
-    override fun set(position: Int, data: T) {
-        throw RuntimeException("Please use setItem()")
-    }
+  override fun removeAt(position: Int) {
+    throw RuntimeException("Please use setItem()")
+  }
+
+  override fun set(position: Int, data: T) {
+    throw RuntimeException("Please use setItem()")
+  }
 }

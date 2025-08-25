@@ -6,7 +6,7 @@ import android.net.Uri
 import android.webkit.MimeTypeMap
 
 inline val Uri.fileExtension
-    get() = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+  get() = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
 
 inline val Uri.mimeType
-    get() = application.contentResolver.getType(this)
+  get() = application.contentResolver.getType(this)

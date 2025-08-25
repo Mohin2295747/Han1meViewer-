@@ -27,51 +27,50 @@ import kotlinx.coroutines.withContext
 private val atomicInteger = AtomicInteger()
 
 suspend fun <I, O> Context.awaitActivityResult(
-    contract: ActivityResultContract<I, O>,
-    input: I,
+  contract: ActivityResultContract<I, O>,
+  input: I,
 ): O {
-    val key = "activity_rq#${atomicInteger.getAndIncrement()}"
+  val key = "activity_rq#${atomicInteger.getAndIncrement()}"
 
-    val activity = this.requireComponentActivity()
-    val lifecycle = activity.lifecycle
-    var launcher: ActivityResultLauncher<I>? = null
-    val observer: LifecycleEventObserver =
-        object : LifecycleEventObserver {
-            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                if (Lifecycle.Event.ON_DESTROY === event) {
-                    launcher?.unregister()
-                    lifecycle.removeObserver(this)
-                }
-            }
+  val activity = this.requireComponentActivity()
+  val lifecycle = activity.lifecycle
+  var launcher: ActivityResultLauncher<I>? = null
+  val observer: LifecycleEventObserver =
+    object : LifecycleEventObserver {
+      override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        if (Lifecycle.Event.ON_DESTROY === event) {
+          launcher?.unregister()
+          lifecycle.removeObserver(this)
         }
-
-    return withContext(Dispatchers.Main) {
-        lifecycle.addObserver(observer)
-        suspendCoroutine(
-            object : Function1<Continuation<O>, Unit> {
-                private var resumed = false
-
-                override fun invoke(cont: Continuation<O>) {
-                    // #issue-crashlytics-7b7eaa428e2541056ce949dff5fe4c55
-                    launcher =
-                        activity.activityResultRegistry
-                            .register(key, contract) {
-                                if (!resumed) {
-                                    resumed = true
-                                    launcher?.unregister()
-                                    lifecycle.removeObserver(observer)
-                                    cont.resume(it)
-                                }
-                            }
-                            .apply { launch(input) }
-                }
-            }
-        )
+      }
     }
+
+  return withContext(Dispatchers.Main) {
+    lifecycle.addObserver(observer)
+    suspendCoroutine(
+      object : Function1<Continuation<O>, Unit> {
+        private var resumed = false
+
+        override fun invoke(cont: Continuation<O>) {
+          // #issue-crashlytics-7b7eaa428e2541056ce949dff5fe4c55
+          launcher =
+            activity.activityResultRegistry
+              .register(key, contract) {
+                if (!resumed) {
+                  resumed = true
+                  launcher?.unregister()
+                  lifecycle.removeObserver(observer)
+                  cont.resume(it)
+                }
+              }
+              .apply { launch(input) }
+        }
+      }
+    )
+  }
 }
 
 suspend fun Context.requestPermission(key: String): Boolean {
-    if (ContextCompat.checkSelfPermission(this, key) == PackageManager.PERMISSION_GRANTED)
-        return true
-    return awaitActivityResult(ActivityResultContracts.RequestPermission(), key)
+  if (ContextCompat.checkSelfPermission(this, key) == PackageManager.PERMISSION_GRANTED) return true
+  return awaitActivityResult(ActivityResultContracts.RequestPermission(), key)
 }

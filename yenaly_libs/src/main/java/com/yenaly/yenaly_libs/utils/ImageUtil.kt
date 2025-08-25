@@ -9,34 +9,34 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 fun Drawable.toByteArrayOrNull(): ByteArray? {
-    return toBitmapOrNull()?.run {
-        ByteArrayOutputStream().use { stream ->
-            compress(Bitmap.CompressFormat.PNG, 100, stream)
-            stream.toByteArray()
-        }
+  return toBitmapOrNull()?.run {
+    ByteArrayOutputStream().use { stream ->
+      compress(Bitmap.CompressFormat.PNG, 100, stream)
+      stream.toByteArray()
     }
+  }
 }
 
 fun Bitmap.saveTo(
-    file: File,
-    format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
-    quality: Int = 100,
+  file: File,
+  format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
+  quality: Int = 100,
 ): Boolean {
-    return try {
-        file.outputStream().buffered().use { stream ->
-            compress(format, quality, stream)
-            true
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        false
+  return try {
+    file.outputStream().buffered().use { stream ->
+      compress(format, quality, stream)
+      true
     }
+  } catch (e: Exception) {
+    e.printStackTrace()
+    false
+  }
 }
 
 fun Drawable.saveTo(
-    file: File,
-    format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
-    quality: Int = 100,
+  file: File,
+  format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
+  quality: Int = 100,
 ): Boolean {
-    return toBitmapOrNull()?.saveTo(file, format, quality) == true
+  return toBitmapOrNull()?.saveTo(file, format, quality) == true
 }

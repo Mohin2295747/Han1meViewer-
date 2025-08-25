@@ -23,74 +23,71 @@ import retrofit2.Retrofit
  */
 object ServiceCreator {
 
-    val cache =
-        Cache(
-            directory = File(applicationContext.cacheDir, "http_cache"),
-            maxSize = 10 * 1024 * 1024,
-        )
+  val cache =
+    Cache(directory = File(applicationContext.cacheDir, "http_cache"), maxSize = 10 * 1024 * 1024)
 
-    private val downloadSpeedLimitInterceptor by unsafeLazy {
-        SpeedLimitInterceptor(maxSpeed = Preferences.downloadSpeedLimit)
-    }
+  private val downloadSpeedLimitInterceptor by unsafeLazy {
+    SpeedLimitInterceptor(maxSpeed = Preferences.downloadSpeedLimit)
+  }
 
-    inline fun <reified T> create(baseUrl: String): T =
-        Retrofit.Builder().baseUrl(baseUrl).client(hClient).build().create(T::class.java)
+  inline fun <reified T> create(baseUrl: String): T =
+    Retrofit.Builder().baseUrl(baseUrl).client(hClient).build().create(T::class.java)
 
-    inline fun <reified T> createGitHubApi(): T =
-        Retrofit.Builder()
-            .baseUrl(HA1_GITHUB_API_URL)
-            .client(githubClient)
-            .addConverterFactory(HJson.asConverterFactory("application/json".toMediaType()))
+  inline fun <reified T> createGitHubApi(): T =
+    Retrofit.Builder()
+      .baseUrl(HA1_GITHUB_API_URL)
+      .client(githubClient)
+      .addConverterFactory(HJson.asConverterFactory("application/json".toMediaType()))
+      .build()
+      .create(T::class.java)
+
+  /** OkHttpClient */
+  var hClient: OkHttpClient = buildHClient()
+    private set
+
+  var githubClient: OkHttpClient = buildGithubClient()
+    private set
+
+  var downloadClient: OkHttpClient = buildDownloadClient()
+    private set
+
+  /** Rebuild OkHttpClient */
+  fun rebuildOkHttpClient() {
+    hClient = buildHClient()
+  }
+
+  private fun buildDownloadClient(): OkHttpClient {
+    return OkHttpClient.Builder()
+      .connectTimeout(5, TimeUnit.SECONDS)
+      .addInterceptor(UserAgentInterceptor)
+      .addInterceptor(downloadSpeedLimitInterceptor)
+      .build()
+  }
+
+  /** Build OkHttpClient */
+  private fun buildHClient(): OkHttpClient {
+    return OkHttpClient.Builder()
+      .connectTimeout(15, TimeUnit.SECONDS)
+      .addInterceptor(UserAgentInterceptor)
+      .cache(cache)
+      .cookieJar(HCookieJar())
+      .proxySelector(HProxySelector())
+      .dns(HDns())
+      .build()
+  }
+
+  private fun buildGithubClient(): OkHttpClient {
+    return OkHttpClient.Builder()
+      .dns(GitHubDns)
+      .addInterceptor { chain ->
+        val request =
+          chain
+            .request()
+            .newBuilder()
+            .addHeader("Authorization", "Bearer ${BuildConfig.HA1_GITHUB_TOKEN}")
             .build()
-            .create(T::class.java)
-
-    /** OkHttpClient */
-    var hClient: OkHttpClient = buildHClient()
-        private set
-
-    var githubClient: OkHttpClient = buildGithubClient()
-        private set
-
-    var downloadClient: OkHttpClient = buildDownloadClient()
-        private set
-
-    /** Rebuild OkHttpClient */
-    fun rebuildOkHttpClient() {
-        hClient = buildHClient()
-    }
-
-    private fun buildDownloadClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(5, TimeUnit.SECONDS)
-            .addInterceptor(UserAgentInterceptor)
-            .addInterceptor(downloadSpeedLimitInterceptor)
-            .build()
-    }
-
-    /** Build OkHttpClient */
-    private fun buildHClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .addInterceptor(UserAgentInterceptor)
-            .cache(cache)
-            .cookieJar(HCookieJar())
-            .proxySelector(HProxySelector())
-            .dns(HDns())
-            .build()
-    }
-
-    private fun buildGithubClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .dns(GitHubDns)
-            .addInterceptor { chain ->
-                val request =
-                    chain
-                        .request()
-                        .newBuilder()
-                        .addHeader("Authorization", "Bearer ${BuildConfig.HA1_GITHUB_TOKEN}")
-                        .build()
-                return@addInterceptor chain.proceed(request)
-            }
-            .build()
-    }
+        return@addInterceptor chain.proceed(request)
+      }
+      .build()
+  }
 }

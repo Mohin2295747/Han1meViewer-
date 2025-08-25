@@ -22,82 +22,79 @@ import okhttp3.internal.proxy.NullProxySelector
 // #issue-15: 添加系统代理功能
 class HProxySelector : ProxySelector() {
 
-    private var delegation: ProxySelector? = null
-    private val alternative: ProxySelector = getDefault() ?: NullProxySelector
+  private var delegation: ProxySelector? = null
+  private val alternative: ProxySelector = getDefault() ?: NullProxySelector
 
-    init {
-        updateProxy()
+  init {
+    updateProxy()
+  }
+
+  companion object {
+    const val TYPE_DIRECT = 0
+    const val TYPE_SYSTEM = 1
+    const val TYPE_HTTP = 2
+    const val TYPE_SOCKS = 3
+
+    private val ipv4Regex =
+      Regex("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$")
+
+    fun validateIp(ip: String): Boolean {
+      return ipv4Regex.matches(ip)
     }
 
-    companion object {
-        const val TYPE_DIRECT = 0
-        const val TYPE_SYSTEM = 1
-        const val TYPE_HTTP = 2
-        const val TYPE_SOCKS = 3
+    fun validatePort(port: Int): Boolean {
+      return port in 0..65535
+    }
 
-        private val ipv4Regex =
-            Regex("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$")
-
-        fun validateIp(ip: String): Boolean {
-            return ipv4Regex.matches(ip)
+    // #issue-39: 代理沒有應用到 WebView 上，只能通過此種方式來全局代理。
+    fun rebuildNetwork() {
+      val properties = System.getProperties()
+      when (Preferences.proxyType) {
+        TYPE_HTTP,
+        TYPE_SOCKS -> {
+          properties["proxySet"] = true.toString()
+          properties["proxyHost"] = Preferences.proxyIp
+          properties["proxyPort"] = Preferences.proxyPort.toString()
         }
 
-        fun validatePort(port: Int): Boolean {
-            return port in 0..65535
+        else -> {
+          properties["proxySet"] = false.toString()
+          properties["proxyHost"] = ""
+          properties["proxyPort"] = ""
         }
+      }
+    }
+  }
 
-        // #issue-39: 代理沒有應用到 WebView 上，只能通過此種方式來全局代理。
-        fun rebuildNetwork() {
-            val properties = System.getProperties()
-            when (Preferences.proxyType) {
-                TYPE_HTTP,
-                TYPE_SOCKS -> {
-                    properties["proxySet"] = true.toString()
-                    properties["proxyHost"] = Preferences.proxyIp
-                    properties["proxyPort"] = Preferences.proxyPort.toString()
-                }
+  private fun updateProxy() {
+    delegation =
+      when (Preferences.proxyType) {
+        TYPE_DIRECT -> NullProxySelector
+        TYPE_SYSTEM -> alternative
+        TYPE_HTTP,
+        TYPE_SOCKS -> null
+        else -> NullProxySelector
+      }
+  }
 
-                else -> {
-                    properties["proxySet"] = false.toString()
-                    properties["proxyHost"] = ""
-                    properties["proxyPort"] = ""
-                }
-            }
-        }
+  override fun select(uri: URI?): MutableList<Proxy> {
+    val type = Preferences.proxyType
+    if (type == TYPE_HTTP || type == TYPE_SOCKS) {
+      val ip = Preferences.proxyIp
+      val port = Preferences.proxyPort
+      if (ip.isNotBlank() && port != -1) {
+        val inetAddress = InetAddress.getByName(ip)
+        val socketAddress = InetSocketAddress(inetAddress, port)
+        return mutableListOf(
+          Proxy(if (type == TYPE_HTTP) Proxy.Type.HTTP else Proxy.Type.SOCKS, socketAddress)
+        )
+      }
     }
 
-    private fun updateProxy() {
-        delegation =
-            when (Preferences.proxyType) {
-                TYPE_DIRECT -> NullProxySelector
-                TYPE_SYSTEM -> alternative
-                TYPE_HTTP,
-                TYPE_SOCKS -> null
-                else -> NullProxySelector
-            }
-    }
+    return delegation?.select(uri) ?: alternative.select(uri)
+  }
 
-    override fun select(uri: URI?): MutableList<Proxy> {
-        val type = Preferences.proxyType
-        if (type == TYPE_HTTP || type == TYPE_SOCKS) {
-            val ip = Preferences.proxyIp
-            val port = Preferences.proxyPort
-            if (ip.isNotBlank() && port != -1) {
-                val inetAddress = InetAddress.getByName(ip)
-                val socketAddress = InetSocketAddress(inetAddress, port)
-                return mutableListOf(
-                    Proxy(
-                        if (type == TYPE_HTTP) Proxy.Type.HTTP else Proxy.Type.SOCKS,
-                        socketAddress,
-                    )
-                )
-            }
-        }
-
-        return delegation?.select(uri) ?: alternative.select(uri)
-    }
-
-    override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
-        delegation?.select(uri)
-    }
+  override fun connectFailed(uri: URI?, sa: SocketAddress?, ioe: IOException?) {
+    delegation?.select(uri)
+  }
 }

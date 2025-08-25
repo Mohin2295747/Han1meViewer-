@@ -14,24 +14,24 @@ import com.yenaly.han1meviewer.util.showWithBlurEffect
  */
 class MaterialDialogPreference : ListPreference {
 
-    constructor(context: Context) : this(context, null)
+  constructor(context: Context) : this(context, null)
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        dialog = MaterialAlertDialogBuilder(context)
+  constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+    dialog = MaterialAlertDialogBuilder(context)
+  }
+
+  private val dialog: MaterialAlertDialogBuilder
+
+  override fun onClick() {
+    dialog.setTitle(title)
+    dialog.setBackground(context.getDialogDefaultDrawable())
+    dialog.setSingleChoiceItems(entries, findIndexOfValue(value)) { di, which ->
+      val str = entryValues[which].toString()
+      if (callChangeListener(str)) {
+        this.value = str
+        di.dismiss()
+      }
     }
-
-    private val dialog: MaterialAlertDialogBuilder
-
-    override fun onClick() {
-        dialog.setTitle(title)
-        dialog.setBackground(context.getDialogDefaultDrawable())
-        dialog.setSingleChoiceItems(entries, findIndexOfValue(value)) { di, which ->
-            val str = entryValues[which].toString()
-            if (callChangeListener(str)) {
-                this.value = str
-                di.dismiss()
-            }
-        }
-        dialog.create().showWithBlurEffect()
-    }
+    dialog.create().showWithBlurEffect()
+  }
 }

@@ -26,100 +26,97 @@ import com.yenaly.yenaly_libs.utils.startActivity
  * @time 2024/04/03 003 21:40
  */
 class SharedHKeyframesRvAdapter : BaseDifferAdapter<HKeyframeType, QuickViewHolder>(COMPARATOR) {
-    init {
-        isStateViewEnable = true
-    }
+  init {
+    isStateViewEnable = true
+  }
 
-    companion object {
-        val COMPARATOR =
-            object : DiffUtil.ItemCallback<HKeyframeType>() {
-                override fun areItemsTheSame(oldItem: HKeyframeType, newItem: HKeyframeType) =
-                    when {
-                        oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
-                            oldItem.videoCode == newItem.videoCode
-                        }
-
-                        oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
-                            oldItem.title == newItem.title
-                        }
-
-                        else -> false
-                    }
-
-                @SuppressLint("DiffUtilEquals")
-                override fun areContentsTheSame(oldItem: HKeyframeType, newItem: HKeyframeType) =
-                    when {
-                        oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
-                            oldItem == newItem
-                        }
-
-                        oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
-                            oldItem == newItem
-                        }
-
-                        else -> false
-                    }
-            }
-    }
-
-    override fun getItemViewType(position: Int, list: List<HKeyframeType>): Int {
-        return list[position].itemType
-    }
-
-    override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HKeyframeType?) {
-        when (getItemViewType(position)) {
-            HKeyframeType.H_KEYFRAME -> {
-                require(item is HKeyframeEntity)
-                holder.setText(R.id.tv_title, item.title)
-                holder.getView<TextView>(R.id.tv_video_code).apply {
-                    movementMethod = LinkMovementMethodCompat.getInstance()
-                    text = spannable {
-                        context.getString(R.string.h_keyframe_title_prefix).text()
-                        item.videoCode.span {
-                            clickable(
-                                color = context.getColor(R.color.video_code_link_text_color)
-                            ) { _, videoCode ->
-                                context.activity?.startActivity<VideoActivity>(
-                                    VIDEO_CODE to videoCode
-                                )
-                            }
-                            underline()
-                        }
-                    }
-                }
-                holder.getView<RecyclerView>(R.id.rv_h_keyframe).apply {
-                    layoutManager = LinearLayoutManager(context)
-                    adapter =
-                        HKeyframeRvAdapter(item.videoCode, item).apply {
-                            isLocal = item.author == null
-                            isShared = true
-                        }
-                }
-                holder.setText(R.id.tv_author, "@${item.author}")
+  companion object {
+    val COMPARATOR =
+      object : DiffUtil.ItemCallback<HKeyframeType>() {
+        override fun areItemsTheSame(oldItem: HKeyframeType, newItem: HKeyframeType) =
+          when {
+            oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
+              oldItem.videoCode == newItem.videoCode
             }
 
-            HKeyframeType.HEADER -> {
-                require(item is HKeyframeHeader)
-                holder.setText(R.id.tv_title, item.title)
+            oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
+              oldItem.title == newItem.title
+            }
+
+            else -> false
+          }
+
+        @SuppressLint("DiffUtilEquals")
+        override fun areContentsTheSame(oldItem: HKeyframeType, newItem: HKeyframeType) =
+          when {
+            oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
+              oldItem == newItem
+            }
+
+            oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
+              oldItem == newItem
+            }
+
+            else -> false
+          }
+      }
+  }
+
+  override fun getItemViewType(position: Int, list: List<HKeyframeType>): Int {
+    return list[position].itemType
+  }
+
+  override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HKeyframeType?) {
+    when (getItemViewType(position)) {
+      HKeyframeType.H_KEYFRAME -> {
+        require(item is HKeyframeEntity)
+        holder.setText(R.id.tv_title, item.title)
+        holder.getView<TextView>(R.id.tv_video_code).apply {
+          movementMethod = LinkMovementMethodCompat.getInstance()
+          text = spannable {
+            context.getString(R.string.h_keyframe_title_prefix).text()
+            item.videoCode.span {
+              clickable(color = context.getColor(R.color.video_code_link_text_color)) { _, videoCode
+                ->
+                context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
+              }
+              underline()
+            }
+          }
+        }
+        holder.getView<RecyclerView>(R.id.rv_h_keyframe).apply {
+          layoutManager = LinearLayoutManager(context)
+          adapter =
+            HKeyframeRvAdapter(item.videoCode, item).apply {
+              isLocal = item.author == null
+              isShared = true
             }
         }
+        holder.setText(R.id.tv_author, "@${item.author}")
+      }
+
+      HKeyframeType.HEADER -> {
+        require(item is HKeyframeHeader)
+        holder.setText(R.id.tv_title, item.title)
+      }
     }
+  }
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): QuickViewHolder {
-        return when (viewType) {
-            HKeyframeType.H_KEYFRAME -> {
-                QuickViewHolder(R.layout.item_shared_h_keyframes, parent)
-            }
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): QuickViewHolder {
+    return when (viewType) {
+      HKeyframeType.H_KEYFRAME -> {
+        QuickViewHolder(R.layout.item_shared_h_keyframes, parent)
+      }
 
-            HKeyframeType.HEADER -> {
-                QuickViewHolder(R.layout.layout_header_h_keyframes, parent)
-            }
+      HKeyframeType.HEADER -> {
+        QuickViewHolder(R.layout.layout_header_h_keyframes, parent)
+      }
 
-            else -> throw IllegalArgumentException("Unknown viewType: $viewType")
-        }
+      else -> throw IllegalArgumentException("Unknown viewType: $viewType")
     }
+  }
 }

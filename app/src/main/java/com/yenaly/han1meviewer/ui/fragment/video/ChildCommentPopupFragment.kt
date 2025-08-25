@@ -33,86 +33,86 @@ import kotlinx.coroutines.launch
  * @time 2022/06/21 021 22:58
  */
 class ChildCommentPopupFragment :
-    YenalyBottomSheetDialogFragment<PopUpFragmentChildCommentBinding>() {
+  YenalyBottomSheetDialogFragment<PopUpFragmentChildCommentBinding>() {
 
-    val commentId by arguments<String>(COMMENT_ID)
-    val viewModel by viewModels<CommentViewModel>()
-    private val replyAdapter by unsafeLazy { VideoCommentRvAdapter(this) }
+  val commentId by arguments<String>(COMMENT_ID)
+  val viewModel by viewModels<CommentViewModel>()
+  private val replyAdapter by unsafeLazy { VideoCommentRvAdapter(this) }
 
-    override fun getViewBinding(layoutInflater: LayoutInflater) =
-        PopUpFragmentChildCommentBinding.inflate(layoutInflater)
+  override fun getViewBinding(layoutInflater: LayoutInflater) =
+    PopUpFragmentChildCommentBinding.inflate(layoutInflater)
 
-    override fun initData(savedInstanceState: Bundle?, dialog: Dialog) {
-        if (commentId == null) dialog.dismiss()
+  override fun initData(savedInstanceState: Bundle?, dialog: Dialog) {
+    if (commentId == null) dialog.dismiss()
 
-        binding.root.minimumHeight = appScreenHeight / 2
-        binding.rvReply.layoutManager = LinearLayoutManager(context)
-        binding.rvReply.adapter = replyAdapter
+    binding.root.minimumHeight = appScreenHeight / 2
+    binding.rvReply.layoutManager = LinearLayoutManager(context)
+    binding.rvReply.adapter = replyAdapter
 
-        viewModel.getCommentReply(commentId!!)
+    viewModel.getCommentReply(commentId!!)
 
-        lifecycleScope.launch {
-            viewModel.videoReplyStateFlow.collect { state ->
-                when (state) {
-                    is WebsiteState.Error -> {
-                        showShortToast(R.string.load_reply_failed)
-                        dialog.dismiss()
-                    }
+    lifecycleScope.launch {
+      viewModel.videoReplyStateFlow.collect { state ->
+        when (state) {
+          is WebsiteState.Error -> {
+            showShortToast(R.string.load_reply_failed)
+            dialog.dismiss()
+          }
 
-                    is WebsiteState.Loading -> Unit
+          is WebsiteState.Loading -> Unit
 
-                    is WebsiteState.Success -> Unit
-                }
-            }
+          is WebsiteState.Success -> Unit
         }
-
-        lifecycleScope.launch {
-            viewModel.videoReplyFlow.collectLatest { list ->
-                replyAdapter.submitList(list)
-                attachRedDotCount(list.size)
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.postReplyFlow.collect { state ->
-                when (state) {
-                    is WebsiteState.Error -> {
-                        showShortToast(R.string.send_failed)
-                    }
-
-                    is WebsiteState.Loading -> {
-                        showShortToast(R.string.sending_reply)
-                    }
-
-                    is WebsiteState.Success -> {
-                        showShortToast(R.string.send_success)
-                        viewModel.getCommentReply(commentId!!)
-                        replyAdapter.replyPopup?.dismiss()
-                    }
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.commentLikeFlow.collect { state ->
-                when (state) {
-                    is WebsiteState.Error -> showShortToast(state.throwable.message)
-                    is WebsiteState.Loading -> Unit
-                    is WebsiteState.Success -> {
-                        viewModel.handleCommentLike(state.info)
-                        replyAdapter.notifyItemChanged(state.info.commentPosition, 0)
-                    }
-                }
-            }
-        }
+      }
     }
 
-    @OptIn(ExperimentalBadgeUtils::class)
-    private fun attachRedDotCount(count: Int) {
-        val badgeDrawable = BadgeDrawable.create(requireContext())
-        badgeDrawable.isVisible = count > 0
-        badgeDrawable.number = count
-        BadgeUtils.attachBadgeDrawable(badgeDrawable, binding.tvChildComment)
-        badgeDrawable.setGravity(binding.tvChildComment, Gravity.END, 8.dp)
+    lifecycleScope.launch {
+      viewModel.videoReplyFlow.collectLatest { list ->
+        replyAdapter.submitList(list)
+        attachRedDotCount(list.size)
+      }
     }
+
+    lifecycleScope.launch {
+      viewModel.postReplyFlow.collect { state ->
+        when (state) {
+          is WebsiteState.Error -> {
+            showShortToast(R.string.send_failed)
+          }
+
+          is WebsiteState.Loading -> {
+            showShortToast(R.string.sending_reply)
+          }
+
+          is WebsiteState.Success -> {
+            showShortToast(R.string.send_success)
+            viewModel.getCommentReply(commentId!!)
+            replyAdapter.replyPopup?.dismiss()
+          }
+        }
+      }
+    }
+
+    lifecycleScope.launch {
+      viewModel.commentLikeFlow.collect { state ->
+        when (state) {
+          is WebsiteState.Error -> showShortToast(state.throwable.message)
+          is WebsiteState.Loading -> Unit
+          is WebsiteState.Success -> {
+            viewModel.handleCommentLike(state.info)
+            replyAdapter.notifyItemChanged(state.info.commentPosition, 0)
+          }
+        }
+      }
+    }
+  }
+
+  @OptIn(ExperimentalBadgeUtils::class)
+  private fun attachRedDotCount(count: Int) {
+    val badgeDrawable = BadgeDrawable.create(requireContext())
+    badgeDrawable.isVisible = count > 0
+    badgeDrawable.number = count
+    BadgeUtils.attachBadgeDrawable(badgeDrawable, binding.tvChildComment)
+    badgeDrawable.setGravity(binding.tvChildComment, Gravity.END, 8.dp)
+  }
 }

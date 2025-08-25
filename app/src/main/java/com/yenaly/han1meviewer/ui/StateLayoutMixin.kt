@@ -18,15 +18,15 @@ import com.yenaly.han1meviewer.pienization
 @JvmDefaultWithoutCompatibility
 interface StateLayoutMixin {
 
-    /** 初始化 StateLayout */
-    @SuppressLint("SetTextI18n")
-    fun StateLayout.init(apply: StateLayout.() -> Unit = {}) {
-        errorLayout = R.layout.layout_empty_view
-        emptyLayout = R.layout.layout_empty_view
-        onError {
-            val err = it as Throwable
-            findViewById<TextView>(R.id.tv_empty).text = err.pienization
-        }
-        apply()
+  /** 初始化 StateLayout */
+  @SuppressLint("SetTextI18n")
+  fun StateLayout.init(apply: StateLayout.() -> Unit = {}) {
+    errorLayout = R.layout.layout_empty_view
+    emptyLayout = R.layout.layout_empty_view
+    onError {
+      val err = it as Throwable
+      findViewById<TextView>(R.id.tv_empty).text = err.pienization
     }
+    apply()
+  }
 }

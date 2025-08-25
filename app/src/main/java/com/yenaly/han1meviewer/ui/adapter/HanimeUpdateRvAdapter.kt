@@ -31,188 +31,177 @@ import java.lang.ref.WeakReference
  * @time 2023/11/26 026 17:05
  */
 class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
-    BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatingBinding>>(COMPARATOR) {
+  BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatingBinding>>(COMPARATOR) {
 
-    init {
-        isStateViewEnable = true
-    }
+  init {
+    isStateViewEnable = true
+  }
 
-    companion object {
-        const val TAG = "HanimeUpdateRvAdapter"
+  companion object {
+    const val TAG = "HanimeUpdateRvAdapter"
 
-        private val interpolator = FastOutSlowInInterpolator()
+    private val interpolator = FastOutSlowInInterpolator()
 
-        private const val DOWNLOADING = 1
-        private const val STATE = 1 shl 1
-        private const val PROGRESS = 1 shl 2
+    private const val DOWNLOADING = 1
+    private const val STATE = 1 shl 1
+    private const val PROGRESS = 1 shl 2
 
-        val COMPARATOR =
-            object : DiffUtil.ItemCallback<HUpdateEntity>() {
-                override fun areContentsTheSame(
-                    oldItem: HUpdateEntity,
-                    newItem: HUpdateEntity,
-                ): Boolean {
-                    return oldItem == newItem
-                }
-
-                override fun areItemsTheSame(
-                    oldItem: HUpdateEntity,
-                    newItem: HUpdateEntity,
-                ): Boolean {
-                    return oldItem.id == newItem.id
-                }
-
-                override fun getChangePayload(oldItem: HUpdateEntity, newItem: HUpdateEntity): Any {
-                    logFieldsChange(TAG, oldItem, newItem)
-                    var bitset = 0
-                    if (oldItem.downloadedLength != newItem.downloadedLength)
-                        bitset = bitset or DOWNLOADING
-                    if (oldItem.state != newItem.state) bitset = bitset or STATE
-                    if (oldItem.progress != newItem.progress) bitset = bitset or PROGRESS
-                    return bitset
-                }
-            }
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(
-        holder: DataBindingHolder<ItemHanimeUpdatingBinding>,
-        position: Int,
-        item: HUpdateEntity?,
-    ) {
-        item ?: return
-        holder.binding.tvTitle.text = item.name
-        Log.d(TAG, "调用 load")
-        holder.itemView.post {
-            holder.binding.vCoverBg.updateLayoutParams { height = holder.itemView.height }
-            holder.binding.ivCoverBg.updateLayoutParams { height = holder.itemView.height }
+    val COMPARATOR =
+      object : DiffUtil.ItemCallback<HUpdateEntity>() {
+        override fun areContentsTheSame(oldItem: HUpdateEntity, newItem: HUpdateEntity): Boolean {
+          return oldItem == newItem
         }
-        holder.binding.clProgress.post {
-            holder.binding.vProgress.updateLayoutParams {
-                width = holder.binding.clProgress.width * item.progress / 100
-            }
-        }
-        holder.binding.tvDownloadedSize.text = item.downloadedLength.formatFileSizeV2()
-        holder.binding.tvSize.text = item.length.formatFileSizeV2()
 
-        holder.binding.btnStart.handleStartButton(item)
+        override fun areItemsTheSame(oldItem: HUpdateEntity, newItem: HUpdateEntity): Boolean {
+          return oldItem.id == newItem.id
+        }
+
+        override fun getChangePayload(oldItem: HUpdateEntity, newItem: HUpdateEntity): Any {
+          logFieldsChange(TAG, oldItem, newItem)
+          var bitset = 0
+          if (oldItem.downloadedLength != newItem.downloadedLength) bitset = bitset or DOWNLOADING
+          if (oldItem.state != newItem.state) bitset = bitset or STATE
+          if (oldItem.progress != newItem.progress) bitset = bitset or PROGRESS
+          return bitset
+        }
+      }
+  }
+
+  @SuppressLint("SetTextI18n")
+  override fun onBindViewHolder(
+    holder: DataBindingHolder<ItemHanimeUpdatingBinding>,
+    position: Int,
+    item: HUpdateEntity?,
+  ) {
+    item ?: return
+    holder.binding.tvTitle.text = item.name
+    Log.d(TAG, "调用 load")
+    holder.itemView.post {
+      holder.binding.vCoverBg.updateLayoutParams { height = holder.itemView.height }
+      holder.binding.ivCoverBg.updateLayoutParams { height = holder.itemView.height }
     }
-
-    @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(
-        holder: DataBindingHolder<ItemHanimeUpdatingBinding>,
-        position: Int,
-        item: HUpdateEntity?,
-        payloads: List<Any>,
-    ) {
-        if (payloads.isEmpty() || payloads.first() == 0)
-            return super.onBindViewHolder(holder, position, item, payloads)
-        item ?: return
-        val bitset = payloads.first() as Int
-        if (bitset and DOWNLOADING != 0) {
-            holder.binding.btnStart.handleStartButton(item)
-            holder.binding.tvDownloadedSize.text = item.downloadedLength.formatFileSizeV2()
-        }
-        if (bitset and STATE != 0) {
-            holder.binding.btnStart.handleStartButton(item)
-        }
-        if (bitset and PROGRESS != 0) {
-            // 根据百分比，设置 vProgress 的宽度，比如 50% 就设置成 itemView 50% 的宽度
-            val weakViewProgress = WeakReference(holder.binding.vProgress)
-            ValueAnimator.ofInt(
-                    holder.binding.vProgress.width,
-                    holder.itemView.width * item.progress / 100,
-                )
-                .apply {
-                    // must be less than HanimeDownloadWorker.RESPONSE_INTERVAL
-                    duration = 300L.coerceAtMost(HanimeDownloadWorker.RESPONSE_INTERVAL)
-                    interpolator = interpolator
-                    addUpdateListener(fragment) {
-                        weakViewProgress.get()?.updateLayoutParams {
-                            width = it.animatedValue as Int
-                        }
-                    }
-                }
-                .start()
-        }
+    holder.binding.clProgress.post {
+      holder.binding.vProgress.updateLayoutParams {
+        width = holder.binding.clProgress.width * item.progress / 100
+      }
     }
+    holder.binding.tvDownloadedSize.text = item.downloadedLength.formatFileSizeV2()
+    holder.binding.tvSize.text = item.length.formatFileSizeV2()
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): DataBindingHolder<ItemHanimeUpdatingBinding> {
-        return DataBindingHolder(
-                ItemHanimeUpdatingBinding.inflate(LayoutInflater.from(context), parent, false)
-            )
-            .also { viewHolder ->
-                viewHolder.binding.btnStart.setOnClickListener {
-                    val pos = viewHolder.bindingAdapterPosition
-                    val item = getItem(pos) ?: return@setOnClickListener
-                    if (item.isDownloading) {
-                        HUpdateWorker.stop()
-                    } else {
-                        HUpdateWorker.resume()
-                    }
-                    viewHolder.binding.btnStart.handleStartButton(item, rotate = true)
-                }
-                viewHolder.binding.btnCancel.setOnClickListener {
-                    val pos = viewHolder.bindingAdapterPosition
-                    val item = getItem(pos) ?: return@setOnClickListener
-                    context.showAlertDialog {
-                        setTitle(R.string.sure_to_delete)
-                        setMessage(context.getString(R.string.prepare_to_delete_s, item.name))
-                        setPositiveButton(R.string.confirm) { _, _ ->
-                            HUpdateWorker.deleteUpdate(context)
-                        }
-                        setNegativeButton(R.string.cancel, null)
-                    }
-                }
-            }
+    holder.binding.btnStart.handleStartButton(item)
+  }
+
+  @SuppressLint("SetTextI18n")
+  override fun onBindViewHolder(
+    holder: DataBindingHolder<ItemHanimeUpdatingBinding>,
+    position: Int,
+    item: HUpdateEntity?,
+    payloads: List<Any>,
+  ) {
+    if (payloads.isEmpty() || payloads.first() == 0)
+      return super.onBindViewHolder(holder, position, item, payloads)
+    item ?: return
+    val bitset = payloads.first() as Int
+    if (bitset and DOWNLOADING != 0) {
+      holder.binding.btnStart.handleStartButton(item)
+      holder.binding.tvDownloadedSize.text = item.downloadedLength.formatFileSizeV2()
     }
-
-    @SuppressLint("SetTextI18n")
-    private fun MaterialButton.handleStartButton(item: HUpdateEntity, rotate: Boolean = false) {
-        val state =
-            if (rotate) {
-                when (item.state) {
-                    DownloadState.Unknown,
-                    DownloadState.Queued,
-                    DownloadState.Paused -> DownloadState.Downloading
-
-                    DownloadState.Downloading -> DownloadState.Paused
-
-                    DownloadState.Finished,
-                    DownloadState.Failed -> DownloadState.Unknown
-                }
-            } else {
-                item.state
-            }
-        when (state) {
-            DownloadState.Queued -> {
-                setText(R.string.already_in_queue)
-                setIconResource(R.drawable.ic_baseline_play_arrow_24)
-            }
-
-            DownloadState.Downloading -> {
-                //                setText(R.string.pause)
-                //                setIconResource(R.drawable.ic_baseline_pause_24)
-                text = "${item.progress}%"
-                setIconResource(R.drawable.ic_baseline_pause_24)
-            }
-
-            DownloadState.Paused -> {
-                setText(R.string.continues)
-                setIconResource(R.drawable.ic_baseline_play_arrow_24)
-            }
-
-            DownloadState.Failed -> {
-                setText(R.string.retry)
-                setIconResource(R.drawable.baseline_error_outline_24)
-            }
-
-            DownloadState.Finished,
-            DownloadState.Unknown -> {} // do nothing
+    if (bitset and STATE != 0) {
+      holder.binding.btnStart.handleStartButton(item)
+    }
+    if (bitset and PROGRESS != 0) {
+      // 根据百分比，设置 vProgress 的宽度，比如 50% 就设置成 itemView 50% 的宽度
+      val weakViewProgress = WeakReference(holder.binding.vProgress)
+      ValueAnimator.ofInt(
+          holder.binding.vProgress.width,
+          holder.itemView.width * item.progress / 100,
+        )
+        .apply {
+          // must be less than HanimeDownloadWorker.RESPONSE_INTERVAL
+          duration = 300L.coerceAtMost(HanimeDownloadWorker.RESPONSE_INTERVAL)
+          interpolator = interpolator
+          addUpdateListener(fragment) {
+            weakViewProgress.get()?.updateLayoutParams { width = it.animatedValue as Int }
+          }
         }
+        .start()
     }
+  }
+
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): DataBindingHolder<ItemHanimeUpdatingBinding> {
+    return DataBindingHolder(
+        ItemHanimeUpdatingBinding.inflate(LayoutInflater.from(context), parent, false)
+      )
+      .also { viewHolder ->
+        viewHolder.binding.btnStart.setOnClickListener {
+          val pos = viewHolder.bindingAdapterPosition
+          val item = getItem(pos) ?: return@setOnClickListener
+          if (item.isDownloading) {
+            HUpdateWorker.stop()
+          } else {
+            HUpdateWorker.resume()
+          }
+          viewHolder.binding.btnStart.handleStartButton(item, rotate = true)
+        }
+        viewHolder.binding.btnCancel.setOnClickListener {
+          val pos = viewHolder.bindingAdapterPosition
+          val item = getItem(pos) ?: return@setOnClickListener
+          context.showAlertDialog {
+            setTitle(R.string.sure_to_delete)
+            setMessage(context.getString(R.string.prepare_to_delete_s, item.name))
+            setPositiveButton(R.string.confirm) { _, _ -> HUpdateWorker.deleteUpdate(context) }
+            setNegativeButton(R.string.cancel, null)
+          }
+        }
+      }
+  }
+
+  @SuppressLint("SetTextI18n")
+  private fun MaterialButton.handleStartButton(item: HUpdateEntity, rotate: Boolean = false) {
+    val state =
+      if (rotate) {
+        when (item.state) {
+          DownloadState.Unknown,
+          DownloadState.Queued,
+          DownloadState.Paused -> DownloadState.Downloading
+
+          DownloadState.Downloading -> DownloadState.Paused
+
+          DownloadState.Finished,
+          DownloadState.Failed -> DownloadState.Unknown
+        }
+      } else {
+        item.state
+      }
+    when (state) {
+      DownloadState.Queued -> {
+        setText(R.string.already_in_queue)
+        setIconResource(R.drawable.ic_baseline_play_arrow_24)
+      }
+
+      DownloadState.Downloading -> {
+        //                setText(R.string.pause)
+        //                setIconResource(R.drawable.ic_baseline_pause_24)
+        text = "${item.progress}%"
+        setIconResource(R.drawable.ic_baseline_pause_24)
+      }
+
+      DownloadState.Paused -> {
+        setText(R.string.continues)
+        setIconResource(R.drawable.ic_baseline_play_arrow_24)
+      }
+
+      DownloadState.Failed -> {
+        setText(R.string.retry)
+        setIconResource(R.drawable.baseline_error_outline_24)
+      }
+
+      DownloadState.Finished,
+      DownloadState.Unknown -> {} // do nothing
+    }
+  }
 }

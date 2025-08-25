@@ -8,9 +8,9 @@ val gson by unsafeLazy { GsonBuilder().create()!! }
 
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified T> String.fromJson(): T {
-    return gson.fromJson(this, typeOf<T>().javaType)
+  return gson.fromJson(this, typeOf<T>().javaType)
 }
 
 fun Any?.toJson(): String {
-    return gson.toJson(this)
+  return gson.toJson(this)
 }

@@ -34,153 +34,151 @@ import kotlinx.coroutines.launch
  * @time 2022/07/04 004 22:42
  */
 class MyWatchLaterFragment :
-    YenalyFragment<FragmentPageListBinding>(),
-    IToolbarFragment<MainActivity>,
-    LoginNeededFragmentMixin,
-    StateLayoutMixin {
+  YenalyFragment<FragmentPageListBinding>(),
+  IToolbarFragment<MainActivity>,
+  LoginNeededFragmentMixin,
+  StateLayoutMixin {
 
-    val viewModel by activityViewModels<MyListViewModel>()
+  val viewModel by activityViewModels<MyListViewModel>()
 
-    private var page: Int
-        set(value) {
-            viewModel.watchLater.watchLaterPage = value
+  private var page: Int
+    set(value) {
+      viewModel.watchLater.watchLaterPage = value
+    }
+    get() = viewModel.watchLater.watchLaterPage
+
+  private val adapter by unsafeLazy { HanimeMyListVideoAdapter() }
+
+  override fun getViewBinding(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+  ): FragmentPageListBinding {
+    return FragmentPageListBinding.inflate(inflater, container, false)
+  }
+
+  override fun initData(savedInstanceState: Bundle?) {
+    checkLogin()
+    (activity as MainActivity).setupToolbar()
+    binding.state.init()
+
+    adapter.setOnItemLongClickListener { _, _, position ->
+      val item = adapter.getItem(position) ?: return@setOnItemLongClickListener true
+      requireContext().showAlertDialog {
+        setTitle(R.string.delete_watch_later)
+        setMessage(getString(R.string.sure_to_delete_s, item.title))
+        setPositiveButton(R.string.confirm) { _, _ ->
+          viewModel.watchLater.deleteMyWatchLater(item.videoCode, position)
         }
-        get() = viewModel.watchLater.watchLaterPage
-
-    private val adapter by unsafeLazy { HanimeMyListVideoAdapter() }
-
-    override fun getViewBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-    ): FragmentPageListBinding {
-        return FragmentPageListBinding.inflate(inflater, container, false)
+        setNegativeButton(R.string.cancel, null)
+      }
+      return@setOnItemLongClickListener true
     }
 
-    override fun initData(savedInstanceState: Bundle?) {
-        checkLogin()
-        (activity as MainActivity).setupToolbar()
-        binding.state.init()
+    binding.rvPageList.apply {
+      layoutManager = GridLayoutManager(context, VideoCoverSize.Simplified.videoInOneLine)
+      adapter = this@MyWatchLaterFragment.adapter
+    }
 
-        adapter.setOnItemLongClickListener { _, _, position ->
-            val item = adapter.getItem(position) ?: return@setOnItemLongClickListener true
-            requireContext().showAlertDialog {
-                setTitle(R.string.delete_watch_later)
-                setMessage(getString(R.string.sure_to_delete_s, item.title))
-                setPositiveButton(R.string.confirm) { _, _ ->
-                    viewModel.watchLater.deleteMyWatchLater(item.videoCode, position)
-                }
-                setNegativeButton(R.string.cancel, null)
+    binding.srlPageList.apply {
+      setOnLoadMoreListener { getMyWatchLater() }
+      setOnRefreshListener { getNewMyWatchLater() }
+      setDisableContentWhenRefresh(true)
+    }
+  }
+
+  @SuppressLint("SetTextI18n")
+  override fun bindDataObservers() {
+    viewLifecycleOwner.lifecycleScope.launch {
+      repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.watchLater.watchLaterStateFlow.collect { state ->
+          when (state) {
+            is PageLoadingState.Error -> {
+              binding.srlPageList.finishRefresh()
+              binding.srlPageList.finishLoadMore(false)
+              // set error view
+              binding.state.showError()
             }
-            return@setOnItemLongClickListener true
-        }
 
-        binding.rvPageList.apply {
-            layoutManager = GridLayoutManager(context, VideoCoverSize.Simplified.videoInOneLine)
-            adapter = this@MyWatchLaterFragment.adapter
-        }
-
-        binding.srlPageList.apply {
-            setOnLoadMoreListener { getMyWatchLater() }
-            setOnRefreshListener { getNewMyWatchLater() }
-            setDisableContentWhenRefresh(true)
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun bindDataObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.watchLater.watchLaterStateFlow.collect { state ->
-                    when (state) {
-                        is PageLoadingState.Error -> {
-                            binding.srlPageList.finishRefresh()
-                            binding.srlPageList.finishLoadMore(false)
-                            // set error view
-                            binding.state.showError()
-                        }
-
-                        is PageLoadingState.Loading -> {
-                            adapter.stateView = null
-                            if (viewModel.watchLater.watchLaterFlow.value.isEmpty())
-                                binding.srlPageList.autoRefresh()
-                        }
-
-                        is PageLoadingState.NoMoreData -> {
-                            binding.srlPageList.finishLoadMoreWithNoMoreData()
-                            if (viewModel.watchLater.watchLaterFlow.value.isEmpty())
-                                binding.state.showEmpty()
-                        }
-
-                        is PageLoadingState.Success -> {
-                            page++
-                            binding.srlPageList.finishRefresh()
-                            binding.srlPageList.finishLoadMore(true)
-                            binding.state.showContent()
-                        }
-                    }
-                }
+            is PageLoadingState.Loading -> {
+              adapter.stateView = null
+              if (viewModel.watchLater.watchLaterFlow.value.isEmpty())
+                binding.srlPageList.autoRefresh()
             }
-        }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.watchLater.watchLaterFlow.collectLatest { adapter.submitList(it) }
+            is PageLoadingState.NoMoreData -> {
+              binding.srlPageList.finishLoadMoreWithNoMoreData()
+              if (viewModel.watchLater.watchLaterFlow.value.isEmpty()) binding.state.showEmpty()
             }
-        }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.watchLater.deleteMyWatchLaterFlow.collect { state ->
-                when (state) {
-                    is WebsiteState.Error -> {
-                        showShortToast(R.string.delete_failed)
-                        state.throwable.printStackTrace()
-                    }
-
-                    is WebsiteState.Loading -> {}
-
-                    is WebsiteState.Success -> {
-                        showShortToast(R.string.delete_success)
-                    }
-                }
+            is PageLoadingState.Success -> {
+              page++
+              binding.srlPageList.finishRefresh()
+              binding.srlPageList.finishLoadMore(true)
+              binding.state.showContent()
             }
+          }
         }
+      }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        binding.rvPageList.layoutManager =
-            GridLayoutManager(context, VideoCoverSize.Simplified.videoInOneLine)
+    viewLifecycleOwner.lifecycleScope.launch {
+      repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.watchLater.watchLaterFlow.collectLatest { adapter.submitList(it) }
+      }
     }
 
-    private fun getMyWatchLater() {
-        viewModel.watchLater.getMyWatchLaterItems(page)
-    }
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.watchLater.deleteMyWatchLaterFlow.collect { state ->
+        when (state) {
+          is WebsiteState.Error -> {
+            showShortToast(R.string.delete_failed)
+            state.throwable.printStackTrace()
+          }
 
-    private fun getNewMyWatchLater() {
-        page = 1
-        viewModel.watchLater.clearMyListItems()
-        getMyWatchLater()
-    }
+          is WebsiteState.Loading -> {}
 
-    override fun MainActivity.setupToolbar() {
-        val toolbar = this@MyWatchLaterFragment.binding.toolbar
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setSubtitle(R.string.watch_later)
-        this@MyWatchLaterFragment.addMenu(R.menu.menu_my_list_toolbar, viewLifecycleOwner) {
-            menuItem ->
-            when (menuItem.itemId) {
-                R.id.tb_help -> {
-                    requireContext().showAlertDialog {
-                        setTitle(R.string.attention)
-                        setMessage(R.string.long_press_to_cancel_watch_later)
-                        setPositiveButton(R.string.ok, null)
-                    }
-                    return@addMenu true
-                }
-            }
-            return@addMenu false
+          is WebsiteState.Success -> {
+            showShortToast(R.string.delete_success)
+          }
         }
-
-        toolbar.setupWithMainNavController()
+      }
     }
+  }
+
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    binding.rvPageList.layoutManager =
+      GridLayoutManager(context, VideoCoverSize.Simplified.videoInOneLine)
+  }
+
+  private fun getMyWatchLater() {
+    viewModel.watchLater.getMyWatchLaterItems(page)
+  }
+
+  private fun getNewMyWatchLater() {
+    page = 1
+    viewModel.watchLater.clearMyListItems()
+    getMyWatchLater()
+  }
+
+  override fun MainActivity.setupToolbar() {
+    val toolbar = this@MyWatchLaterFragment.binding.toolbar
+    setSupportActionBar(toolbar)
+    supportActionBar!!.setSubtitle(R.string.watch_later)
+    this@MyWatchLaterFragment.addMenu(R.menu.menu_my_list_toolbar, viewLifecycleOwner) { menuItem ->
+      when (menuItem.itemId) {
+        R.id.tb_help -> {
+          requireContext().showAlertDialog {
+            setTitle(R.string.attention)
+            setMessage(R.string.long_press_to_cancel_watch_later)
+            setPositiveButton(R.string.ok, null)
+          }
+          return@addMenu true
+        }
+      }
+      return@addMenu false
+    }
+
+    toolbar.setupWithMainNavController()
+  }
 }

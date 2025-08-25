@@ -27,82 +27,74 @@ import kotlinx.coroutines.launch
  * @time 2023/11/26 026 16:57
  */
 class HanimeUpdatedRvAdapter(private val fragment: DownloadedFragment) :
-    BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatedBinding>>(COMPARATOR) {
+  BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatedBinding>>(COMPARATOR) {
 
-    init {
-        isStateViewEnable = true
-    }
+  init {
+    isStateViewEnable = true
+  }
 
-    companion object {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+  companion object {
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-        val COMPARATOR =
-            object : DiffUtil.ItemCallback<HUpdateEntity>() {
-                override fun areContentsTheSame(
-                    oldItem: HUpdateEntity,
-                    newItem: HUpdateEntity,
-                ): Boolean {
-                    return oldItem == newItem
-                }
-
-                override fun areItemsTheSame(
-                    oldItem: HUpdateEntity,
-                    newItem: HUpdateEntity,
-                ): Boolean {
-                    return oldItem.id == newItem.id
-                }
-            }
-    }
-
-    override fun onBindViewHolder(
-        holder: DataBindingHolder<ItemHanimeUpdatedBinding>,
-        position: Int,
-        item: HUpdateEntity?,
-    ) {
-        item ?: return
-        holder.binding.tvTitle.text = item.name
-        holder.itemView.post {
-            // fast path
-            if (holder.itemView.height == holder.binding.vCoverBg.height) return@post
-            holder.binding.vCoverBg.updateLayoutParams { height = holder.itemView.height }
-            holder.binding.ivCoverBg.updateLayoutParams { height = holder.itemView.height }
+    val COMPARATOR =
+      object : DiffUtil.ItemCallback<HUpdateEntity>() {
+        override fun areContentsTheSame(oldItem: HUpdateEntity, newItem: HUpdateEntity): Boolean {
+          return oldItem == newItem
         }
-        val realSize = context.updateFile.length()
-        holder.binding.tvSize.text =
-            if (realSize == 0L) {
-                "???"
-            } else {
-                item.length.formatFileSizeV2()
-            }
-    }
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): DataBindingHolder<ItemHanimeUpdatedBinding> {
-        return DataBindingHolder(
-                ItemHanimeUpdatedBinding.inflate(LayoutInflater.from(context), parent, false)
-            )
-            .also { viewHolder ->
-                viewHolder.binding.btnDelete.setOnClickListener {
-                    val position = viewHolder.bindingAdapterPosition
-                    // #issue-158: 这里可能为空
-                    val item = getItem(position)
-                    item?.let {
-                        context.showAlertDialog {
-                            setTitle(R.string.sure_to_delete)
-                            setMessage(context.getString(R.string.prepare_to_delete_s, it.name))
-                            setPositiveButton(R.string.confirm) { _, _ ->
-                                HUpdateWorker.deleteUpdate(context)
-                            }
-                            setNegativeButton(R.string.cancel, null)
-                        }
-                    }
-                }
-                viewHolder.binding.btnInstall.setOnClickListener {
-                    scope.launch { context.installApkPackage(context.updateFile) }
-                }
-            }
+        override fun areItemsTheSame(oldItem: HUpdateEntity, newItem: HUpdateEntity): Boolean {
+          return oldItem.id == newItem.id
+        }
+      }
+  }
+
+  override fun onBindViewHolder(
+    holder: DataBindingHolder<ItemHanimeUpdatedBinding>,
+    position: Int,
+    item: HUpdateEntity?,
+  ) {
+    item ?: return
+    holder.binding.tvTitle.text = item.name
+    holder.itemView.post {
+      // fast path
+      if (holder.itemView.height == holder.binding.vCoverBg.height) return@post
+      holder.binding.vCoverBg.updateLayoutParams { height = holder.itemView.height }
+      holder.binding.ivCoverBg.updateLayoutParams { height = holder.itemView.height }
     }
+    val realSize = context.updateFile.length()
+    holder.binding.tvSize.text =
+      if (realSize == 0L) {
+        "???"
+      } else {
+        item.length.formatFileSizeV2()
+      }
+  }
+
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): DataBindingHolder<ItemHanimeUpdatedBinding> {
+    return DataBindingHolder(
+        ItemHanimeUpdatedBinding.inflate(LayoutInflater.from(context), parent, false)
+      )
+      .also { viewHolder ->
+        viewHolder.binding.btnDelete.setOnClickListener {
+          val position = viewHolder.bindingAdapterPosition
+          // #issue-158: 这里可能为空
+          val item = getItem(position)
+          item?.let {
+            context.showAlertDialog {
+              setTitle(R.string.sure_to_delete)
+              setMessage(context.getString(R.string.prepare_to_delete_s, it.name))
+              setPositiveButton(R.string.confirm) { _, _ -> HUpdateWorker.deleteUpdate(context) }
+              setNegativeButton(R.string.cancel, null)
+            }
+          }
+        }
+        viewHolder.binding.btnInstall.setOnClickListener {
+          scope.launch { context.installApkPackage(context.updateFile) }
+        }
+      }
+  }
 }

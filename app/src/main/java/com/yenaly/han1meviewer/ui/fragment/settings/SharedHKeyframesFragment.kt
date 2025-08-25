@@ -28,75 +28,75 @@ import kotlinx.coroutines.launch
  * @time 2023/11/18 018 17:38
  */
 class SharedHKeyframesFragment :
-    YenalyFragment<FragmentHKeyframesBinding>(),
-    IToolbarFragment<SettingsActivity>,
-    StateLayoutMixin {
+  YenalyFragment<FragmentHKeyframesBinding>(),
+  IToolbarFragment<SettingsActivity>,
+  StateLayoutMixin {
 
-    val viewModel by activityViewModels<SettingsViewModel>()
+  val viewModel by activityViewModels<SettingsViewModel>()
 
-    private val adapter by unsafeLazy { SharedHKeyframesRvAdapter() }
+  private val adapter by unsafeLazy { SharedHKeyframesRvAdapter() }
 
-    override fun onStart() {
-        super.onStart()
-        (activity as SettingsActivity).setupToolbar()
-    }
+  override fun onStart() {
+    super.onStart()
+    (activity as SettingsActivity).setupToolbar()
+  }
 
-    override fun getViewBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-    ): FragmentHKeyframesBinding {
-        return FragmentHKeyframesBinding.inflate(inflater, container, false)
-    }
+  override fun getViewBinding(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+  ): FragmentHKeyframesBinding {
+    return FragmentHKeyframesBinding.inflate(inflater, container, false)
+  }
 
-    override fun initData(savedInstanceState: Bundle?) {
-        val layoutManager = LinearLayoutManager(context)
-        val smoothScroller = LinearSmoothToStartScroller(context)
-        binding.rvKeyframe.layoutManager = layoutManager
-        binding.rvKeyframe.adapter = adapter
-        binding.btnUp.setOnClickListener {
-            var firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            if (adapter.getItemViewType(firstVisibleItemPosition) == HKeyframeType.HEADER) {
-                firstVisibleItemPosition--
-            }
-            for (i in firstVisibleItemPosition downTo 0) {
-                if (adapter.getItemViewType(i) == HKeyframeType.HEADER) {
-                    smoothScroller.targetPosition = i
-                    layoutManager.startSmoothScroll(smoothScroller)
-                    break
-                }
-            }
+  override fun initData(savedInstanceState: Bundle?) {
+    val layoutManager = LinearLayoutManager(context)
+    val smoothScroller = LinearSmoothToStartScroller(context)
+    binding.rvKeyframe.layoutManager = layoutManager
+    binding.rvKeyframe.adapter = adapter
+    binding.btnUp.setOnClickListener {
+      var firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+      if (adapter.getItemViewType(firstVisibleItemPosition) == HKeyframeType.HEADER) {
+        firstVisibleItemPosition--
+      }
+      for (i in firstVisibleItemPosition downTo 0) {
+        if (adapter.getItemViewType(i) == HKeyframeType.HEADER) {
+          smoothScroller.targetPosition = i
+          layoutManager.startSmoothScroll(smoothScroller)
+          break
         }
-        binding.btnDown.setOnClickListener {
-            var firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            if (adapter.getItemViewType(firstVisibleItemPosition) == HKeyframeType.HEADER) {
-                firstVisibleItemPosition++
-            }
-            for (i in firstVisibleItemPosition..<adapter.itemCount) {
-                if (adapter.getItemViewType(i) == HKeyframeType.HEADER) {
-                    smoothScroller.targetPosition = i
-                    layoutManager.startSmoothScroll(smoothScroller)
-                    break
-                }
-            }
+      }
+    }
+    binding.btnDown.setOnClickListener {
+      var firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+      if (adapter.getItemViewType(firstVisibleItemPosition) == HKeyframeType.HEADER) {
+        firstVisibleItemPosition++
+      }
+      for (i in firstVisibleItemPosition..<adapter.itemCount) {
+        if (adapter.getItemViewType(i) == HKeyframeType.HEADER) {
+          smoothScroller.targetPosition = i
+          layoutManager.startSmoothScroll(smoothScroller)
+          break
         }
-        binding.rvKeyframe.addOnScrollListener(
-            object : OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    binding.btnUp.isEnabled = recyclerView.canScrollVertically(-1)
-                    binding.btnDown.isEnabled = recyclerView.canScrollVertically(1)
-                }
-            }
-        )
-        adapter.setStateViewLayout(R.layout.layout_empty_view, getString(R.string.here_is_empty))
+      }
     }
-
-    override fun bindDataObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAllSharedHKeyframes().collect { adapter.submitList(it) }
+    binding.rvKeyframe.addOnScrollListener(
+      object : OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+          binding.btnUp.isEnabled = recyclerView.canScrollVertically(-1)
+          binding.btnDown.isEnabled = recyclerView.canScrollVertically(1)
         }
-    }
+      }
+    )
+    adapter.setStateViewLayout(R.layout.layout_empty_view, getString(R.string.here_is_empty))
+  }
 
-    override fun SettingsActivity.setupToolbar() {
-        supportActionBar!!.setTitle(R.string.shared_h_keyframe_manage)
+  override fun bindDataObservers() {
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.loadAllSharedHKeyframes().collect { adapter.submitList(it) }
     }
+  }
+
+  override fun SettingsActivity.setupToolbar() {
+    supportActionBar!!.setTitle(R.string.shared_h_keyframe_manage)
+  }
 }

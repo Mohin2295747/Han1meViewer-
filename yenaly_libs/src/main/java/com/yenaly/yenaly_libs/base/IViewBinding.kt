@@ -6,7 +6,7 @@ import androidx.databinding.ViewDataBinding
 
 interface IViewBinding<DB : ViewDataBinding> {
 
-    val binding: DB
+  val binding: DB
 
-    fun getViewBinding(inflater: LayoutInflater, container: ViewGroup?): DB
+  fun getViewBinding(inflater: LayoutInflater, container: ViewGroup?): DB
 }

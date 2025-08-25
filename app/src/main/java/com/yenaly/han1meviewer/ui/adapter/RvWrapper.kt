@@ -23,61 +23,61 @@ import com.yenaly.han1meviewer.util.dpToPx
  * @time 2023/11/27 027 17:00
  */
 class RvWrapper<VH : ViewHolder>(
-    private val adapter: RecyclerView.Adapter<VH>,
-    private val customRv: ((Context) -> RecyclerView)?,
-    private val layoutManager: () -> LayoutManager,
+  private val adapter: RecyclerView.Adapter<VH>,
+  private val customRv: ((Context) -> RecyclerView)?,
+  private val layoutManager: () -> LayoutManager,
 ) : BaseSingleItemAdapter<Unit, QuickViewHolder>() {
-    companion object {
-        fun <VH : ViewHolder> RecyclerView.Adapter<VH>.wrappedWith(
-            customRv: ((Context) -> RecyclerView)? = null,
-            layoutManager: () -> LayoutManager,
-        ) = RvWrapper(this, customRv, layoutManager)
-    }
+  companion object {
+    fun <VH : ViewHolder> RecyclerView.Adapter<VH>.wrappedWith(
+      customRv: ((Context) -> RecyclerView)? = null,
+      layoutManager: () -> LayoutManager,
+    ) = RvWrapper(this, customRv, layoutManager)
+  }
 
-    var wrapper: RecyclerView? = null
-        private set
+  var wrapper: RecyclerView? = null
+    private set
 
-    private var onWrap: (RecyclerView.() -> Unit)? = null
+  private var onWrap: (RecyclerView.() -> Unit)? = null
 
-    fun doOnWrap(block: RecyclerView.() -> Unit) {
-        onWrap = block
-    }
+  fun doOnWrap(block: RecyclerView.() -> Unit) {
+    onWrap = block
+  }
 
-    override fun onBindViewHolder(holder: QuickViewHolder, item: Unit?) = Unit
+  override fun onBindViewHolder(holder: QuickViewHolder, item: Unit?) = Unit
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): QuickViewHolder {
-        return QuickViewHolder(R.layout.item_rv_wrapper, parent).also { viewHolder ->
-            val frame = viewHolder.itemView as ViewGroup
-            var rv =
-                this@RvWrapper.customRv?.invoke(context)?.apply {
-                    id = R.id.rv
-                    isNestedScrollingEnabled = false
-                }
-            val prevRv = viewHolder.getView<RecyclerView>(R.id.rv)
-            if (rv != null) {
-                frame -= prevRv
-                rv.layoutParams = prevRv.layoutParams
-                frame += rv
-            } else {
-                rv = prevRv
-            }
-            rv.apply wr@{
-                this@wr.layoutManager = this@RvWrapper.layoutManager()
-                this@wr.adapter = this@RvWrapper.adapter
-                this@RvWrapper.wrapper = this@wr
-                onWrap?.invoke(this@wr)
-                outlineProvider =
-                    object : ViewOutlineProvider() {
-                        override fun getOutline(view: View, outline: Outline) {
-                            outline.setRoundRect(0, 0, view.width, view.height, 8f.dpToPx())
-                        }
-                    }
-                clipToOutline = true
-            }
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): QuickViewHolder {
+    return QuickViewHolder(R.layout.item_rv_wrapper, parent).also { viewHolder ->
+      val frame = viewHolder.itemView as ViewGroup
+      var rv =
+        this@RvWrapper.customRv?.invoke(context)?.apply {
+          id = R.id.rv
+          isNestedScrollingEnabled = false
         }
+      val prevRv = viewHolder.getView<RecyclerView>(R.id.rv)
+      if (rv != null) {
+        frame -= prevRv
+        rv.layoutParams = prevRv.layoutParams
+        frame += rv
+      } else {
+        rv = prevRv
+      }
+      rv.apply wr@{
+        this@wr.layoutManager = this@RvWrapper.layoutManager()
+        this@wr.adapter = this@RvWrapper.adapter
+        this@RvWrapper.wrapper = this@wr
+        onWrap?.invoke(this@wr)
+        outlineProvider =
+          object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+              outline.setRoundRect(0, 0, view.width, view.height, 8f.dpToPx())
+            }
+          }
+        clipToOutline = true
+      }
     }
+  }
 }

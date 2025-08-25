@@ -4,10 +4,10 @@ import android.os.Parcel
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Parcel.readBooleanCompat(): Boolean {
-    return readInt() != 0
+  return readInt() != 0
 }
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Parcel.writeBooleanCompat(value: Boolean) {
-    writeInt(if (value) 1 else 0)
+  writeInt(if (value) 1 else 0)
 }

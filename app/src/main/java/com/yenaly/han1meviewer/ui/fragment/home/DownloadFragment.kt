@@ -23,40 +23,40 @@ import com.yenaly.yenaly_libs.utils.view.setUpFragmentStateAdapter
  * @time 2022/08/01 001 17:44
  */
 class DownloadFragment :
-    YenalyFragment<FragmentTabViewPagerOnlyBinding>(), IToolbarFragment<MainActivity> {
+  YenalyFragment<FragmentTabViewPagerOnlyBinding>(), IToolbarFragment<MainActivity> {
 
-    val viewModel by activityViewModels<DownloadViewModel>()
+  val viewModel by activityViewModels<DownloadViewModel>()
 
-    private val tabNameArray = intArrayOf(R.string.downloading, R.string.downloaded)
+  private val tabNameArray = intArrayOf(R.string.downloading, R.string.downloaded)
 
-    override fun getViewBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-    ): FragmentTabViewPagerOnlyBinding {
-        return FragmentTabViewPagerOnlyBinding.inflate(inflater, container, false)
+  override fun getViewBinding(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+  ): FragmentTabViewPagerOnlyBinding {
+    return FragmentTabViewPagerOnlyBinding.inflate(inflater, container, false)
+  }
+
+  override fun initData(savedInstanceState: Bundle?) {
+    (activity as MainActivity).setupToolbar()
+    initViewPager()
+  }
+
+  private fun initViewPager() {
+
+    binding.viewPager.setUpFragmentStateAdapter(this) {
+      addFragment { DownloadingFragment() }
+      addFragment { DownloadedFragment() }
     }
 
-    override fun initData(savedInstanceState: Bundle?) {
-        (activity as MainActivity).setupToolbar()
-        initViewPager()
+    binding.tabLayout.attach(binding.viewPager) { tab, position ->
+      tab.setText(tabNameArray[position])
     }
+  }
 
-    private fun initViewPager() {
-
-        binding.viewPager.setUpFragmentStateAdapter(this) {
-            addFragment { DownloadingFragment() }
-            addFragment { DownloadedFragment() }
-        }
-
-        binding.tabLayout.attach(binding.viewPager) { tab, position ->
-            tab.setText(tabNameArray[position])
-        }
-    }
-
-    override fun MainActivity.setupToolbar() {
-        val toolbar = this@DownloadFragment.binding.toolbar
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setSubtitle(R.string.download)
-        toolbar.setupWithMainNavController()
-    }
+  override fun MainActivity.setupToolbar() {
+    val toolbar = this@DownloadFragment.binding.toolbar
+    setSupportActionBar(toolbar)
+    supportActionBar!!.setSubtitle(R.string.download)
+    toolbar.setupWithMainNavController()
+  }
 }

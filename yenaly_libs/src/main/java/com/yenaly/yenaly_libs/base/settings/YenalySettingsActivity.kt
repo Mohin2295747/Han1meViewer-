@@ -14,33 +14,31 @@ import com.yenaly.yenaly_libs.databinding.YenalySettingsDataBinding
  */
 abstract class YenalySettingsActivity : FrameActivity() {
 
-    lateinit var binding: YenalySettingsDataBinding
+  lateinit var binding: YenalySettingsDataBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.yenaly_activity_settings)
-        binding.lifecycleOwner = this
-        supportActionBar?.hide()
-        setSupportActionBar(binding.settingsToolbar)
-        binding.settingsToolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.settings_container_view, initFragmentContainer())
-                .commit()
-        }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    binding = DataBindingUtil.setContentView(this, R.layout.yenaly_activity_settings)
+    binding.lifecycleOwner = this
+    supportActionBar?.hide()
+    setSupportActionBar(binding.settingsToolbar)
+    binding.settingsToolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    if (savedInstanceState == null) {
+      supportFragmentManager
+        .beginTransaction()
+        .replace(R.id.settings_container_view, initFragmentContainer())
+        .commit()
     }
+  }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::binding.isInitialized) {
-            binding.unbind()
-        }
+  override fun onDestroy() {
+    super.onDestroy()
+    if (::binding.isInitialized) {
+      binding.unbind()
     }
+  }
 
-    /** 初始化设置的Fragment */
-    abstract fun initFragmentContainer(): YenalySettingsFragment
+  /** 初始化设置的Fragment */
+  abstract fun initFragmentContainer(): YenalySettingsFragment
 }

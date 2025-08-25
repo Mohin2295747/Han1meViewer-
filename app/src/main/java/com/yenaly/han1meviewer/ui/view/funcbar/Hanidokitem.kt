@@ -10,20 +10,20 @@ import androidx.annotation.StringRes
  * @project Han1meViewer
  */
 data class Hanidokitem(
-    @DrawableRes var icon: Int = 0,
-    @StringRes var text: Int = 0,
-    var viewAction: OnClickListener? = null,
-    var subitems: List<Hanidokitem> = emptyList(),
-    private val _isBack: Boolean = false,
+  @DrawableRes var icon: Int = 0,
+  @StringRes var text: Int = 0,
+  var viewAction: OnClickListener? = null,
+  var subitems: List<Hanidokitem> = emptyList(),
+  private val _isBack: Boolean = false,
 ) {
 
-    val isBack: Boolean
-        get() = this._isBack
+  val isBack: Boolean
+    get() = this._isBack
 
-    infix fun contentEquals(other: Hanidokitem): Boolean = icon == other.icon && text == other.text
+  infix fun contentEquals(other: Hanidokitem): Boolean = icon == other.icon && text == other.text
 
-    companion object {
-        @JvmStatic
-        inline fun create(action: Hanidokitem.() -> Unit): Hanidokitem = Hanidokitem().apply(action)
-    }
+  companion object {
+    @JvmStatic
+    inline fun create(action: Hanidokitem.() -> Unit): Hanidokitem = Hanidokitem().apply(action)
+  }
 }

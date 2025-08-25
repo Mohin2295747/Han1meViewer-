@@ -13,10 +13,10 @@ import com.yenaly.han1meviewer.Preferences.isAlreadyLogin
  */
 @JvmDefaultWithoutCompatibility
 interface LoginNeededFragmentMixin {
-    /** 檢查是否已經登錄，如果沒有則返回上一個 Fragment */
-    fun Fragment.checkLogin() {
-        if (!isAlreadyLogin) {
-            findNavController().navigateUp()
-        }
+  /** 檢查是否已經登錄，如果沒有則返回上一個 Fragment */
+  fun Fragment.checkLogin() {
+    if (!isAlreadyLogin) {
+      findNavController().navigateUp()
     }
+  }
 }

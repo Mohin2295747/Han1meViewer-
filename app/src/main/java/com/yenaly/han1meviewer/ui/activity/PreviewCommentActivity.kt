@@ -25,43 +25,43 @@ import com.yenaly.yenaly_libs.utils.safeIntentExtra
  */
 class PreviewCommentActivity : YenalyActivity<ActivityPreviewCommentBinding>() {
 
-    val viewModel by viewModels<CommentViewModel>()
+  val viewModel by viewModels<CommentViewModel>()
 
-    private val date by safeIntentExtra<String>("date") // 感覺沒必要弄成個常量
-    private val dateCode by safeIntentExtra<String>(DATE_CODE)
+  private val date by safeIntentExtra<String>("date") // 感覺沒必要弄成個常量
+  private val dateCode by safeIntentExtra<String>(DATE_CODE)
 
-    override fun getViewBinding(layoutInflater: LayoutInflater): ActivityPreviewCommentBinding =
-        ActivityPreviewCommentBinding.inflate(layoutInflater)
+  override fun getViewBinding(layoutInflater: LayoutInflater): ActivityPreviewCommentBinding =
+    ActivityPreviewCommentBinding.inflate(layoutInflater)
 
-    override fun setUiStyle() {
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-        )
+  override fun setUiStyle() {
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+    )
+  }
+
+  override fun initData(savedInstanceState: Bundle?) {
+    setSupportActionBar(binding.toolbar)
+    binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+    supportActionBar?.let {
+      it.setDisplayHomeAsUpEnabled(true)
+      it.setHomeActionContentDescription(R.string.back)
+      it.title = getString(R.string.latest_hanime_comment, date)
     }
 
-    override fun initData(savedInstanceState: Bundle?) {
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
-        supportActionBar?.let {
-            it.setDisplayHomeAsUpEnabled(true)
-            it.setHomeActionContentDescription(R.string.back)
-            it.title = getString(R.string.latest_hanime_comment, date)
-        }
+    viewModel.code = dateCode
 
-        viewModel.code = dateCode
+    PreviewCommentPrefetcher.here().tag(PreviewCommentPrefetcher.Scope.PREVIEW_COMMENT_ACTIVITY)
 
-        PreviewCommentPrefetcher.here().tag(PreviewCommentPrefetcher.Scope.PREVIEW_COMMENT_ACTIVITY)
+    val commentFragment = CommentFragment().makeBundle(COMMENT_TYPE to PREVIEW_COMMENT_PREFIX)
+    supportFragmentManager
+      .beginTransaction()
+      .apply { add(R.id.fcv_pre_comment, commentFragment) }
+      .commit()
+  }
 
-        val commentFragment = CommentFragment().makeBundle(COMMENT_TYPE to PREVIEW_COMMENT_PREFIX)
-        supportFragmentManager
-            .beginTransaction()
-            .apply { add(R.id.fcv_pre_comment, commentFragment) }
-            .commit()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        PreviewCommentPrefetcher.bye(PreviewCommentPrefetcher.Scope.PREVIEW_COMMENT_ACTIVITY)
-    }
+  override fun onDestroy() {
+    super.onDestroy()
+    PreviewCommentPrefetcher.bye(PreviewCommentPrefetcher.Scope.PREVIEW_COMMENT_ACTIVITY)
+  }
 }

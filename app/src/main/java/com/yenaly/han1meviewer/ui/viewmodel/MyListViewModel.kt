@@ -14,8 +14,8 @@ import com.yenaly.yenaly_libs.base.YenalyViewModel
  */
 class MyListViewModel(application: Application) : YenalyViewModel(application) {
 
-    val playlist by sub<PlaylistSubViewModel>()
-    val watchLater by sub<WatchLaterSubViewModel>()
-    val fav by sub<FavSubViewModel>()
-    val subscription by sub<SubscriptionSubViewModel>()
+  val playlist by sub<PlaylistSubViewModel>()
+  val watchLater by sub<WatchLaterSubViewModel>()
+  val fav by sub<FavSubViewModel>()
+  val subscription by sub<SubscriptionSubViewModel>()
 }

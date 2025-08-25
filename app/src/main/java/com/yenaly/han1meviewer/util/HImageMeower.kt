@@ -15,38 +15,38 @@ import okhttp3.OkHttpClient
 @Suppress("NOTHING_TO_INLINE")
 object HImageMeower {
 
-    private const val TAG = "CoilImageNyanner"
+  private const val TAG = "CoilImageNyanner"
 
-    private val okHttpClient = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).build()
+  private val okHttpClient = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).build()
 
-    private val imageLoader =
-        ImageLoader.Builder(applicationContext).okHttpClient(okHttpClient).build()
+  private val imageLoader =
+    ImageLoader.Builder(applicationContext).okHttpClient(okHttpClient).build()
 
-    suspend fun execute(data: Any): ImageResult {
-        Log.d(TAG, "execute: $data")
-        return imageLoader.execute(ImageRequest.Builder(applicationContext).data(data).build())
-    }
+  suspend fun execute(data: Any): ImageResult {
+    Log.d(TAG, "execute: $data")
+    return imageLoader.execute(ImageRequest.Builder(applicationContext).data(data).build())
+  }
 
-    inline fun placeholder(height: Int, width: Int, blur: Int = 8) =
-        "https://picsum.photos/$width/$height/?blur=$blur"
+  inline fun placeholder(height: Int, width: Int, blur: Int = 8) =
+    "https://picsum.photos/$width/$height/?blur=$blur"
 
-    fun ImageView.loadUnhappily(data: Any?, fallbackData: Any?) {
-        Log.d(TAG, "primary: $data, fallback: $fallbackData")
-        val primaryRequest =
-            ImageRequest.Builder(context)
-                .data(data ?: fallbackData)
-                .crossfade(true)
-                .target(this)
-                .listener(
-                    object : ImageRequest.Listener {
-                        private val ivRef = WeakReference(this@loadUnhappily)
+  fun ImageView.loadUnhappily(data: Any?, fallbackData: Any?) {
+    Log.d(TAG, "primary: $data, fallback: $fallbackData")
+    val primaryRequest =
+      ImageRequest.Builder(context)
+        .data(data ?: fallbackData)
+        .crossfade(true)
+        .target(this)
+        .listener(
+          object : ImageRequest.Listener {
+            private val ivRef = WeakReference(this@loadUnhappily)
 
-                        override fun onError(request: ImageRequest, result: ErrorResult) {
-                            fallbackData?.let { ivRef.get()?.loadUnhappily(it, null) }
-                        }
-                    }
-                )
-                .build()
-        context.imageLoader.enqueue(primaryRequest)
-    }
+            override fun onError(request: ImageRequest, result: ErrorResult) {
+              fallbackData?.let { ivRef.get()?.loadUnhappily(it, null) }
+            }
+          }
+        )
+        .build()
+    context.imageLoader.enqueue(primaryRequest)
+  }
 }

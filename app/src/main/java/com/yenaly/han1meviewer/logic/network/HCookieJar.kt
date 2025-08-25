@@ -17,19 +17,18 @@ import okhttp3.HttpUrl
  */
 class HCookieJar : CookieJar {
 
-    companion object {
-        @JvmStatic val cookieMap: MutableMap<String, MutableList<Cookie>> = mutableMapOf()
-    }
+  companion object {
+    @JvmStatic val cookieMap: MutableMap<String, MutableList<Cookie>> = mutableMapOf()
+  }
 
-    override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        return cookieMap[url.host]
-            ?: Preferences.loginCookieStateFlow.value.toLoginCookieList(url.host)
-    }
+  override fun loadForRequest(url: HttpUrl): List<Cookie> {
+    return cookieMap[url.host] ?: Preferences.loginCookieStateFlow.value.toLoginCookieList(url.host)
+  }
 
-    override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        cookieMap[url.host] =
-            cookies.toMutableList().also {
-                it += Preferences.loginCookieStateFlow.value.toLoginCookieList(url.host)
-            }
-    }
+  override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
+    cookieMap[url.host] =
+      cookies.toMutableList().also {
+        it += Preferences.loginCookieStateFlow.value.toLoginCookieList(url.host)
+      }
+  }
 }

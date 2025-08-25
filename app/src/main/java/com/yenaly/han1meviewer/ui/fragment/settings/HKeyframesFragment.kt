@@ -33,93 +33,93 @@ import kotlinx.serialization.json.Json
  * @time 2023/11/13 013 18:46
  */
 class HKeyframesFragment :
-    YenalyFragment<FragmentHKeyframesBinding>(),
-    IToolbarFragment<SettingsActivity>,
-    StateLayoutMixin {
+  YenalyFragment<FragmentHKeyframesBinding>(),
+  IToolbarFragment<SettingsActivity>,
+  StateLayoutMixin {
 
-    val viewModel by activityViewModels<SettingsViewModel>()
+  val viewModel by activityViewModels<SettingsViewModel>()
 
-    private val adapter by unsafeLazy { HKeyframesRvAdapter() }
+  private val adapter by unsafeLazy { HKeyframesRvAdapter() }
 
-    private val hKeyframesShareRegex = Regex(">>>(.+)<<<")
+  private val hKeyframesShareRegex = Regex(">>>(.+)<<<")
 
-    override fun getViewBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-    ): FragmentHKeyframesBinding {
-        return FragmentHKeyframesBinding.inflate(inflater, container, false)
+  override fun getViewBinding(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+  ): FragmentHKeyframesBinding {
+    return FragmentHKeyframesBinding.inflate(inflater, container, false)
+  }
+
+  override fun onStart() {
+    super.onStart()
+    (activity as SettingsActivity).setupToolbar()
+  }
+
+  override fun initData(savedInstanceState: Bundle?) {
+    binding.btnUp.isVisible = false
+    binding.btnDown.isVisible = false
+    binding.rvKeyframe.layoutManager = LinearLayoutManager(context)
+    binding.rvKeyframe.adapter = adapter
+    adapter.setStateViewLayout(R.layout.layout_empty_view)
+  }
+
+  override fun bindDataObservers() {
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.loadAllHKeyframes().flowWithLifecycle(lifecycle).collect { entity ->
+        adapter.submitList(entity)
+      }
     }
+  }
 
-    override fun onStart() {
-        super.onStart()
-        (activity as SettingsActivity).setupToolbar()
-    }
-
-    override fun initData(savedInstanceState: Bundle?) {
-        binding.btnUp.isVisible = false
-        binding.btnDown.isVisible = false
-        binding.rvKeyframe.layoutManager = LinearLayoutManager(context)
-        binding.rvKeyframe.adapter = adapter
-        adapter.setStateViewLayout(R.layout.layout_empty_view)
-    }
-
-    override fun bindDataObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAllHKeyframes().flowWithLifecycle(lifecycle).collect { entity ->
-                adapter.submitList(entity)
+  private fun addHKeyframes() {
+    thread {
+      textFromClipboard?.let { text ->
+        val matchResult = hKeyframesShareRegex.find(text)
+        if (matchResult != null) {
+          val (toBase64) = matchResult.destructured
+          val toJson = toBase64.decodeFromStringByBase64()
+          val entity = Json.decodeFromString<HKeyframeEntity>(toJson)
+          activity?.runOnUiThread {
+            context?.showAlertDialog {
+              setTitle(R.string.h_keyframes_shared_by_other_detected)
+              setMessage(
+                getString(
+                    R.string.shared_h_keyframe_detected_msg,
+                    entity.title,
+                    entity.videoCode,
+                    entity.keyframes.size,
+                  )
+                  .trimIndent()
+              )
+              setPositiveButton(R.string.confirm) { _, _ ->
+                viewModel.insertHKeyframes(
+                  entity.copy(lastModifiedTime = System.currentTimeMillis())
+                )
+              }
+              setNegativeButton(R.string.cancel, null)
             }
+          }
+        } else {
+          activity?.runOnUiThread {
+            showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
+          }
+        }
+      }
+        ?: activity?.runOnUiThread {
+          showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
         }
     }
+  }
 
-    private fun addHKeyframes() {
-        thread {
-            textFromClipboard?.let { text ->
-                val matchResult = hKeyframesShareRegex.find(text)
-                if (matchResult != null) {
-                    val (toBase64) = matchResult.destructured
-                    val toJson = toBase64.decodeFromStringByBase64()
-                    val entity = Json.decodeFromString<HKeyframeEntity>(toJson)
-                    activity?.runOnUiThread {
-                        context?.showAlertDialog {
-                            setTitle(R.string.h_keyframes_shared_by_other_detected)
-                            setMessage(
-                                getString(
-                                        R.string.shared_h_keyframe_detected_msg,
-                                        entity.title,
-                                        entity.videoCode,
-                                        entity.keyframes.size,
-                                    )
-                                    .trimIndent()
-                            )
-                            setPositiveButton(R.string.confirm) { _, _ ->
-                                viewModel.insertHKeyframes(
-                                    entity.copy(lastModifiedTime = System.currentTimeMillis())
-                                )
-                            }
-                            setNegativeButton(R.string.cancel, null)
-                        }
-                    }
-                } else {
-                    activity?.runOnUiThread {
-                        showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
-                    }
-                }
-            }
-                ?: activity?.runOnUiThread {
-                    showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
-                }
+  override fun SettingsActivity.setupToolbar() {
+    supportActionBar!!.setTitle(R.string.h_keyframe_manage)
+    this@HKeyframesFragment.apply {
+      addMenu(R.menu.menu_h_keyframes_toolbar, viewLifecycleOwner) {
+        when (it.itemId) {
+          R.id.tb_add -> addHKeyframes()
         }
+        return@addMenu true
+      }
     }
-
-    override fun SettingsActivity.setupToolbar() {
-        supportActionBar!!.setTitle(R.string.h_keyframe_manage)
-        this@HKeyframesFragment.apply {
-            addMenu(R.menu.menu_h_keyframes_toolbar, viewLifecycleOwner) {
-                when (it.itemId) {
-                    R.id.tb_add -> addHKeyframes()
-                }
-                return@addMenu true
-            }
-        }
-    }
+  }
 }

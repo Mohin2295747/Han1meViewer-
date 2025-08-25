@@ -20,10 +20,10 @@ import java.net.URLEncoder
  * @param mode 模式
  */
 private fun Context.sp(
-    name: String = packageName,
-    mode: Int = Context.MODE_PRIVATE,
+  name: String = packageName,
+  mode: Int = Context.MODE_PRIVATE,
 ): SharedPreferences {
-    return getSharedPreferences(name, mode)
+  return getSharedPreferences(name, mode)
 }
 
 /**
@@ -36,16 +36,16 @@ private fun Context.sp(
  */
 @JvmOverloads
 fun <Ace> putSpValue(key: String, value: Ace, name: String = applicationContext.packageName) {
-    applicationContext.sp(name = name).edit {
-        when (value) {
-            is Long -> putLong(key, value)
-            is String -> putString(key, value)
-            is Int -> putInt(key, value)
-            is Boolean -> putBoolean(key, value)
-            is Float -> putFloat(key, value)
-            else -> putString(key, serialize(value))
-        }
+  applicationContext.sp(name = name).edit {
+    when (value) {
+      is Long -> putLong(key, value)
+      is String -> putString(key, value)
+      is Int -> putInt(key, value)
+      is Boolean -> putBoolean(key, value)
+      is Float -> putFloat(key, value)
+      else -> putString(key, serialize(value))
     }
+  }
 }
 
 /**
@@ -59,22 +59,22 @@ fun <Ace> putSpValue(key: String, value: Ace, name: String = applicationContext.
  */
 @JvmOverloads
 fun <Taffy> getSpValue(
-    key: String,
-    default: Taffy,
-    name: String = applicationContext.packageName,
+  key: String,
+  default: Taffy,
+  name: String = applicationContext.packageName,
 ): Taffy {
-    return applicationContext.sp(name = name).run {
-        val result =
-            when (default) {
-                is Long -> getLong(key, default)
-                is String -> getString(key, default)
-                is Int -> getInt(key, default)
-                is Boolean -> getBoolean(key, default)
-                is Float -> getFloat(key, default)
-                else -> deSerialization(getString(key, serialize(default)))
-            }
-        result as Taffy
-    }
+  return applicationContext.sp(name = name).run {
+    val result =
+      when (default) {
+        is Long -> getLong(key, default)
+        is String -> getString(key, default)
+        is Int -> getInt(key, default)
+        is Boolean -> getBoolean(key, default)
+        is Float -> getFloat(key, default)
+        else -> deSerialization(getString(key, serialize(default)))
+      }
+    result as Taffy
+  }
 }
 
 /**
@@ -87,7 +87,7 @@ fun <Taffy> getSpValue(
  */
 @JvmOverloads
 fun <Taffy> spValue(key: String, default: Taffy, name: String = applicationContext.packageName) =
-    lazy(LazyThreadSafetyMode.NONE) { getSpValue(key, default, name) }
+  lazy(LazyThreadSafetyMode.NONE) { getSpValue(key, default, name) }
 
 /**
  * 删除sp内特定值
@@ -97,7 +97,7 @@ fun <Taffy> spValue(key: String, default: Taffy, name: String = applicationConte
  */
 @JvmOverloads
 fun removeSpValue(key: String, name: String = applicationContext.packageName) {
-    applicationContext.sp(name = name).edit { remove(key) }
+  applicationContext.sp(name = name).edit { remove(key) }
 }
 
 /**
@@ -107,28 +107,28 @@ fun removeSpValue(key: String, name: String = applicationContext.packageName) {
  */
 @JvmOverloads
 fun clearSharedPreferences(name: String = applicationContext.packageName) {
-    applicationContext.sp(name = name).edit { clear() }
+  applicationContext.sp(name = name).edit { clear() }
 }
 
 /** 序列化 */
 private fun <Nyaru> serialize(obj: Nyaru): String {
-    val byteArrayOutputStream = ByteArrayOutputStream()
-    val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
-    objectOutputStream.writeObject(obj)
-    var serStr = byteArrayOutputStream.toString("ISO-8859-1")
-    serStr = URLEncoder.encode(serStr, "UTF-8")
-    objectOutputStream.close()
-    byteArrayOutputStream.close()
-    return serStr
+  val byteArrayOutputStream = ByteArrayOutputStream()
+  val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
+  objectOutputStream.writeObject(obj)
+  var serStr = byteArrayOutputStream.toString("ISO-8859-1")
+  serStr = URLEncoder.encode(serStr, "UTF-8")
+  objectOutputStream.close()
+  byteArrayOutputStream.close()
+  return serStr
 }
 
 /** 反序列化 */
 private fun <Bekki> deSerialization(str: String?): Bekki {
-    val redStr = URLDecoder.decode(str, "UTF-8")
-    val byteArrayInputStream = ByteArrayInputStream(redStr.toByteArray(charset("ISO-8859-1")))
-    val objectInputStream = ObjectInputStream(byteArrayInputStream)
-    val obj = objectInputStream.readObject() as Bekki
-    objectInputStream.close()
-    byteArrayInputStream.close()
-    return obj
+  val redStr = URLDecoder.decode(str, "UTF-8")
+  val byteArrayInputStream = ByteArrayInputStream(redStr.toByteArray(charset("ISO-8859-1")))
+  val objectInputStream = ObjectInputStream(byteArrayInputStream)
+  val obj = objectInputStream.readObject() as Bekki
+  objectInputStream.close()
+  byteArrayInputStream.close()
+  return obj
 }

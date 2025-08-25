@@ -16,16 +16,12 @@ import com.yenaly.yenaly_libs.utils.applicationContext
 @Database(entities = [HKeyframeEntity::class], version = 1, exportSchema = false)
 abstract class MiscellanyDatabase : RoomDatabase() {
 
-    abstract val hKeyframeDao: HKeyframeDao
+  abstract val hKeyframeDao: HKeyframeDao
 
-    companion object {
-        val instance by lazy {
-            Room.databaseBuilder(
-                    applicationContext,
-                    MiscellanyDatabase::class.java,
-                    "miscellany.db",
-                )
-                .build()
-        }
+  companion object {
+    val instance by lazy {
+      Room.databaseBuilder(applicationContext, MiscellanyDatabase::class.java, "miscellany.db")
+        .build()
     }
+  }
 }

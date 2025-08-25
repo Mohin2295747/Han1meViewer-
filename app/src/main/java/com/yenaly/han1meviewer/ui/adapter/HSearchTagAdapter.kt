@@ -10,36 +10,36 @@ import com.yenaly.han1meviewer.logic.model.SearchOption
 
 class HSearchTagAdapter : BaseQuickAdapter<SearchOption, QuickViewHolder>() {
 
-    val checkedSet = mutableSetOf<SearchOption>()
+  val checkedSet = mutableSetOf<SearchOption>()
 
-    override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: SearchOption?) {
-        item ?: return
-        val chip = holder.itemView as MaterialCheckBox
-        chip.isChecked = item in checkedSet
-        chip.text = item.value
-    }
+  override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: SearchOption?) {
+    item ?: return
+    val chip = holder.itemView as MaterialCheckBox
+    chip.isChecked = item in checkedSet
+    chip.text = item.value
+  }
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): QuickViewHolder {
-        val checkBox =
-            MaterialCheckBox(context).apply {
-                maxLines = 2
-                ellipsize = TextUtils.TruncateAt.END
-            }
-        return QuickViewHolder(checkBox).apply {
-            checkBox.setOnCheckedChangeListener { _, isChecked ->
-                val position = bindingAdapterPosition
-                getItem(position)?.let { item ->
-                    if (isChecked) {
-                        checkedSet += item
-                    } else {
-                        checkedSet -= item
-                    }
-                }
-            }
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): QuickViewHolder {
+    val checkBox =
+      MaterialCheckBox(context).apply {
+        maxLines = 2
+        ellipsize = TextUtils.TruncateAt.END
+      }
+    return QuickViewHolder(checkBox).apply {
+      checkBox.setOnCheckedChangeListener { _, isChecked ->
+        val position = bindingAdapterPosition
+        getItem(position)?.let { item ->
+          if (isChecked) {
+            checkedSet += item
+          } else {
+            checkedSet -= item
+          }
         }
+      }
     }
+  }
 }

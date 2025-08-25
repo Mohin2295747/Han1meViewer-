@@ -20,94 +20,91 @@ import com.yenaly.yenaly_libs.utils.formatBytesPerSecond
 import com.yenaly.yenaly_libs.utils.showShortToast
 
 class DownloadSettingsFragment :
-    YenalySettingsFragment(R.xml.settings_download), IToolbarFragment<SettingsActivity> {
+  YenalySettingsFragment(R.xml.settings_download), IToolbarFragment<SettingsActivity> {
 
-    companion object {
-        const val DOWNLOAD_PATH = "download_path"
-        const val DOWNLOAD_COUNT_LIMIT = "download_count_limit"
-        const val DOWNLOAD_SPEED_LIMIT = "download_speed_limit"
-        const val USE_PRIVATE_DIRECTORY = "use_private_directory"
-    }
+  companion object {
+    const val DOWNLOAD_PATH = "download_path"
+    const val DOWNLOAD_COUNT_LIMIT = "download_count_limit"
+    const val DOWNLOAD_SPEED_LIMIT = "download_speed_limit"
+    const val USE_PRIVATE_DIRECTORY = "use_private_directory"
+  }
 
-    private val downloadPath by safePreference<LongClickablePreference>(DOWNLOAD_PATH)
-    private val downloadCountLimit by safePreference<SeekBarPreference>(DOWNLOAD_COUNT_LIMIT)
-    private val downloadSpeedLimit by safePreference<SeekBarPreference>(DOWNLOAD_SPEED_LIMIT)
+  private val downloadPath by safePreference<LongClickablePreference>(DOWNLOAD_PATH)
+  private val downloadCountLimit by safePreference<SeekBarPreference>(DOWNLOAD_COUNT_LIMIT)
+  private val downloadSpeedLimit by safePreference<SeekBarPreference>(DOWNLOAD_SPEED_LIMIT)
 
-    private val usePrivateDirectory by
-        safePreference<MaterialSwitchPreference>(USE_PRIVATE_DIRECTORY)
+  private val usePrivateDirectory by safePreference<MaterialSwitchPreference>(USE_PRIVATE_DIRECTORY)
 
-    override fun onStart() {
-        super.onStart()
-        (activity as SettingsActivity).setupToolbar()
-    }
+  override fun onStart() {
+    super.onStart()
+    (activity as SettingsActivity).setupToolbar()
+  }
 
-    override fun onPreferencesCreated(savedInstanceState: Bundle?) {
-        downloadPath.apply {
-            val path = getDownloadFolder().path
-            summary = path
-            setOnPreferenceClickListener {
-                requireContext().showAlertDialog {
-                    setTitle(R.string.not_allow_to_change)
-                    setMessage(
-                        getString(R.string.detailed_path_s, path) +
-                            "\n" +
-                            getString(R.string.long_press_pref_to_copy)
-                    )
-                    setPositiveButton(R.string.ok, null)
-                }
-
-                return@setOnPreferenceClickListener true
-            }
-            setOnPreferenceLongClickListener {
-                path.copyToClipboard()
-                showShortToast(R.string.copy_to_clipboard)
-                return@setOnPreferenceLongClickListener true
-            }
+  override fun onPreferencesCreated(savedInstanceState: Bundle?) {
+    downloadPath.apply {
+      val path = getDownloadFolder().path
+      summary = path
+      setOnPreferenceClickListener {
+        requireContext().showAlertDialog {
+          setTitle(R.string.not_allow_to_change)
+          setMessage(
+            getString(R.string.detailed_path_s, path) +
+              "\n" +
+              getString(R.string.long_press_pref_to_copy)
+          )
+          setPositiveButton(R.string.ok, null)
         }
-        downloadCountLimit.apply {
-            setSummaryConverter(
-                defValue = HanimeDownloadManagerV2.MAX_CONCURRENT_DOWNLOAD_DEF,
-                converter = ::toDownloadCountLimitPrettyString,
-            ) {
-                // HanimeDownloadManager.maxConcurrentDownloadCount = it
-                HanimeDownloadManagerV2.maxConcurrentDownloadCount = it
-            }
-        }
-        downloadSpeedLimit.apply {
-            min = 0
-            max = SpeedLimitInterceptor.SPEED_BYTES.lastIndex
-            setSummaryConverter(
-                defValue = SpeedLimitInterceptor.NO_LIMIT_INDEX,
-                converter = { i ->
-                    SpeedLimitInterceptor.SPEED_BYTES[i].toDownloadSpeedPrettyString()
-                },
-            )
-        }
-        usePrivateDirectory.setOnPreferenceChangeListener { _, newValue ->
-            val usePrivate = newValue as Boolean
-            downloadPath.summary =
-                if (usePrivate) appDownloadFolder.path else appExternalDownloadFolder.path
-            return@setOnPreferenceChangeListener true
-        }
-    }
 
-    private fun Long.toDownloadSpeedPrettyString(): String {
-        return if (this == 0L) {
-            getString(R.string.no_limit)
-        } else {
-            this.formatBytesPerSecond()
-        }
+        return@setOnPreferenceClickListener true
+      }
+      setOnPreferenceLongClickListener {
+        path.copyToClipboard()
+        showShortToast(R.string.copy_to_clipboard)
+        return@setOnPreferenceLongClickListener true
+      }
     }
+    downloadCountLimit.apply {
+      setSummaryConverter(
+        defValue = HanimeDownloadManagerV2.MAX_CONCURRENT_DOWNLOAD_DEF,
+        converter = ::toDownloadCountLimitPrettyString,
+      ) {
+        // HanimeDownloadManager.maxConcurrentDownloadCount = it
+        HanimeDownloadManagerV2.maxConcurrentDownloadCount = it
+      }
+    }
+    downloadSpeedLimit.apply {
+      min = 0
+      max = SpeedLimitInterceptor.SPEED_BYTES.lastIndex
+      setSummaryConverter(
+        defValue = SpeedLimitInterceptor.NO_LIMIT_INDEX,
+        converter = { i -> SpeedLimitInterceptor.SPEED_BYTES[i].toDownloadSpeedPrettyString() },
+      )
+    }
+    usePrivateDirectory.setOnPreferenceChangeListener { _, newValue ->
+      val usePrivate = newValue as Boolean
+      downloadPath.summary =
+        if (usePrivate) appDownloadFolder.path else appExternalDownloadFolder.path
+      return@setOnPreferenceChangeListener true
+    }
+  }
 
-    private fun toDownloadCountLimitPrettyString(value: Int): String {
-        return if (value == 0) {
-            getString(R.string.no_limit)
-        } else {
-            value.toString()
-        }
+  private fun Long.toDownloadSpeedPrettyString(): String {
+    return if (this == 0L) {
+      getString(R.string.no_limit)
+    } else {
+      this.formatBytesPerSecond()
     }
+  }
 
-    override fun SettingsActivity.setupToolbar() {
-        supportActionBar!!.setTitle(R.string.download_settings)
+  private fun toDownloadCountLimitPrettyString(value: Int): String {
+    return if (value == 0) {
+      getString(R.string.no_limit)
+    } else {
+      value.toString()
     }
+  }
+
+  override fun SettingsActivity.setupToolbar() {
+    supportActionBar!!.setTitle(R.string.download_settings)
+  }
 }

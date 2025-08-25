@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.GridLayoutManager
  * @time 2022/09/10 010 00:24
  */
 class FixedGridLayoutManager(context: Context?, spanCount: Int) :
-    GridLayoutManager(context, spanCount) {
-    override fun supportsPredictiveItemAnimations(): Boolean {
-        return false
-    }
+  GridLayoutManager(context, spanCount) {
+  override fun supportsPredictiveItemAnimations(): Boolean {
+    return false
+  }
 }

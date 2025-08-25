@@ -26,65 +26,65 @@ import kotlinx.datetime.toLocalDateTime
  * @time 2023/11/26 026 15:35
  */
 class WatchHistoryRvAdapter :
-    BaseDifferAdapter<WatchHistoryEntity, DataBindingHolder<ItemWatchHistoryBinding>>(COMPARATOR) {
+  BaseDifferAdapter<WatchHistoryEntity, DataBindingHolder<ItemWatchHistoryBinding>>(COMPARATOR) {
 
-    init {
-        isStateViewEnable = true
-    }
+  init {
+    isStateViewEnable = true
+  }
 
-    companion object {
-        val COMPARATOR =
-            object : DiffUtil.ItemCallback<WatchHistoryEntity>() {
-                override fun areItemsTheSame(
-                    oldItem: WatchHistoryEntity,
-                    newItem: WatchHistoryEntity,
-                ): Boolean {
-                    return oldItem.id == newItem.id
-                }
+  companion object {
+    val COMPARATOR =
+      object : DiffUtil.ItemCallback<WatchHistoryEntity>() {
+        override fun areItemsTheSame(
+          oldItem: WatchHistoryEntity,
+          newItem: WatchHistoryEntity,
+        ): Boolean {
+          return oldItem.id == newItem.id
+        }
 
-                override fun areContentsTheSame(
-                    oldItem: WatchHistoryEntity,
-                    newItem: WatchHistoryEntity,
-                ): Boolean {
-                    return oldItem == newItem
-                }
-            }
-    }
+        override fun areContentsTheSame(
+          oldItem: WatchHistoryEntity,
+          newItem: WatchHistoryEntity,
+        ): Boolean {
+          return oldItem == newItem
+        }
+      }
+  }
 
-    override fun onBindViewHolder(
-        holder: DataBindingHolder<ItemWatchHistoryBinding>,
-        position: Int,
-        item: WatchHistoryEntity?,
-    ) {
-        item ?: return
-        holder.binding.ivCover.loadUnhappily(item.coverUrl, HImageMeower.placeholder(72, 128))
-        holder.binding.tvAddedTime.text =
-            Instant.fromEpochMilliseconds(item.watchDate)
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-                .format(LOCAL_DATE_TIME_FORMAT)
-        // 不打算顯示發佈日期，所以不用設置
-        holder.binding.tvReleaseDate.text = null
-        holder.binding.tvTitle.text = item.title
-    }
+  override fun onBindViewHolder(
+    holder: DataBindingHolder<ItemWatchHistoryBinding>,
+    position: Int,
+    item: WatchHistoryEntity?,
+  ) {
+    item ?: return
+    holder.binding.ivCover.loadUnhappily(item.coverUrl, HImageMeower.placeholder(72, 128))
+    holder.binding.tvAddedTime.text =
+      Instant.fromEpochMilliseconds(item.watchDate)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .format(LOCAL_DATE_TIME_FORMAT)
+    // 不打算顯示發佈日期，所以不用設置
+    holder.binding.tvReleaseDate.text = null
+    holder.binding.tvTitle.text = item.title
+  }
 
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): DataBindingHolder<ItemWatchHistoryBinding> {
-        return DataBindingHolder(
-                ItemWatchHistoryBinding.inflate(LayoutInflater.from(context), parent, false)
-            )
-            .also { viewHolder ->
-                viewHolder.itemView.apply {
-                    setOnClickListener {
-                        val position = viewHolder.bindingAdapterPosition
-                        val item = getItem(position) ?: return@setOnClickListener
-                        val videoCode = item.videoCode
-                        context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
-                    }
-                    // setOnLongClickListener 由各自的 Fragment 实现
-                }
-            }
-    }
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): DataBindingHolder<ItemWatchHistoryBinding> {
+    return DataBindingHolder(
+        ItemWatchHistoryBinding.inflate(LayoutInflater.from(context), parent, false)
+      )
+      .also { viewHolder ->
+        viewHolder.itemView.apply {
+          setOnClickListener {
+            val position = viewHolder.bindingAdapterPosition
+            val item = getItem(position) ?: return@setOnClickListener
+            val videoCode = item.videoCode
+            context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
+          }
+          // setOnLongClickListener 由各自的 Fragment 实现
+        }
+      }
+  }
 }

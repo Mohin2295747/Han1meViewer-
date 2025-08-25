@@ -18,32 +18,32 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
  * @param scrollToHide 是否选择滑动隐藏
  */
 fun BottomNavigationView.toggleBottomNavBehavior(view: View, scrollToHide: Boolean) {
-    val layoutParams =
-        this.layoutParams as? CoordinatorLayout.LayoutParams
-            ?: throw IllegalStateException("parent needs to be coordinator layout!")
-    val scrollBehavior = YenalyHideBottomViewOnScrollBehavior<BottomNavigationView>()
-    layoutParams.behavior = scrollBehavior
-    val behavior = layoutParams.behavior as YenalyHideBottomViewOnScrollBehavior
-    behavior.slideUp(this)
-    if (scrollToHide) {
-        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            setMargins(leftMargin, topMargin, rightMargin, 0)
-        }
-    } else {
-        layoutParams.behavior = null
-        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            setMargins(
-                leftMargin,
-                topMargin,
-                rightMargin,
-                this@toggleBottomNavBehavior.measuredHeight + layoutParams.bottomMargin,
-            )
-        }
+  val layoutParams =
+    this.layoutParams as? CoordinatorLayout.LayoutParams
+      ?: throw IllegalStateException("parent needs to be coordinator layout!")
+  val scrollBehavior = YenalyHideBottomViewOnScrollBehavior<BottomNavigationView>()
+  layoutParams.behavior = scrollBehavior
+  val behavior = layoutParams.behavior as YenalyHideBottomViewOnScrollBehavior
+  behavior.slideUp(this)
+  if (scrollToHide) {
+    view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+      setMargins(leftMargin, topMargin, rightMargin, 0)
     }
+  } else {
+    layoutParams.behavior = null
+    view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+      setMargins(
+        leftMargin,
+        topMargin,
+        rightMargin,
+        this@toggleBottomNavBehavior.measuredHeight + layoutParams.bottomMargin,
+      )
+    }
+  }
 }
 
 fun BottomNavigationView.attachViewPager2(
-    viewPager2: ViewPager2,
-    smoothScroll: Boolean = true,
-    addAction: SimpleBottomNavViewMediator.() -> Unit,
+  viewPager2: ViewPager2,
+  smoothScroll: Boolean = true,
+  addAction: SimpleBottomNavViewMediator.() -> Unit,
 ) = SimpleBottomNavViewMediator(this, viewPager2, smoothScroll).apply(addAction).attach()

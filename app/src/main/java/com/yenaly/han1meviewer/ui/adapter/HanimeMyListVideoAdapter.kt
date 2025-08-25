@@ -24,53 +24,53 @@ import com.yenaly.yenaly_libs.utils.startActivity
  */
 class HanimeMyListVideoAdapter : BaseDifferAdapter<HanimeInfo, QuickViewHolder>(COMPARATOR) {
 
-    init {
-        isStateViewEnable = true
-    }
+  init {
+    isStateViewEnable = true
+  }
 
-    companion object {
-        val COMPARATOR =
-            object : DiffUtil.ItemCallback<HanimeInfo>() {
-                override fun areItemsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
-                    return oldItem.videoCode == newItem.videoCode
-                }
-
-                override fun areContentsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
-                    return oldItem == newItem
-                }
-            }
-    }
-
-    override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HanimeInfo?) {
-        item ?: return
-        holder.getView<TextView>(R.id.title).text = item.title
-        holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
-    }
-
-    override fun onCreateViewHolder(
-        context: Context,
-        parent: ViewGroup,
-        viewType: Int,
-    ): QuickViewHolder {
-        return QuickViewHolder(R.layout.item_hanime_video_simplified, parent).also { viewHolder ->
-            viewHolder.getView<View>(R.id.frame).layoutParams =
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                )
-            viewHolder.getView<ImageView>(R.id.cover).scaleType = ImageView.ScaleType.CENTER_CROP
-            viewHolder.itemView.apply {
-                setOnClickListener {
-                    val position = viewHolder.bindingAdapterPosition
-                    val item = getItem(position) ?: return@setOnClickListener
-                    val videoCode = item.videoCode
-                    context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
-                }
-                // setOnLongClickListener 由各自的 Fragment 实现
-            }
-            with(VideoCoverSize.Simplified) {
-                viewHolder.getView<ViewGroup>(R.id.cover_wrapper).resizeForVideoCover()
-            }
+  companion object {
+    val COMPARATOR =
+      object : DiffUtil.ItemCallback<HanimeInfo>() {
+        override fun areItemsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
+          return oldItem.videoCode == newItem.videoCode
         }
+
+        override fun areContentsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
+          return oldItem == newItem
+        }
+      }
+  }
+
+  override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HanimeInfo?) {
+    item ?: return
+    holder.getView<TextView>(R.id.title).text = item.title
+    holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
+  }
+
+  override fun onCreateViewHolder(
+    context: Context,
+    parent: ViewGroup,
+    viewType: Int,
+  ): QuickViewHolder {
+    return QuickViewHolder(R.layout.item_hanime_video_simplified, parent).also { viewHolder ->
+      viewHolder.getView<View>(R.id.frame).layoutParams =
+        ViewGroup.LayoutParams(
+          ViewGroup.LayoutParams.MATCH_PARENT,
+          ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+      viewHolder.getView<ImageView>(R.id.cover).scaleType = ImageView.ScaleType.CENTER_CROP
+      viewHolder.itemView.apply {
+        setOnClickListener {
+          val position = viewHolder.bindingAdapterPosition
+          val item = getItem(position) ?: return@setOnClickListener
+          val videoCode = item.videoCode
+          context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
+        }
+        // setOnLongClickListener 由各自的 Fragment 实现
+      }
+      with(VideoCoverSize.Simplified) {
+        viewHolder.getView<ViewGroup>(R.id.cover_wrapper).resizeForVideoCover()
+      }
     }
+  }
 }

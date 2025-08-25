@@ -19,85 +19,85 @@ import kotlinx.parcelize.Parcelize
 class HOptionChip
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyleRes: Int = 0) :
-    AppCompatTextView(context, attrs, defStyleRes), Checkable {
+  AppCompatTextView(context, attrs, defStyleRes), Checkable {
 
-    private val cornerRadius = 12.dp.toFloat()
-    private val unselectedColor = context.getColor(R.color.adv_search_unselected_color)
-    private val selectedColor = context.getColor(R.color.adv_search_selected_color)
+  private val cornerRadius = 12.dp.toFloat()
+  private val unselectedColor = context.getColor(R.color.adv_search_unselected_color)
+  private val selectedColor = context.getColor(R.color.adv_search_selected_color)
 
-    private var mIsChecked: Boolean = false
+  private var mIsChecked: Boolean = false
 
-    init {
-        context.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground)).use {
-            val bgRes = it.getResourceId(0, 0)
-            setBackgroundResource(bgRes)
+  init {
+    context.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground)).use {
+      val bgRes = it.getResourceId(0, 0)
+      setBackgroundResource(bgRes)
+    }
+    // Set default properties
+    updatePadding(top = 12.dp, bottom = 12.dp)
+    setTextColor(Color.WHITE)
+    // corner radius drawable
+    background =
+      GradientDrawable().apply {
+        cornerRadius = this@HOptionChip.cornerRadius
+        setColor(unselectedColor)
+      }
+  }
+
+  private fun animateChipByColorTransition(enable: Boolean) {
+    val startColor = if (enable) unselectedColor else selectedColor
+    val endColor = if (enable) selectedColor else unselectedColor
+
+    val animator = ValueAnimator.ofArgb(startColor, endColor)
+    animator.addUpdateListener { animation ->
+      background =
+        GradientDrawable().apply {
+          cornerRadius = this@HOptionChip.cornerRadius
+          setColor(animation.animatedValue as Int)
         }
-        // Set default properties
-        updatePadding(top = 12.dp, bottom = 12.dp)
-        setTextColor(Color.WHITE)
-        // corner radius drawable
-        background =
-            GradientDrawable().apply {
-                cornerRadius = this@HOptionChip.cornerRadius
-                setColor(unselectedColor)
-            }
+    }
+    animator.interpolator = FastOutSlowInInterpolator()
+    animator.duration = 300
+    animator.start()
+  }
+
+  var isAvailable: Boolean = true
+    set(available) {
+      field = available
+      isEnabled = available
+      val gd = background as? GradientDrawable
+      if (available) {
+        gd?.setColor(if (isChecked) selectedColor else unselectedColor)
+      } else {
+        gd?.setColor(ColorUtils.setAlphaComponent(unselectedColor, 0x80))
+      }
     }
 
-    private fun animateChipByColorTransition(enable: Boolean) {
-        val startColor = if (enable) unselectedColor else selectedColor
-        val endColor = if (enable) selectedColor else unselectedColor
+  override fun setChecked(checked: Boolean) {
+    if (mIsChecked == checked) return
+    mIsChecked = checked
+    animateChipByColorTransition(checked)
+  }
 
-        val animator = ValueAnimator.ofArgb(startColor, endColor)
-        animator.addUpdateListener { animation ->
-            background =
-                GradientDrawable().apply {
-                    cornerRadius = this@HOptionChip.cornerRadius
-                    setColor(animation.animatedValue as Int)
-                }
-        }
-        animator.interpolator = FastOutSlowInInterpolator()
-        animator.duration = 300
-        animator.start()
+  override fun isChecked(): Boolean = mIsChecked
+
+  override fun toggle() {
+    isChecked = !isChecked
+  }
+
+  override fun onSaveInstanceState(): Parcelable {
+    return SavedState(super.onSaveInstanceState(), isChecked)
+  }
+
+  override fun onRestoreInstanceState(state: Parcelable?) {
+    if (state !is SavedState) {
+      super.onRestoreInstanceState(state)
+      return
     }
 
-    var isAvailable: Boolean = true
-        set(available) {
-            field = available
-            isEnabled = available
-            val gd = background as? GradientDrawable
-            if (available) {
-                gd?.setColor(if (isChecked) selectedColor else unselectedColor)
-            } else {
-                gd?.setColor(ColorUtils.setAlphaComponent(unselectedColor, 0x80))
-            }
-        }
+    super.onRestoreInstanceState(state.superState)
+    this.isChecked = state.isChecked
+  }
 
-    override fun setChecked(checked: Boolean) {
-        if (mIsChecked == checked) return
-        mIsChecked = checked
-        animateChipByColorTransition(checked)
-    }
-
-    override fun isChecked(): Boolean = mIsChecked
-
-    override fun toggle() {
-        isChecked = !isChecked
-    }
-
-    override fun onSaveInstanceState(): Parcelable {
-        return SavedState(super.onSaveInstanceState(), isChecked)
-    }
-
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        if (state !is SavedState) {
-            super.onRestoreInstanceState(state)
-            return
-        }
-
-        super.onRestoreInstanceState(state.superState)
-        this.isChecked = state.isChecked
-    }
-
-    @Parcelize
-    data class SavedState(val ss: Parcelable?, val isChecked: Boolean) : BaseSavedState(ss)
+  @Parcelize
+  data class SavedState(val ss: Parcelable?, val isChecked: Boolean) : BaseSavedState(ss)
 }

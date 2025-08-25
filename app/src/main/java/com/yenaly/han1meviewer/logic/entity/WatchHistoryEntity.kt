@@ -10,14 +10,14 @@ import androidx.room.PrimaryKey
  */
 @Entity
 data class WatchHistoryEntity(
-    val coverUrl: String,
-    val title: String,
-    val releaseDate: Long,
-    val watchDate: Long,
-    val videoCode: String,
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  val coverUrl: String,
+  val title: String,
+  val releaseDate: Long,
+  val watchDate: Long,
+  val videoCode: String,
+  @PrimaryKey(autoGenerate = true) val id: Int = 0,
 ) {
 
-    val releaseDateDays: Int
-        get() = (releaseDate / (24 * 60 * 60 * 1000)).toInt()
+  val releaseDateDays: Int
+    get() = (releaseDate / (24 * 60 * 60 * 1000)).toInt()
 }
