@@ -20,7 +20,10 @@ import com.yenaly.han1meviewer.logic.state.VideoLoadingState
 import com.yenaly.han1meviewer.logic.state.WebsiteState
 import com.yenaly.han1meviewer.toVideoCode
 import com.yenaly.han1meviewer.util.TagDictionary
+import com.yenaly.han1meviewer.util.TranslatableText
 import com.yenaly.han1meviewer.util.TranslationManager
+import com.yenaly.han1meviewer.util.logIfParseNull
+import com.yenaly.han1meviewer.util.scheduleTranslation
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.json.JSONObject
