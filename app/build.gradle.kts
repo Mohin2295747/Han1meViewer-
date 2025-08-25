@@ -15,7 +15,7 @@ plugins {
     alias(libs.plugins.com.google.gms.google.services)
     alias(libs.plugins.com.google.firebase.crashlytics)
     alias(libs.plugins.com.google.firebase.firebase.pref)
-    // alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -121,55 +121,45 @@ dependencies {
     implementation(project(":yenaly_libs"))
 
     // android related
-
     implementation(libs.bundles.android.base)
     implementation(libs.bundles.android.jetpack)
     implementation(libs.palette)
 
-//    implementation(platform(libs.compose.compose.bom))
-//    androidTestImplementation(platform(libs.compose.compose.bom))
-//    implementation(libs.compose.material3)
-//    implementation(libs.androidx.activity.compose)
-//    implementation(libs.compose.ui.graphics)
-//    implementation(libs.compose.ui.ui.tooling.preview)
-//    debugImplementation(libs.compose.ui.ui.tooling)
-
     // datetime
-
     implementation(libs.datetime)
+    implementation(libs.serialization.json) // Use this instead of duplicate
 
     // parse
-
-    implementation(libs.serialization.json)
     implementation(libs.jsoup)
 
     // network
-
     implementation(libs.retrofit)
     implementation(libs.converter.serialization)
 
     // pic
-
     implementation(libs.coil)
 
     // mlkit
-
     implementation("com.google.mlkit:translate:17.0.2")
     implementation("com.jakewharton:disklrucache:2.0.2")
 
     // popup
-
     implementation(libs.xpopup)
     implementation(libs.xpopup.ext)
 
     // video
-
     implementation(libs.jiaozi.video.player)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
 
-    // view
+    // Compose - Keep only these lines
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.runtime:runtime")
 
+    // view
     implementation(libs.refresh.layout.kernel)
     implementation(libs.refresh.header.material)
     implementation(libs.refresh.footer.classics)
@@ -182,7 +172,6 @@ dependencies {
     implementation(libs.circular.reveal.switch)
 
     // firebase
-
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
@@ -193,17 +182,12 @@ dependencies {
     implementation(libs.mpv.lib)
 
     ksp(libs.room.compiler)
-
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
-
     androidTestImplementation(libs.test.junit)
     androidTestImplementation(libs.test.espresso.core)
-
-    // debugImplementation(libs.leak.canary)
 }
-
 /**
  * This function is used to check if a file exists and is a file.
  */

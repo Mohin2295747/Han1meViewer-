@@ -1,6 +1,14 @@
 package com.yenaly.han1meviewer.util
 
 import android.widget.TextView
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.logic.model.TranslatableText
