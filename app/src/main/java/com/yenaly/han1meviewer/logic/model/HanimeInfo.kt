@@ -12,7 +12,7 @@ interface HanimeInfoType : MultiItemEntity
  * @time 2022/06/08 008 22:56
  */
 data class HanimeInfo(
-    val title: String,
+    val title: TranslatableText, // Changed from String
     val coverUrl: String,
     val videoCode: String,
     val duration: String? = null,

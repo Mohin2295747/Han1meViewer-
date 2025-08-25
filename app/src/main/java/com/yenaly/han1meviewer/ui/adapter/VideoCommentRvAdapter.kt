@@ -48,6 +48,7 @@ class VideoCommentRvAdapter(private val fragment: Fragment? = null) :
 
     companion object {
         private const val THUMB = 0
+        private const val CONTENT = 1
 
         val COMPARATOR = object : DiffUtil.ItemCallback<VideoComments.VideoComment>() {
             override fun areItemsTheSame(
@@ -68,9 +69,15 @@ class VideoCommentRvAdapter(private val fragment: Fragment? = null) :
                 oldItem: VideoComments.VideoComment,
                 newItem: VideoComments.VideoComment,
             ): Any? {
-                return if (oldItem.post.likeCommentStatus != newItem.post.likeCommentStatus ||
+                if (oldItem.post.likeCommentStatus != newItem.post.likeCommentStatus ||
                     oldItem.post.unlikeCommentStatus != newItem.post.unlikeCommentStatus
-                ) THUMB else null
+                ) {
+                    return THUMB
+                }
+                if (oldItem.content != newItem.content) {
+                    return CONTENT
+                }
+                return null
             }
         }
     }
@@ -96,14 +103,25 @@ class VideoCommentRvAdapter(private val fragment: Fragment? = null) :
             crossfade(true)
             transformations(CircleCropTransformation())
         }
+        
+        // Use getDisplayText() instead of direct content access
+        val displayText = item.content.getDisplayText()
         holder.binding.tvContent.text = kotlin.run {
             val regex = usernameRegex
             if (regex != null) {
-                item.content.replaceSpanFirst(regex) { _ ->
+                displayText.replaceSpanFirst(regex) { _ ->
                     HighlightSpan(context, R.color.at_person)
                 }
-            } else item.content
+            } else displayText
         }
+        
+        // Show translation progress indicator if needed
+        if (!item.content.isTranslated()) {
+            holder.binding.translationProgress.isVisible = true
+        } else {
+            holder.binding.translationProgress.isVisible = false
+        }
+        
         holder.binding.tvDate.text = item.date
         holder.binding.tvUsername.text = item.username
         holder.binding.btnViewMoreReplies.isVisible = item.hasMoreReplies
@@ -120,10 +138,34 @@ class VideoCommentRvAdapter(private val fragment: Fragment? = null) :
     ) {
         if (payloads.isEmpty()) return super.onBindViewHolder(holder, position, item, payloads)
         item ?: return
-        if (payloads.first() == THUMB) {
-            holder.binding.btnThumbUp.setThumbUpIcon(item.post.likeCommentStatus)
-            holder.binding.btnThumbDown.setThumbDownIcon(item.post.unlikeCommentStatus)
-            holder.binding.btnThumbUp.text = item.realLikesCount?.toString()
+        
+        payloads.forEach { payload ->
+            when (payload) {
+                THUMB -> {
+                    holder.binding.btnThumbUp.setThumbUpIcon(item.post.likeCommentStatus)
+                    holder.binding.btnThumbDown.setThumbDownIcon(item.post.unlikeCommentStatus)
+                    holder.binding.btnThumbUp.text = item.realLikesCount?.toString()
+                }
+                CONTENT -> {
+                    // Update content when translation completes
+                    val displayText = item.content.getDisplayText()
+                    holder.binding.tvContent.text = kotlin.run {
+                        val regex = usernameRegex
+                        if (regex != null) {
+                            displayText.replaceSpanFirst(regex) { _ ->
+                                HighlightSpan(context, R.color.at_person)
+                            }
+                        } else displayText
+                    }
+                    
+                    // Update translation progress indicator
+                    if (!item.content.isTranslated()) {
+                        holder.binding.translationProgress.isVisible = true
+                    } else {
+                        holder.binding.translationProgress.isVisible = false
+                    }
+                }
+            }
         }
     }
 

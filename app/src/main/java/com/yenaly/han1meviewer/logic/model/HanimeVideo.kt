@@ -13,17 +13,17 @@ import kotlinx.serialization.Transient
  */
 @Serializable
 data class HanimeVideo(
-    val title: String,
+    val title: TranslatableText, // Changed from String
     val coverUrl: String,
     val chineseTitle: String?,
-    val introduction: String?,
+    val introduction: TranslatableText?, // Changed from String
     val uploadTime: LocalDate?,
     @Transient val views: String? = null,
 
     // resolution to video url
     val videoUrls: ResolutionLinkMap,
 
-    val tags: List<String>,
+    val tags: List<TranslatableText>, // Changed from List<String>
     /**
      * 注意，這裏的myList是指用戶的播放清單playlist
      */

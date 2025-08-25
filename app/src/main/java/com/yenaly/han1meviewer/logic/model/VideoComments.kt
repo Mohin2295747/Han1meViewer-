@@ -18,7 +18,7 @@ data class VideoComments(
         // 發佈日期
         val date: String,
         // 内容
-        val content: String,
+        val content: TranslatableText, // Changed from String
         // 點讚數量，登入前不能憑藉post獲取
         var thumbUp: Int? = null,
         // 是否为子评论

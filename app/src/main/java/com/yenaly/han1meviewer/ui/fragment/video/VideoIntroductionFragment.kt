@@ -14,6 +14,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import com.yenaly.han1meviewer.logic.model.TranslatableText
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ConcatAdapter
@@ -87,31 +88,34 @@ import kotlinx.datetime.format
 class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBinding>() {
 
     companion object {
-        private const val FAV = 1
-        private const val PLAYLIST = 1 shl 1
-        private const val SUBSCRIBE = 1 shl 2
+    private const val FAV = 1
+    private const val PLAYLIST = 1 shl 1
+    private const val SUBSCRIBE = 1 shl 2
+    private const val CONTENT = 1 shl 3 // Add content payload
 
-        val COMPARATOR = object : DiffUtil.ItemCallback<HanimeVideo>() {
-            override fun areItemsTheSame(oldItem: HanimeVideo, newItem: HanimeVideo): Boolean {
-                return true
-            }
+    val COMPARATOR = object : DiffUtil.ItemCallback<HanimeVideo>() {
+        override fun areItemsTheSame(oldItem: HanimeVideo, newItem: HanimeVideo): Boolean {
+            return oldItem.title.raw == newItem.title.raw // Use raw text for identity
+        }
 
-            override fun areContentsTheSame(oldItem: HanimeVideo, newItem: HanimeVideo): Boolean {
-                return false
-            }
+        override fun areContentsTheSame(oldItem: HanimeVideo, newItem: HanimeVideo): Boolean {
+            return oldItem == newItem
+        }
 
-            override fun getChangePayload(oldItem: HanimeVideo, newItem: HanimeVideo): Any {
-                var bitset = 0
-                if (oldItem.isFav != newItem.isFav)
-                    bitset = bitset or FAV
-                if (!(oldItem.myList?.isSelectedArray contentEquals newItem.myList?.isSelectedArray))
-                    bitset = bitset or PLAYLIST
-                if (oldItem.artist?.isSubscribed != newItem.artist?.isSubscribed)
-                    bitset = bitset or SUBSCRIBE
-                return bitset
-            }
+        override fun getChangePayload(oldItem: HanimeVideo, newItem: HanimeVideo): Any {
+            var bitset = 0
+            if (oldItem.isFav != newItem.isFav)
+                bitset = bitset or FAV
+            if (!(oldItem.myList?.isSelectedArray contentEquals newItem.myList?.isSelectedArray))
+                bitset = bitset or PLAYLIST
+            if (oldItem.artist?.isSubscribed != newItem.artist?.isSubscribed)
+                bitset = bitset or SUBSCRIBE
+            if (oldItem.title != newItem.title || oldItem.introduction != newItem.introduction)
+                bitset = bitset or CONTENT // Add content check
+            return bitset
         }
     }
+}
 
     val viewModel by activityViewModels<VideoViewModel>()
 
@@ -308,39 +312,52 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
             }
         }
     }
+    
+    private fun ItemVideoIntroductionBinding.initIntroduction(info: HanimeVideo) {
+    // Use getDisplayText() for introduction
+    tvIntroduction.setContent(info.introduction?.getDisplayText())
+    
+    // Show/hide translation progress
+    if (info.introduction != null && !info.introduction.isTranslated()) {
+        introTranslationProgress.isVisible = true
+    } else {
+        introTranslationProgress.isVisible = false
+    }
+}
 
     private fun notifyDownload(
-        info: HanimeVideo, oldQuality: String?, newQuality: String,
-        action: () -> Unit
-    ) {
-        val notifyMsg = spannable {
-            getString(R.string.download_video_detail_below).text()
+    info: HanimeVideo, oldQuality: String?, newQuality: String,
+    action: () -> Unit
+) {
+    val notifyMsg = spannable {
+        getString(R.string.download_video_detail_below).text()
+        newline(2)
+        if (oldQuality != null) {
+            getString(R.string.check_video_exists_in_download, oldQuality).text()
             newline(2)
-            if (oldQuality != null) {
-                getString(R.string.check_video_exists_in_download, oldQuality).text()
-                newline(2)
-            }
-            getString(R.string.name_with_colon).text()
-            newline()
-            info.title.span {
+        }
+        getString(R.string.name_with_colon).text()
+        newline()
+        // Use getDisplayText() for title
+        info.title.getDisplayText().span {
+            style(Typeface.BOLD)
+        }
+        newline()
+        getString(R.string.quality_with_colon).text()
+        newline()
+        if (oldQuality != null && oldQuality != newQuality) {
+            "$oldQuality → ".text()
+            newQuality.span {
                 style(Typeface.BOLD)
             }
-            newline()
-            getString(R.string.quality_with_colon).text()
-            newline()
-            if (oldQuality != null && oldQuality != newQuality) {
-                "$oldQuality → ".text()
-                newQuality.span {
-                    style(Typeface.BOLD)
-                }
-            } else {
-                newQuality.span {
-                    style(Typeface.BOLD)
-                }
+        } else {
+            newQuality.span {
+                style(Typeface.BOLD)
             }
-            newline(2)
-            getString(R.string.after_download_tips).text()
         }
+        newline(2)
+        getString(R.string.after_download_tips).text()
+    }
         requireContext().showAlertDialog {
             setTitle(if (oldQuality != null) R.string.sure_to_redownload else R.string.sure_to_download)
             setMessage(notifyMsg)
@@ -355,22 +372,22 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
     }
 
     private suspend fun enqueueDownloadWork(videoData: HanimeVideo, redownload: Boolean = false) {
-        requireContext().requestPostNotificationPermission()
-        val checkedQuality = requireNotNull(checkedQuality)
-        HCacheManager.saveHanimeVideoInfo(viewModel.videoCode, videoData)
-        // HanimeDownloadManager.addTask(
-        HanimeDownloadManagerV2.addTask(
-            HanimeDownloadWorker.Args(
-                quality = checkedQuality,
-                downloadUrl = videoData.videoUrls[checkedQuality]?.link,
-                videoType = videoData.videoUrls[checkedQuality]?.suffix,
-                hanimeName = videoData.title,
-                videoCode = viewModel.videoCode,
-                coverUrl = videoData.coverUrl,
-            ),
-            redownload = redownload
-        )
-    }
+    requireContext().requestPostNotificationPermission()
+    val checkedQuality = requireNotNull(checkedQuality)
+    HCacheManager.saveHanimeVideoInfo(viewModel.videoCode, videoData)
+    HanimeDownloadManagerV2.addTask(
+        HanimeDownloadWorker.Args(
+            quality = checkedQuality,
+            downloadUrl = videoData.videoUrls[checkedQuality]?.link,
+            videoType = videoData.videoUrls[checkedQuality]?.suffix,
+            // Use getDisplayText() for title
+            hanimeName = videoData.title.getDisplayText(),
+            videoCode = viewModel.videoCode,
+            coverUrl = videoData.coverUrl,
+        ),
+        redownload = redownload
+    )
+}
 
     private val List<HanimeInfo>.eachGridCounts
         get() = if (isNotEmpty() && this.first().itemType == HanimeInfo.NORMAL) {
@@ -447,50 +464,61 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
             }
 
         override fun onBindViewHolder(
-            holder: DataBindingHolder<ItemVideoIntroductionBinding>,
-            item: HanimeVideo?,
-        ) {
-            item ?: return
-            holder.binding.apply {
-                this@VideoIntroductionAdapter.binding = this
-                uploadTime.text = item.uploadTime?.format(LOCAL_DATE_FORMAT)
-                views.text = if (viewModel.fromDownload) {
-                    getString(R.string.s_view_times, "0721")
-                } else {
-                    getString(R.string.s_view_times, item.views.toString())
-                }
-                tvIntroduction.linkClickListener = onLinkClickListener
-                tvIntroduction.setContent(item.introduction)
-                tags.tags = item.tags
-                tags.lifecycle = viewLifecycleOwner.lifecycle
-
-                initTitle(item)
-                initArtist(item.artist)
-                initDownloadButton(item)
-                initFunctionBar(item)
-            }
+    holder: DataBindingHolder<ItemVideoIntroductionBinding>,
+    item: HanimeVideo?,
+) {
+    item ?: return
+    holder.binding.apply {
+        this@VideoIntroductionAdapter.binding = this
+        uploadTime.text = item.uploadTime?.format(LOCAL_DATE_FORMAT)
+        views.text = if (viewModel.fromDownload) {
+            getString(R.string.s_view_times, "0721")
+        } else {
+            getString(R.string.s_view_times, item.views.toString())
         }
+        
+        // Use getDisplayText() for introduction
+        tvIntroduction.linkClickListener = onLinkClickListener
+        tvIntroduction.setContent(item.introduction?.getDisplayText())
+        
+        // Update tags to use TranslatableText (if tags are now TranslatableText)
+        // tags.tags = item.tags.map { it.getDisplayText() } // If tags are TranslatableText
+        tags.tags = item.tags // If tags are still Strings
+        tags.lifecycle = viewLifecycleOwner.lifecycle
+
+        initTitle(item)
+        initIntroduction(item) // Add this call
+        initArtist(item.artist)
+        initDownloadButton(item)
+        initFunctionBar(item)
+    }
+}
 
         override fun onBindViewHolder(
-            holder: DataBindingHolder<ItemVideoIntroductionBinding>,
-            item: HanimeVideo?,
-            payloads: List<Any>,
-        ) {
-            if (payloads.isEmpty() || payloads.first() == 0)
-                return super.onBindViewHolder(holder, item, payloads)
-            item ?: return
-            val bitset = payloads.first() as Int
-            if (bitset and FAV != 0) {
-                holder.binding.initFavButton(item)
-            }
-            // #issue-202: 加入清单之后不会正常刷新
-            if (bitset and PLAYLIST != 0) {
-                holder.binding.initMyList(item.myList)
-            }
-            if (bitset and SUBSCRIBE != 0) {
-                holder.binding.initArtist(item.artist)
-            }
-        }
+    holder: DataBindingHolder<ItemVideoIntroductionBinding>,
+    item: HanimeVideo?,
+    payloads: List<Any>,
+) {
+    if (payloads.isEmpty() || payloads.first() == 0)
+        return super.onBindViewHolder(holder, item, payloads)
+    item ?: return
+    val bitset = payloads.first() as Int
+    if (bitset and FAV != 0) {
+        holder.binding.initFavButton(item)
+    }
+    // #issue-202: 加入清单之后不会正常刷新
+    if (bitset and PLAYLIST != 0) {
+        holder.binding.initMyList(item.myList)
+    }
+    if (bitset and SUBSCRIBE != 0) {
+        holder.binding.initArtist(item.artist)
+    }
+    if (bitset and CONTENT != 0) {
+        // Handle translation updates
+        holder.binding.initTitle(item)
+        holder.binding.initIntroduction(item)
+    }
+}
 
         override fun onCreateViewHolder(
             context: Context,
@@ -505,20 +533,29 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
         }
 
         private fun ItemVideoIntroductionBinding.initTitle(info: HanimeVideo) {
-            title.text = info.title.also { initShareButton(it) }
-            chineseTitle.text = info.chineseTitle
-            // #issue-80: 长按复制功能请求
-            title.setOnLongClickListener {
-                title.text.copyToClipboard()
-                showShortToast(R.string.copy_to_clipboard)
-                return@setOnLongClickListener true
-            }
-            chineseTitle.setOnLongClickListener {
-                chineseTitle.text.copyToClipboard()
-                showShortToast(R.string.copy_to_clipboard)
-                return@setOnLongClickListener true
-            }
-        }
+    // Use getDisplayText() instead of direct access
+    title.text = info.title.getDisplayText().also { initShareButton(it) }
+    chineseTitle.text = info.chineseTitle
+    
+    // Show/hide translation progress
+    if (!info.title.isTranslated()) {
+        titleTranslationProgress.isVisible = true
+    } else {
+        titleTranslationProgress.isVisible = false
+    }
+    
+    // #issue-80: 长按复制功能请求
+    title.setOnLongClickListener {
+        title.text.copyToClipboard()
+        showShortToast(R.string.copy_to_clipboard)
+        return@setOnLongClickListener true
+    }
+    chineseTitle.setOnLongClickListener {
+        chineseTitle.text.copyToClipboard()
+        showShortToast(R.string.copy_to_clipboard)
+        return@setOnLongClickListener true
+    }
+}
 
         private fun ItemVideoIntroductionBinding.initFavButton(info: HanimeVideo) {
             if (info.isFav) {
@@ -644,17 +681,18 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
             }
         }
 
-        private fun ItemVideoIntroductionBinding.initShareButton(title: String) {
-            val shareText = getHanimeShareText(title, viewModel.videoCode)
-            btnShare.setOnClickListener {
-                shareText(shareText, getString(R.string.long_press_share_to_copy))
-            }
-            btnShare.setOnLongClickListener {
-                shareText.copyToClipboard()
-                showShortToast(R.string.copy_to_clipboard)
-                return@setOnLongClickListener true
-            }
-        }
+       private fun ItemVideoIntroductionBinding.initShareButton(title: TranslatableText) {
+    // Use getDisplayText() for share text
+    val shareText = getHanimeShareText(title.getDisplayText(), viewModel.videoCode)
+    btnShare.setOnClickListener {
+        shareText(shareText, getString(R.string.long_press_share_to_copy))
+    }
+    btnShare.setOnLongClickListener {
+        shareText.copyToClipboard()
+        showShortToast(R.string.copy_to_clipboard)
+        return@setOnLongClickListener true
+    }
+}
 
         private fun ItemVideoIntroductionBinding.initDownloadButton(videoData: HanimeVideo) {
             if (videoData.videoUrls.isEmpty()) {

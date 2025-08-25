@@ -9,7 +9,9 @@ import com.yenaly.han1meviewer.logic.NetworkRepo
 import com.yenaly.han1meviewer.logic.entity.SearchHistoryEntity
 import com.yenaly.han1meviewer.logic.model.HanimeInfo
 import com.yenaly.han1meviewer.logic.model.SearchOption
+import com.yenaly.han1meviewer.logic.model.TranslatableText
 import com.yenaly.han1meviewer.logic.state.PageLoadingState
+import com.yenaly.han1meviewer.util.TranslationManager
 import com.yenaly.han1meviewer.util.loadAssetAs
 import com.yenaly.yenaly_libs.base.YenalyViewModel
 import com.yenaly.yenaly_libs.utils.unsafeLazy
@@ -98,17 +100,71 @@ class SearchViewModel(application: Application) : YenalyViewModel(application) {
                 sort, broad, date,
                 duration, tags, brands
             ).collect { state ->
-                val prev = _searchStateFlow.getAndUpdate { state }
-                if (prev is PageLoadingState.Loading) _searchFlow.value = emptyList()
-                _searchFlow.update { prevList ->
-                    when (state) {
-                        is PageLoadingState.Success -> prevList + state.info
-                        is PageLoadingState.Loading -> emptyList()
-                        else -> prevList
+                when (state) {
+                    is PageLoadingState.Success -> {
+                        // Update flow with search results first (shows raw text immediately)
+                        _searchStateFlow.value = PageLoadingState.Success(state.info)
+                        _searchFlow.update { prevList ->
+                            if (page == 1) state.info else prevList + state.info
+                        }
+
+                        // Collect translatable texts and trigger batch translation
+                        val textsToTranslate = mutableListOf<TranslatableText>()
+                        state.info.forEach { hanimeInfo ->
+                            textsToTranslate.add(hanimeInfo.title)
+                        }
+
+                        // Trigger batch translation in background
+                        launch {
+                            TranslationManager.translateBatch(textsToTranslate)
+                            
+                            // Update flow again when translations complete
+                            _searchStateFlow.value = PageLoadingState.Success(state.info)
+                            _searchFlow.update { currentList ->
+                                // Return current list to trigger UI update
+                                currentList
+                            }
+                        }
+                    }
+                    is PageLoadingState.Loading -> {
+                        _searchStateFlow.value = state
+                        if (page == 1) {
+                            _searchFlow.value = emptyList()
+                        }
+                    }
+                    is PageLoadingState.Error -> {
+                        _searchStateFlow.value = state
+                    }
+                    is PageLoadingState.NoMoreData -> {
+                        _searchStateFlow.value = state
                     }
                 }
             }
         }
+    }
+
+    // Optional: Function to manually trigger translation refresh for current search results
+    fun refreshTranslations() {
+        viewModelScope.launch {
+            val currentResults = _searchFlow.value
+            if (currentResults.isNotEmpty()) {
+                val textsToTranslate = mutableListOf<TranslatableText>()
+                currentResults.forEach { hanimeInfo ->
+                    textsToTranslate.add(hanimeInfo.title)
+                }
+
+                TranslationManager.translateBatch(textsToTranslate)
+                
+                // Update state to trigger UI refresh
+                _searchStateFlow.value = PageLoadingState.Success(currentResults)
+                _searchFlow.update { it } // Trigger flow update
+            }
+        }
+    }
+
+    // Optional: Clear pending translations when needed
+    fun clearTranslations() {
+        TranslationManager.clearPending()
     }
 
     fun insertSearchHistory(history: SearchHistoryEntity) {

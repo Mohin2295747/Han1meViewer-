@@ -65,4 +65,9 @@ object MLKitTranslator {
                 }
                 .addOnFailureListener { cont.resume(text) }
         }
+    suspend fun translate(text: TranslatableText) {
+        if (!text.isTranslated()) {
+            text.translated = translate(text.raw)
+        }
+    }
 }
