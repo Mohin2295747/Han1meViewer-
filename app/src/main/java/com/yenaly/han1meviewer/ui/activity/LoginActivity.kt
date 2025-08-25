@@ -50,7 +50,7 @@ class LoginActivity : FrameActivity() {
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
@@ -58,18 +58,14 @@ class LoginActivity : FrameActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login)
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
         supportActionBar?.let {
             it.title = HL.parseAsHtml()
             it.setDisplayHomeAsUpEnabled(true)
             it.setHomeActionContentDescription(R.string.back)
         }
         initWebView()
-        binding.srlLogin.setOnRefreshListener {
-            binding.wvLogin.loadUrl(HANIME_LOGIN_URL)
-        }
+        binding.srlLogin.setOnRefreshListener { binding.wvLogin.loadUrl(HANIME_LOGIN_URL) }
         binding.srlLogin.autoRefresh()
     }
 
@@ -99,43 +95,45 @@ class LoginActivity : FrameActivity() {
             settings.domStorageEnabled = true
             settings.userAgentString = USER_AGENT
 
-            webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    binding.srlLogin.finishRefresh()
-                }
-
-                override fun shouldOverrideUrlLoading(
-                    view: WebView,
-                    request: WebResourceRequest,
-                ): Boolean {
-                    val isSameUrl = request.url.toString() == HANIME_MAIN_BASE_URL ||
-                            request.url.toString() == HANIME_ALTER_BASE_URL
-                    if (request.isRedirect && isSameUrl) {
-                        val url = request.url
-                        val cookieManager = CookieManager.getInstance().getCookie(url.host)
-                        Log.d("login_cookie", cookieManager.toString())
-                        login(cookieManager)
-                        setResult(RESULT_OK)
-                        finish()
-                        return true
-                    }
-                    return super.shouldOverrideUrlLoading(view, request)
-                }
-
-                override fun onReceivedError(
-                    view: WebView?,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String?,
-                ) {
-                    // #issue-146
-                    // #issue-160: 修复字段销毁后调用引发的错误
-                    if (!isDestroyed && !isFinishing) {
+            webViewClient =
+                object : WebViewClient() {
+                    override fun onPageFinished(view: WebView, url: String) {
                         binding.srlLogin.finishRefresh()
-                        dialog.value.show()
+                    }
+
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView,
+                        request: WebResourceRequest,
+                    ): Boolean {
+                        val isSameUrl =
+                            request.url.toString() == HANIME_MAIN_BASE_URL ||
+                                request.url.toString() == HANIME_ALTER_BASE_URL
+                        if (request.isRedirect && isSameUrl) {
+                            val url = request.url
+                            val cookieManager = CookieManager.getInstance().getCookie(url.host)
+                            Log.d("login_cookie", cookieManager.toString())
+                            login(cookieManager)
+                            setResult(RESULT_OK)
+                            finish()
+                            return true
+                        }
+                        return super.shouldOverrideUrlLoading(view, request)
+                    }
+
+                    override fun onReceivedError(
+                        view: WebView?,
+                        errorCode: Int,
+                        description: String?,
+                        failingUrl: String?,
+                    ) {
+                        // #issue-146
+                        // #issue-160: 修复字段销毁后调用引发的错误
+                        if (!isDestroyed && !isFinishing) {
+                            binding.srlLogin.finishRefresh()
+                            dialog.value.show()
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -145,8 +143,11 @@ class LoginActivity : FrameActivity() {
 
         private val dialog: AlertDialog
 
-        private val username get() = etUsername.text?.toString().orEmpty()
-        private val password get() = etPassword.text?.toString().orEmpty()
+        private val username
+            get() = etUsername.text?.toString().orEmpty()
+
+        private val password
+            get() = etPassword.text?.toString().orEmpty()
 
         init {
             val view = View.inflate(this@LoginActivity, layoutRes, null)
@@ -160,9 +161,7 @@ class LoginActivity : FrameActivity() {
                 setNegativeButton(R.string.cancel, null)
             }
             dialog.setOnShowListener {
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                    handleLogin()
-                }
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { handleLogin() }
             }
         }
 

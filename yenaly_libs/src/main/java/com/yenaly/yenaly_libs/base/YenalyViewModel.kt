@@ -10,15 +10,13 @@ import com.yenaly.yenaly_libs.utils.unsafeLazy
  * @Time : 2022/04/20 020 11:37
  * @Description : Description...
  */
-open class YenalyViewModel(
-    @JvmField protected val application: Application
-) : AndroidViewModel(application) {
+open class YenalyViewModel(@JvmField protected val application: Application) :
+    AndroidViewModel(application) {
 
     var parent: YenalyViewModel? = null
         private set
 
-    @Suppress("UNCHECKED_CAST")
-    fun <YVM : YenalyViewModel> parent(): YVM? = parent as? YVM
+    @Suppress("UNCHECKED_CAST") fun <YVM : YenalyViewModel> parent(): YVM? = parent as? YVM
 
     fun <YVM : YenalyViewModel> requireParent(): YVM = parent() ?: error("Parent not found")
 

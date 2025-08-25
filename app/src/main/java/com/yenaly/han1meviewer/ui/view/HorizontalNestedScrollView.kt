@@ -9,13 +9,13 @@ import kotlin.math.abs
 /**
  * 暂时是专门为影片界面中的横向功能滚动条而设计的
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/08/21 021 16:05
  */
-class HorizontalNestedScrollView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
-) : HorizontalScrollView(context, attrs) {
+class HorizontalNestedScrollView
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) : HorizontalScrollView(context, attrs) {
 
     private var disallowIntercept = false
     private var startX = 0
@@ -46,7 +46,8 @@ class HorizontalNestedScrollView @JvmOverloads constructor(
                 }
             }
 
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
                 parent.requestDisallowInterceptTouchEvent(false)
             }
         }

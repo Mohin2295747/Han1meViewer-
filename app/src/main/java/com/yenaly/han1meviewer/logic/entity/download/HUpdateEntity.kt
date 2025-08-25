@@ -10,44 +10,34 @@ import com.yenaly.han1meviewer.logic.state.DownloadState
 @Entity
 @TypeConverters(HUpdateEntity.StateTypeConverter::class)
 data class HUpdateEntity(
-    @PrimaryKey()
-    val id: Int = 1,
-
+    @PrimaryKey() val id: Int = 1,
     val name: String,
     val url: String,
     val nodeId: String,
 
-    /**
-     * 安装包长度
-     */
+    /** 安装包长度 */
     val length: Long,
-    /**
-     * 安装包已下载长度
-     */
+    /** 安装包已下载长度 */
     val downloadedLength: Long,
 
-    /**
-     * 当前状态
-     */
+    /** 当前状态 */
     val state: DownloadState = DownloadState.Unknown,
 ) {
-    /**
-     * 下载进度
-     */
+    /** 下载进度 */
     @get:IntRange(from = 0, to = 100)
-    val progress get() = (downloadedLength * 100 / length).toInt()
-    /**
-     * 是否已下载完成
-     */
-    val isDownloaded get() = state == DownloadState.Finished
+    val progress
+        get() = (downloadedLength * 100 / length).toInt()
 
-    val isDownloading get() = state == DownloadState.Downloading
+    /** 是否已下载完成 */
+    val isDownloaded
+        get() = state == DownloadState.Finished
+
+    val isDownloading
+        get() = state == DownloadState.Downloading
 
     class StateTypeConverter {
-        @TypeConverter
-        fun from(state: DownloadState): Int = state.mask
+        @TypeConverter fun from(state: DownloadState): Int = state.mask
 
-        @TypeConverter
-        fun to(state: Int): DownloadState = DownloadState.from(state)
+        @TypeConverter fun to(state: Int): DownloadState = DownloadState.from(state)
     }
 }

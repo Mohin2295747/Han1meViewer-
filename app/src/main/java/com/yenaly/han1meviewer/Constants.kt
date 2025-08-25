@@ -4,9 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 
-/**
- * 我觉得空字符串写出来太逆天了，所以搞了个常量
- */
+/** 我觉得空字符串写出来太逆天了，所以搞了个常量 */
 const val EMPTY_STRING = ""
 
 const val APP_NAME = "Han1meViewer"
@@ -14,15 +12,18 @@ const val APP_NAME = "Han1meViewer"
 // 标准时间格式
 
 /* yyyy-MM-dd */
-@JvmField
-val LOCAL_DATE_FORMAT = LocalDate.Formats.ISO
+@JvmField val LOCAL_DATE_FORMAT = LocalDate.Formats.ISO
 
 /* yyyy-MM-dd HH:mm */
 @JvmField
-val LOCAL_DATE_TIME_FORMAT = LocalDateTime.Format {
-    date(LocalDate.Formats.ISO); char(' ')
-    hour(); char(':'); minute()
-}
+val LOCAL_DATE_TIME_FORMAT =
+    LocalDateTime.Format {
+        date(LocalDate.Formats.ISO)
+        char(' ')
+        hour()
+        char(':')
+        minute()
+    }
 
 // 网络基本设置
 
@@ -35,12 +36,9 @@ const val FROM_DOWNLOAD = "FROM_DOWNLOAD"
 
 const val VIDEO_CODE = "VIDEO_CODE"
 
-@Deprecated("Use [ADVANCED_SEARCH_MAP] instead")
-const val FROM_VIDEO_TAG = "FROM_VIDEO_TAG"
+@Deprecated("Use [ADVANCED_SEARCH_MAP] instead") const val FROM_VIDEO_TAG = "FROM_VIDEO_TAG"
 
-/**
- * 接受类型 [AdvancedSearchMap] 或者 [String]
- */
+/** 接受类型 [AdvancedSearchMap] 或者 [String] */
 const val ADVANCED_SEARCH_MAP = "ADVANCED_SEARCH_MAP"
 
 const val COMMENT_ID = "COMMENT_ID"
@@ -70,8 +68,7 @@ const val PREVIEW_COMMENT_PREFIX = "preview"
 
 // base url
 
-@JvmField
-val HANIME_BASE_URL = Preferences.baseUrl
+@JvmField val HANIME_BASE_URL = Preferences.baseUrl
 
 const val HANIME_MAIN_HOSTNAME = "hanime1.me"
 
@@ -81,8 +78,7 @@ const val HANIME_MAIN_BASE_URL = "https://hanime1.me/"
 
 const val HANIME_ALTER_BASE_URL = "https://hanime1.com/"
 
-@JvmField
-val HANIME_LOGIN_URL = HANIME_BASE_URL + "login"
+@JvmField val HANIME_LOGIN_URL = HANIME_BASE_URL + "login"
 
 // github url
 

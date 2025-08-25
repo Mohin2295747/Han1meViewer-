@@ -8,11 +8,7 @@ data class CommitComparison(val commits: List<Commit>) {
     data class Commit(val commit: CommitDetail) {
         @Serializable
         data class CommitDetail(val author: CommitAuthor, val message: String) {
-            @Serializable
-            data class CommitAuthor(val name: String)
+            @Serializable data class CommitAuthor(val name: String)
         }
     }
 }
-
-
-

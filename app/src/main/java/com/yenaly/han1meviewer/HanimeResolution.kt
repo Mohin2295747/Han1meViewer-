@@ -3,16 +3,14 @@ package com.yenaly.han1meviewer
 import kotlinx.serialization.Serializable
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
-/**
- * resolution to link map
- */
+/** resolution to link map */
 typealias ResolutionLinkMap = LinkedHashMap<String, HanimeLink>
 
 /**
  * 如果你在其他地方看到了 Quality，那就是 Resolution，我混用了。
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/10/11 011 21:19
  */
 class HanimeResolution {
@@ -38,9 +36,8 @@ class HanimeResolution {
      * @param type 例如 video/mp4
      */
     fun parseResolution(resString: String?, resLink: String, type: String? = null) {
-        val mediaType = type?.toMediaTypeOrNull()?.takeIf {
-            it.type.equals("video", ignoreCase = true)
-        }
+        val mediaType =
+            type?.toMediaTypeOrNull()?.takeIf { it.type.equals("video", ignoreCase = true) }
         val link = HanimeLink(resLink, mediaType?.subtype)
         when (resString) {
             RES_1080P -> resArray[0] = RES_1080P to link
@@ -57,20 +54,18 @@ class HanimeResolution {
 }
 
 @Serializable
-data class HanimeLink(
-    val link: String,
-    val subtype: String?,
-) {
+data class HanimeLink(val link: String, val subtype: String?) {
     val suffix: String
-        get() = when (subtype?.lowercase()) {
-            "mp4" -> "mp4"
-            "mpeg" -> "mpeg"
-            "x-msvideo" -> "avi"
-            "3gpp" -> "3gp"
-            "3gpp2" -> "3g2"
-            "ogg" -> "ogv"
-            "mp2t" -> "ts"
-            "webm" -> "webm"
-            else -> HFileManager.DEF_VIDEO_TYPE
-        }
+        get() =
+            when (subtype?.lowercase()) {
+                "mp4" -> "mp4"
+                "mpeg" -> "mpeg"
+                "x-msvideo" -> "avi"
+                "3gpp" -> "3gp"
+                "3gpp2" -> "3g2"
+                "ogg" -> "ogv"
+                "mp2t" -> "ts"
+                "webm" -> "webm"
+                else -> HFileManager.DEF_VIDEO_TYPE
+            }
 }

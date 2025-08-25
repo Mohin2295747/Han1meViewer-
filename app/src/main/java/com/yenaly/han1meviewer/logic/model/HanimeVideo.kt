@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/11 011 20:30
  */
 @Serializable
@@ -22,19 +22,13 @@ data class HanimeVideo(
 
     // resolution to video url
     val videoUrls: ResolutionLinkMap,
-
     val tags: List<TranslatableText>, // Changed from List<String>
-    /**
-     * 注意，這裏的myList是指用戶的播放清單playlist
-     */
+    /** 注意，這裏的myList是指用戶的播放清單playlist */
     @Transient val myList: MyList? = null,
-    /**
-     * 注意，這裏的playlist是指該影片的系列影片，並非用戶的播放清單
-     */
+    /** 注意，這裏的playlist是指該影片的系列影片，並非用戶的播放清單 */
     @Transient val playlist: Playlist? = null,
     @Transient val relatedHanimes: List<HanimeInfo> = emptyList(),
     val artist: Artist? = null,
-
     @Transient val favTimes: Int? = null,
     @Transient val isFav: Boolean = false,
     @Transient val csrfToken: String? = null,
@@ -47,28 +41,19 @@ data class HanimeVideo(
 
     // 為保證兼容性，不能直接用天數
     val uploadTimeMillis: Long
-        get() = uploadTime?.let {
-            it.toEpochDays().toLong() * 24 * 60 * 60 * 1000
-        } ?: 0L
+        get() = uploadTime?.let { it.toEpochDays().toLong() * 24 * 60 * 60 * 1000 } ?: 0L
 
-    data class MyList(
-        var isWatchLater: Boolean,
-        val myListInfo: List<MyListInfo>,
-    ) {
-        data class MyListInfo(
-            val code: String,
-            val title: String,
-            var isSelected: Boolean,
-        )
+    data class MyList(var isWatchLater: Boolean, val myListInfo: List<MyListInfo>) {
+        data class MyListInfo(val code: String, val title: String, var isSelected: Boolean)
 
-        val titleArray get() = myListInfo.mapToArray(MyListInfo::title)
-        val isSelectedArray get() = myListInfo.map(MyListInfo::isSelected).toBooleanArray()
+        val titleArray
+            get() = myListInfo.mapToArray(MyListInfo::title)
+
+        val isSelectedArray
+            get() = myListInfo.map(MyListInfo::isSelected).toBooleanArray()
     }
 
-    data class Playlist(
-        val playlistName: String?,
-        val video: List<HanimeInfo>,
-    )
+    data class Playlist(val playlistName: String?, val video: List<HanimeInfo>)
 
     @Serializable
     data class Artist(
@@ -77,12 +62,9 @@ data class HanimeVideo(
         val genre: String,
         @Transient val post: POST? = null,
     ) {
-        val isSubscribed: Boolean get() = post != null && post.isSubscribed
+        val isSubscribed: Boolean
+            get() = post != null && post.isSubscribed
 
-        data class POST(
-            val userId: String,
-            val artistId: String,
-            val isSubscribed: Boolean,
-        )
+        data class POST(val userId: String, val artistId: String, val isSubscribed: Boolean)
     }
 }

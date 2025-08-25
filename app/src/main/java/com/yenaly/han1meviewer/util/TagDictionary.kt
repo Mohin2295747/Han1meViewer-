@@ -1,9 +1,9 @@
 package com.yenaly.han1meviewer.util
 
 import android.content.Context
+import java.nio.charset.Charset
 import org.json.JSONArray
 import org.json.JSONObject
-import java.nio.charset.Charset
 
 object TagDictionary {
     private var _dict: Map<String, String>? = null
@@ -21,9 +21,11 @@ object TagDictionary {
 
         for (file in files) {
             val inputStream = context.assets.open(file)
-            val jsonString = inputStream.bufferedReader(Charset.forName("UTF-8")).use { it.readText() }
+            val jsonString =
+                inputStream.bufferedReader(Charset.forName("UTF-8")).use { it.readText() }
 
-            // Try to parse as JSONObject (tags.json style), fallback to JSONArray (genre.json style)
+            // Try to parse as JSONObject (tags.json style), fallback to JSONArray (genre.json
+            // style)
             try {
                 val root = JSONObject(jsonString)
 
@@ -32,7 +34,6 @@ object TagDictionary {
                     val items = root.getJSONArray(category)
                     parseItems(items, tempDict)
                 }
-
             } catch (_: Exception) {
                 // case 2: genre.json → array root
                 val rootArr = JSONArray(jsonString)

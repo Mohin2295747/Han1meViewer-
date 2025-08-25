@@ -33,12 +33,12 @@ import kotlinx.coroutines.launch
 /**
  * 已下载影片
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/08/01 001 17:45
  */
-class DownloadedFragment : YenalyFragment<FragmentListOnlyBinding>(),
-    IToolbarFragment<MainActivity>, StateLayoutMixin {
+class DownloadedFragment :
+    YenalyFragment<FragmentListOnlyBinding>(), IToolbarFragment<MainActivity>, StateLayoutMixin {
 
     val viewModel by activityViewModels<DownloadViewModel>()
 
@@ -46,7 +46,7 @@ class DownloadedFragment : YenalyFragment<FragmentListOnlyBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentListOnlyBinding {
         return FragmentListOnlyBinding.inflate(inflater, container, false)
     }
@@ -65,28 +65,31 @@ class DownloadedFragment : YenalyFragment<FragmentListOnlyBinding>(),
 
     override fun bindDataObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.downloaded.flowWithLifecycle(viewLifecycleOwner.lifecycle)
-                .collect {
-                    adapter.submitList(it)
-                }
+            viewModel.downloaded.flowWithLifecycle(viewLifecycleOwner.lifecycle).collect {
+                adapter.submitList(it)
+            }
         }
     }
 
     override fun MainActivity.setupToolbar() {
         val fv = this@DownloadedFragment.viewModel
-        addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-                menuInflater.inflate(R.menu.menu_downloaded_toolbar, menu)
-                menu.findItem(fv.currentSortOptionId)?.isChecked = true
-            }
+        addMenuProvider(
+            object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menu.clear()
+                    menuInflater.inflate(R.menu.menu_downloaded_toolbar, menu)
+                    menu.findItem(fv.currentSortOptionId)?.isChecked = true
+                }
 
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                fv.currentSortOptionId = menuItem.itemId
-                menuItem.isChecked = true
-                return loadAllSortedDownloadedHanime()
-            }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    fv.currentSortOptionId = menuItem.itemId
+                    menuItem.isChecked = true
+                    return loadAllSortedDownloadedHanime()
+                }
+            },
+            viewLifecycleOwner,
+            Lifecycle.State.RESUMED,
+        )
     }
 
     override fun onResume() {
@@ -95,39 +98,40 @@ class DownloadedFragment : YenalyFragment<FragmentListOnlyBinding>(),
     }
 
     // #issue-18: 添加下载区排序
-    private fun loadAllSortedDownloadedHanime(): Boolean = when (viewModel.currentSortOptionId) {
-        R.id.sm_sort_by_alphabet_ascending -> {
-            viewModel.loadAllDownloadedHanime(
-                sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
-                ascending = true
-            )
-            true
-        }
+    private fun loadAllSortedDownloadedHanime(): Boolean =
+        when (viewModel.currentSortOptionId) {
+            R.id.sm_sort_by_alphabet_ascending -> {
+                viewModel.loadAllDownloadedHanime(
+                    sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
+                    ascending = true,
+                )
+                true
+            }
 
-        R.id.sm_sort_by_alphabet_descending -> {
-            viewModel.loadAllDownloadedHanime(
-                sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
-                ascending = false
-            )
-            true
-        }
+            R.id.sm_sort_by_alphabet_descending -> {
+                viewModel.loadAllDownloadedHanime(
+                    sortedBy = HanimeDownloadEntity.SortedBy.TITLE,
+                    ascending = false,
+                )
+                true
+            }
 
-        R.id.sm_sort_by_date_ascending -> {
-            viewModel.loadAllDownloadedHanime(
-                sortedBy = HanimeDownloadEntity.SortedBy.ID,
-                ascending = true
-            )
-            true
-        }
+            R.id.sm_sort_by_date_ascending -> {
+                viewModel.loadAllDownloadedHanime(
+                    sortedBy = HanimeDownloadEntity.SortedBy.ID,
+                    ascending = true,
+                )
+                true
+            }
 
-        R.id.sm_sort_by_date_descending -> {
-            viewModel.loadAllDownloadedHanime(
-                sortedBy = HanimeDownloadEntity.SortedBy.ID,
-                ascending = false
-            )
-            true
-        }
+            R.id.sm_sort_by_date_descending -> {
+                viewModel.loadAllDownloadedHanime(
+                    sortedBy = HanimeDownloadEntity.SortedBy.ID,
+                    ascending = false,
+                )
+                true
+            }
 
-        else -> false
-    }
+            else -> false
+        }
 }

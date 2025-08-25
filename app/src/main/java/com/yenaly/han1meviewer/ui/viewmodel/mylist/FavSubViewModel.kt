@@ -45,23 +45,20 @@ class FavSubViewModel(application: Application) : YenalyViewModel(application) {
         }
     }
 
-    private val _deleteMyFavVideoFlow =
-        MutableSharedFlow<WebsiteState<Int>>()
+    private val _deleteMyFavVideoFlow = MutableSharedFlow<WebsiteState<Int>>()
     val deleteMyFavVideoFlow = _deleteMyFavVideoFlow.asSharedFlow()
 
     fun deleteMyFavVideo(videoCode: String, position: Int) {
         viewModelScope.launch {
-            NetworkRepo.deleteMyListItems(
-                MyListType.FAV_VIDEO, videoCode,
-                position, csrfToken
-            ).collect {
-                _deleteMyFavVideoFlow.emit(it)
-                _favVideoFlow.update { list ->
-                    if (it is WebsiteState.Success) {
-                        list.toMutableList().apply { removeAt(position) }
-                    } else list
+            NetworkRepo.deleteMyListItems(MyListType.FAV_VIDEO, videoCode, position, csrfToken)
+                .collect {
+                    _deleteMyFavVideoFlow.emit(it)
+                    _favVideoFlow.update { list ->
+                        if (it is WebsiteState.Success) {
+                            list.toMutableList().apply { removeAt(position) }
+                        } else list
+                    }
                 }
-            }
         }
     }
 

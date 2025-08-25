@@ -14,14 +14,14 @@ class SimpleFragmentStateAdapter : FragmentStateAdapter {
 
     private val newFragmentList = mutableListOf<NewFragment>()
 
-    constructor(fragmentActivity: FragmentActivity) :
-            super(fragmentActivity)
+    constructor(fragmentActivity: FragmentActivity) : super(fragmentActivity)
 
-    constructor(fragment: Fragment) :
-            super(fragment)
+    constructor(fragment: Fragment) : super(fragment)
 
-    constructor(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
-            super(fragmentManager, lifecycle)
+    constructor(
+        fragmentManager: FragmentManager,
+        lifecycle: Lifecycle,
+    ) : super(fragmentManager, lifecycle)
 
     override fun getItemCount(): Int {
         return newFragmentList.size

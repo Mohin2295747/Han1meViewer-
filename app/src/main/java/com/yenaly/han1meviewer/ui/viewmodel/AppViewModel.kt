@@ -23,15 +23,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/03/29 029 18:00
  */
 object AppViewModel : YenalyViewModel(application), IHCsrfToken {
 
-    /**
-     * csrfToken 全局唯一，只需要在首页拉起或点击视频页时更新一下就可以了
-     */
+    /** csrfToken 全局唯一，只需要在首页拉起或点击视频页时更新一下就可以了 */
     override var csrfToken: String? = null
 
     private val _versionFlow = MutableStateFlow<WebsiteState<Latest?>>(WebsiteState.Loading)
@@ -51,15 +49,11 @@ object AppViewModel : YenalyViewModel(application), IHCsrfToken {
         viewModelScope.launch(Dispatchers.Main) {
             Preferences.loginStateFlow.collect { isLogin ->
                 Log.d("LoginState", "isLogin: $isLogin")
-                Firebase.crashlytics.setCustomKeys {
-                    key(FirebaseConstants.LOGIN_STATE, isLogin)
-                }
+                Firebase.crashlytics.setCustomKeys { key(FirebaseConstants.LOGIN_STATE, isLogin) }
             }
         }
 
-        viewModelScope.launch(Dispatchers.Main) {
-            HUpdateWorker.collectOutput(application)
-        }
+        viewModelScope.launch(Dispatchers.Main) { HUpdateWorker.collectOutput(application) }
 
         viewModelScope.launch(Dispatchers.IO) {
             HanimeDownloadWorker.getRunningWorkInfoCount(application).collect { count ->
@@ -80,8 +74,6 @@ object AppViewModel : YenalyViewModel(application), IHCsrfToken {
     }
 
     private suspend fun getLatestVersionSuspend(forceCheck: Boolean = true) {
-        NetworkRepo.getLatestVersion(forceCheck).collect {
-            _versionFlow.value = it
-        }
+        NetworkRepo.getLatestVersion(forceCheck).collect { _versionFlow.value = it }
     }
 }

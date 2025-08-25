@@ -16,13 +16,20 @@ import com.yenaly.han1meviewer.logic.state.DownloadState
 import com.yenaly.yenaly_libs.utils.applicationContext
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/08/07 007 18:26
  */
 @Database(
-    entities = [HanimeDownloadEntity::class, DownloadCategoryEntity::class, HanimeCategoryCrossRef::class, HUpdateEntity::class],
-    version = 4, exportSchema = false
+    entities =
+        [
+            HanimeDownloadEntity::class,
+            DownloadCategoryEntity::class,
+            HanimeCategoryCrossRef::class,
+            HUpdateEntity::class,
+        ],
+    version = 4,
+    exportSchema = false,
 )
 abstract class DownloadDatabase : RoomDatabase() {
 
@@ -32,11 +39,9 @@ abstract class DownloadDatabase : RoomDatabase() {
 
     companion object {
         val instance by lazy {
-            Room.databaseBuilder(
-                applicationContext,
-                DownloadDatabase::class.java,
-                "download.db"
-            ).addMigrations(Migration1To2, Migration2To3, Migration3To4).build()
+            Room.databaseBuilder(applicationContext, DownloadDatabase::class.java, "download.db")
+                .addMigrations(Migration1To2, Migration2To3, Migration3To4)
+                .build()
         }
     }
 
@@ -49,7 +54,8 @@ abstract class DownloadDatabase : RoomDatabase() {
                     `videoUri` TEXT NOT NULL, `quality` TEXT NOT NULL,
                     `videoUrl` TEXT NOT NULL, `length` INTEGER NOT NULL,
                     `downloadedLength` INTEGER NOT NULL, `isDownloading` INTEGER NOT NULL,
-                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)""".trimIndent()
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)"""
+                    .trimIndent()
             )
             db.execSQL(
                 """INSERT INTO `HanimeDownloadEntity`(
@@ -59,7 +65,8 @@ abstract class DownloadDatabase : RoomDatabase() {
                      SELECT `coverUrl`, `title`, `addDate`, `videoCode`, `videoUri`, `quality`,
                         '' AS `videoUrl`, 1 AS `length`, 1 AS `downloadedLength`, 0 AS `isDownloading`,
                         `id`
-                     FROM `HanimeDownloadedEntity`""".trimIndent()
+                     FROM `HanimeDownloadedEntity`"""
+                    .trimIndent()
             )
             db.execSQL("""DROP TABLE IF EXISTS HanimeDownloadedEntity""")
         }
@@ -77,7 +84,9 @@ abstract class DownloadDatabase : RoomDatabase() {
             db.execSQL("""ALTER TABLE `HanimeDownloadEntity` ADD COLUMN `coverUri` TEXT NULL""")
 
             // Add state column with default value (convert from isDownloading)
-            db.execSQL("""ALTER TABLE `HanimeDownloadEntity` ADD COLUMN `state` INTEGER NOT NULL DEFAULT ${DownloadState.Mask.UNKNOWN}""")
+            db.execSQL(
+                """ALTER TABLE `HanimeDownloadEntity` ADD COLUMN `state` INTEGER NOT NULL DEFAULT ${DownloadState.Mask.UNKNOWN}"""
+            )
 
             // Update state values based on isDownloading
             // If isDownloading=1, set state to DOWNLOADING (2)
@@ -88,7 +97,8 @@ abstract class DownloadDatabase : RoomDatabase() {
                 """UPDATE `HanimeDownloadEntity` SET `state` = 
                     |CASE WHEN `isDownloading` = 1 THEN ${DownloadState.Mask.DOWNLOADING} ELSE 
                     |CASE WHEN `downloadedLength` = `length` THEN ${DownloadState.Mask.FINISHED} 
-                    |ELSE ${DownloadState.Mask.PAUSED} END END""".trimMargin()
+                    |ELSE ${DownloadState.Mask.PAUSED} END END"""
+                    .trimMargin()
             )
         }
     }
@@ -100,9 +110,12 @@ abstract class DownloadDatabase : RoomDatabase() {
                     `name` TEXT NOT NULL, `url` TEXT NOT NULL,
                     `nodeId` TEXT NOT NULL,
                     `length` INTEGER NOT NULL, `downloadedLength` INTEGER NOT NULL, 
-                    `id` INTEGER PRIMARY KEY NOT NULL)""".trimIndent()
+                    `id` INTEGER PRIMARY KEY NOT NULL)"""
+                    .trimIndent()
             )
-            db.execSQL("""ALTER TABLE `HUpdateEntity` ADD COLUMN `state` INTEGER NOT NULL DEFAULT ${DownloadState.Mask.UNKNOWN}""")
+            db.execSQL(
+                """ALTER TABLE `HUpdateEntity` ADD COLUMN `state` INTEGER NOT NULL DEFAULT ${DownloadState.Mask.UNKNOWN}"""
+            )
         }
     }
 }

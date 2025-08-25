@@ -13,8 +13,8 @@ import com.yenaly.han1meviewer.ui.activity.MainActivity
 import com.yenaly.yenaly_libs.utils.applicationContext
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/27 027 12:55
  */
 class VideoColumnTitleAdapter : BaseSingleItemAdapter<Unit, QuickViewHolder> {
@@ -22,16 +22,18 @@ class VideoColumnTitleAdapter : BaseSingleItemAdapter<Unit, QuickViewHolder> {
     private val notifyWhenSet: Boolean
 
     var title: String = EMPTY_STRING
-        set(value) = if (notifyWhenSet) {
-            field = value
-            notifyItemChanged(0)
-        } else field = value
+        set(value) =
+            if (notifyWhenSet) {
+                field = value
+                notifyItemChanged(0)
+            } else field = value
 
     var subtitle: String? = null
-        set(value) = if (notifyWhenSet) {
-            field = value
-            notifyItemChanged(0)
-        } else field = value
+        set(value) =
+            if (notifyWhenSet) {
+                field = value
+                notifyItemChanged(0)
+            } else field = value
 
     var onMoreHanimeListener: ((View) -> Unit)? = null
 
@@ -54,7 +56,7 @@ class VideoColumnTitleAdapter : BaseSingleItemAdapter<Unit, QuickViewHolder> {
     ) : this(
         applicationContext.getString(title),
         if (subtitle != 0) applicationContext.getString(subtitle) else null,
-        notifyWhenSet
+        notifyWhenSet,
     )
 
     override fun onBindViewHolder(holder: QuickViewHolder, item: Unit?) {

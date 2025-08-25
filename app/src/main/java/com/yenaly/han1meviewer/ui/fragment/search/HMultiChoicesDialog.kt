@@ -24,7 +24,7 @@ import com.yenaly.yenaly_libs.utils.view.attach
 class HMultiChoicesDialog(
     val context: Context,
     @StringRes private val titleRes: Int,
-    private val hasSingleItem: Boolean = false
+    private val hasSingleItem: Boolean = false,
 ) {
 
     companion object {
@@ -47,12 +47,13 @@ class HMultiChoicesDialog(
 
     private var isAdded = false
 
-    private val dialog = context.createAlertDialog {
-        setTitle(titleRes)
-        setPositiveButton(R.string.save, null)
-        setNeutralButton(R.string.reset, null)
-        setView(coreView)
-    }
+    private val dialog =
+        context.createAlertDialog {
+            setTitle(titleRes)
+            setPositiveButton(R.string.save, null)
+            setNeutralButton(R.string.reset, null)
+            setView(coreView)
+        }
 
     init {
         HMultiChoicesDialog.adapterMap = SparseArray()
@@ -64,12 +65,8 @@ class HMultiChoicesDialog(
         dialog.setOnShowListener { di ->
             page.requestLayout()
             val ad = di as AlertDialog
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                onSave?.invoke(ad)
-            }
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                onReset?.invoke(ad)
-            }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { onSave?.invoke(ad) }
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { onReset?.invoke(ad) }
         }
     }
 
@@ -87,9 +84,7 @@ class HMultiChoicesDialog(
         adapterMap[scopeNameRes ?: UNKNOWN_ADAPTER] = tagAdapter
         nameResList += scopeNameRes ?: UNKNOWN_ADAPTER
         pageAdapter.addFragment {
-            HCheckBoxFragment.newInstance(
-                scopeNameRes ?: UNKNOWN_ADAPTER, items, spanCount
-            )
+            HCheckBoxFragment.newInstance(scopeNameRes ?: UNKNOWN_ADAPTER, items, spanCount)
         }
     }
 
@@ -140,13 +135,13 @@ class HMultiChoicesDialog(
 
     fun show() {
         if (!hasSingleItem) {
-            tab.attach(page) { tab, pos ->
-                tab.setText(nameResList[pos])
-            }
+            tab.attach(page) { tab, pos -> tab.setText(nameResList[pos]) }
         }
-        dialog.showWithBlurEffect(DialogInterface.OnDismissListener {
-            onDismiss?.onDismiss(it)
-            HMultiChoicesDialog.adapterMap = null
-        })
+        dialog.showWithBlurEffect(
+            DialogInterface.OnDismissListener {
+                onDismiss?.onDismiss(it)
+                HMultiChoicesDialog.adapterMap = null
+            }
+        )
     }
 }

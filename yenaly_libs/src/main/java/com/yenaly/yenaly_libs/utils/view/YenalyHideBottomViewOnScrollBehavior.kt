@@ -20,7 +20,8 @@ import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
  * The [CoordinatorLayout.Behavior] for a View within a [CoordinatorLayout] to hide the view off the
  * bottom of the screen when scrolling down, and show it when scrolling up.
  *
- * SPECIFICALLY FOR [BottomNavigationView][com.google.android.material.bottomnavigation.BottomNavigationView].
+ * SPECIFICALLY FOR
+ * [BottomNavigationView][com.google.android.material.bottomnavigation.BottomNavigationView].
  *
  * @author Yenaly Liew
  * @time 2022/07/19 019 12:18
@@ -34,14 +35,9 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
 
     constructor() : super()
 
-    constructor(
-        context: Context,
-        attrs: AttributeSet?
-    ) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    override fun onLayoutChild(
-        parent: CoordinatorLayout, child: V, layoutDirection: Int
-    ): Boolean {
+    override fun onLayoutChild(parent: CoordinatorLayout, child: V, layoutDirection: Int): Boolean {
         val paramsCompat = child.layoutParams as MarginLayoutParams
         height = child.measuredHeight + paramsCompat.bottomMargin
         return super.onLayoutChild(parent, child, layoutDirection)
@@ -66,7 +62,7 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
         directTargetChild: View,
         target: View,
         nestedScrollAxes: Int,
-        type: Int
+        type: Int,
     ): Boolean {
         return nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
     }
@@ -80,7 +76,7 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
         dxUnconsumed: Int,
         dyUnconsumed: Int,
         type: Int,
-        consumed: IntArray
+        consumed: IntArray,
     ) {
         if (dyConsumed > 0) {
             slideDown(child)
@@ -89,16 +85,16 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
         }
     }
 
-    /** Returns true if the current state is scrolled up.  */
+    /** Returns true if the current state is scrolled up. */
     val isScrolledUp: Boolean
         get() = currentState == STATE_SCROLLED_UP
 
     /**
-     * Performs an animation that will slide the child from it's current position to be totally on the
-     * screen.
+     * Performs an animation that will slide the child from it's current position to be totally on
+     * the screen.
      */
     @JvmOverloads
-    fun slideUp(child: V, animate: Boolean =  /*animate=*/true) {
+    fun slideUp(child: V, animate: Boolean = /* animate= */ true) {
         if (isScrolledUp) {
             return
         }
@@ -113,14 +109,14 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
                 child,
                 targetTranslationY,
                 ENTER_ANIMATION_DURATION.toLong(),
-                LINEAR_OUT_SLOW_IN_INTERPOLATOR
+                LINEAR_OUT_SLOW_IN_INTERPOLATOR,
             )
         } else {
             child.translationY = targetTranslationY.toFloat()
         }
     }
 
-    /** Returns true if the current state is scrolled down.  */
+    /** Returns true if the current state is scrolled down. */
     val isScrolledDown: Boolean
         get() = currentState == STATE_SCROLLED_DOWN
 
@@ -129,7 +125,7 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
      * the screen.
      */
     @JvmOverloads
-    fun slideDown(child: V, animate: Boolean =  /*animate=*/true) {
+    fun slideDown(child: V, animate: Boolean = /* animate= */ true) {
         if (isScrolledDown) {
             return
         }
@@ -144,7 +140,7 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
                 child,
                 targetTranslationY,
                 EXIT_ANIMATION_DURATION.toLong(),
-                FAST_OUT_LINEAR_IN_INTERPOLATOR
+                FAST_OUT_LINEAR_IN_INTERPOLATOR,
             )
         } else {
             child.translationY = targetTranslationY.toFloat()
@@ -152,19 +148,24 @@ open class YenalyHideBottomViewOnScrollBehavior<V : View> : CoordinatorLayout.Be
     }
 
     private fun animateChildTo(
-        child: V, targetY: Int, duration: Long, interpolator: TimeInterpolator
+        child: V,
+        targetY: Int,
+        duration: Long,
+        interpolator: TimeInterpolator,
     ) {
-        currentAnimator = child
-            .animate()
-            .translationY(targetY.toFloat())
-            .setInterpolator(interpolator)
-            .setDuration(duration)
-            .setListener(
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        currentAnimator = null
+        currentAnimator =
+            child
+                .animate()
+                .translationY(targetY.toFloat())
+                .setInterpolator(interpolator)
+                .setDuration(duration)
+                .setListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            currentAnimator = null
+                        }
                     }
-                })
+                )
     }
 
     companion object {

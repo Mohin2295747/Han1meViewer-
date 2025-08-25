@@ -23,12 +23,14 @@ import com.yenaly.yenaly_libs.utils.unsafeLazy
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/18 018 17:38
  */
-class SharedHKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
-    IToolbarFragment<SettingsActivity>, StateLayoutMixin {
+class SharedHKeyframesFragment :
+    YenalyFragment<FragmentHKeyframesBinding>(),
+    IToolbarFragment<SettingsActivity>,
+    StateLayoutMixin {
 
     val viewModel by activityViewModels<SettingsViewModel>()
 
@@ -41,7 +43,7 @@ class SharedHKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentHKeyframesBinding {
         return FragmentHKeyframesBinding.inflate(inflater, container, false)
     }
@@ -77,20 +79,20 @@ class SharedHKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
                 }
             }
         }
-        binding.rvKeyframe.addOnScrollListener(object : OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                binding.btnUp.isEnabled = recyclerView.canScrollVertically(-1)
-                binding.btnDown.isEnabled = recyclerView.canScrollVertically(1)
+        binding.rvKeyframe.addOnScrollListener(
+            object : OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    binding.btnUp.isEnabled = recyclerView.canScrollVertically(-1)
+                    binding.btnDown.isEnabled = recyclerView.canScrollVertically(1)
+                }
             }
-        })
+        )
         adapter.setStateViewLayout(R.layout.layout_empty_view, getString(R.string.here_is_empty))
     }
 
     override fun bindDataObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAllSharedHKeyframes().collect {
-                adapter.submitList(it)
-            }
+            viewModel.loadAllSharedHKeyframes().collect { adapter.submitList(it) }
         }
     }
 

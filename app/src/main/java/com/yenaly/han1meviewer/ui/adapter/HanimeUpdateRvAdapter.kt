@@ -26,14 +26,12 @@ import com.yenaly.yenaly_libs.utils.logFieldsChange
 import java.lang.ref.WeakReference
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 17:05
  */
 class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
-    BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatingBinding>>(
-        COMPARATOR
-    ) {
+    BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatingBinding>>(COMPARATOR) {
 
     init {
         isStateViewEnable = true
@@ -48,36 +46,32 @@ class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
         private const val STATE = 1 shl 1
         private const val PROGRESS = 1 shl 2
 
-        val COMPARATOR = object : DiffUtil.ItemCallback<HUpdateEntity>() {
-            override fun areContentsTheSame(
-                oldItem: HUpdateEntity,
-                newItem: HUpdateEntity,
-            ): Boolean {
-                return oldItem == newItem
-            }
+        val COMPARATOR =
+            object : DiffUtil.ItemCallback<HUpdateEntity>() {
+                override fun areContentsTheSame(
+                    oldItem: HUpdateEntity,
+                    newItem: HUpdateEntity,
+                ): Boolean {
+                    return oldItem == newItem
+                }
 
-            override fun areItemsTheSame(
-                oldItem: HUpdateEntity,
-                newItem: HUpdateEntity,
-            ): Boolean {
-                return oldItem.id == newItem.id
-            }
+                override fun areItemsTheSame(
+                    oldItem: HUpdateEntity,
+                    newItem: HUpdateEntity,
+                ): Boolean {
+                    return oldItem.id == newItem.id
+                }
 
-            override fun getChangePayload(
-                oldItem: HUpdateEntity,
-                newItem: HUpdateEntity,
-            ): Any {
-                logFieldsChange(TAG, oldItem, newItem)
-                var bitset = 0
-                if (oldItem.downloadedLength != newItem.downloadedLength)
-                    bitset = bitset or DOWNLOADING
-                if (oldItem.state != newItem.state)
-                    bitset = bitset or STATE
-                if (oldItem.progress != newItem.progress)
-                    bitset = bitset or PROGRESS
-                return bitset
+                override fun getChangePayload(oldItem: HUpdateEntity, newItem: HUpdateEntity): Any {
+                    logFieldsChange(TAG, oldItem, newItem)
+                    var bitset = 0
+                    if (oldItem.downloadedLength != newItem.downloadedLength)
+                        bitset = bitset or DOWNLOADING
+                    if (oldItem.state != newItem.state) bitset = bitset or STATE
+                    if (oldItem.progress != newItem.progress) bitset = bitset or PROGRESS
+                    return bitset
+                }
             }
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -90,12 +84,8 @@ class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
         holder.binding.tvTitle.text = item.name
         Log.d(TAG, "调用 load")
         holder.itemView.post {
-            holder.binding.vCoverBg.updateLayoutParams {
-                height = holder.itemView.height
-            }
-            holder.binding.ivCoverBg.updateLayoutParams {
-                height = holder.itemView.height
-            }
+            holder.binding.vCoverBg.updateLayoutParams { height = holder.itemView.height }
+            holder.binding.ivCoverBg.updateLayoutParams { height = holder.itemView.height }
         }
         holder.binding.clProgress.post {
             holder.binding.vProgress.updateLayoutParams {
@@ -130,18 +120,20 @@ class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
             // 根据百分比，设置 vProgress 的宽度，比如 50% 就设置成 itemView 50% 的宽度
             val weakViewProgress = WeakReference(holder.binding.vProgress)
             ValueAnimator.ofInt(
-                holder.binding.vProgress.width,
-                holder.itemView.width * item.progress / 100
-            ).apply {
-                // must be less than HanimeDownloadWorker.RESPONSE_INTERVAL
-                duration = 300L.coerceAtMost(HanimeDownloadWorker.RESPONSE_INTERVAL)
-                interpolator = interpolator
-                addUpdateListener(fragment) {
-                    weakViewProgress.get()?.updateLayoutParams {
-                        width = it.animatedValue as Int
+                    holder.binding.vProgress.width,
+                    holder.itemView.width * item.progress / 100,
+                )
+                .apply {
+                    // must be less than HanimeDownloadWorker.RESPONSE_INTERVAL
+                    duration = 300L.coerceAtMost(HanimeDownloadWorker.RESPONSE_INTERVAL)
+                    interpolator = interpolator
+                    addUpdateListener(fragment) {
+                        weakViewProgress.get()?.updateLayoutParams {
+                            width = it.animatedValue as Int
+                        }
                     }
                 }
-            }.start()
+                .start()
         }
     }
 
@@ -151,57 +143,51 @@ class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
         viewType: Int,
     ): DataBindingHolder<ItemHanimeUpdatingBinding> {
         return DataBindingHolder(
-            ItemHanimeUpdatingBinding.inflate(
-                LayoutInflater.from(context), parent, false
+                ItemHanimeUpdatingBinding.inflate(LayoutInflater.from(context), parent, false)
             )
-        ).also { viewHolder ->
-            viewHolder.binding.btnStart.setOnClickListener {
-                val pos = viewHolder.bindingAdapterPosition
-                val item = getItem(pos) ?: return@setOnClickListener
-                if (item.isDownloading) {
-                    HUpdateWorker.stop()
-                } else {
-                    HUpdateWorker.resume()
-                }
-                viewHolder.binding.btnStart.handleStartButton(item, rotate = true)
-            }
-            viewHolder.binding.btnCancel.setOnClickListener {
-                val pos = viewHolder.bindingAdapterPosition
-                val item = getItem(pos) ?: return@setOnClickListener
-                context.showAlertDialog {
-                    setTitle(R.string.sure_to_delete)
-                    setMessage(
-                        context.getString(R.string.prepare_to_delete_s, item.name)
-                    )
-                    setPositiveButton(R.string.confirm) { _, _ ->
-                        HUpdateWorker.deleteUpdate(context)
+            .also { viewHolder ->
+                viewHolder.binding.btnStart.setOnClickListener {
+                    val pos = viewHolder.bindingAdapterPosition
+                    val item = getItem(pos) ?: return@setOnClickListener
+                    if (item.isDownloading) {
+                        HUpdateWorker.stop()
+                    } else {
+                        HUpdateWorker.resume()
                     }
-                    setNegativeButton(R.string.cancel, null)
+                    viewHolder.binding.btnStart.handleStartButton(item, rotate = true)
+                }
+                viewHolder.binding.btnCancel.setOnClickListener {
+                    val pos = viewHolder.bindingAdapterPosition
+                    val item = getItem(pos) ?: return@setOnClickListener
+                    context.showAlertDialog {
+                        setTitle(R.string.sure_to_delete)
+                        setMessage(context.getString(R.string.prepare_to_delete_s, item.name))
+                        setPositiveButton(R.string.confirm) { _, _ ->
+                            HUpdateWorker.deleteUpdate(context)
+                        }
+                        setNegativeButton(R.string.cancel, null)
+                    }
                 }
             }
-        }
     }
 
-
     @SuppressLint("SetTextI18n")
-    private fun MaterialButton.handleStartButton(
-        item: HUpdateEntity,
-        rotate: Boolean = false
-    ) {
-        val state = if (rotate) {
-            when (item.state) {
-                DownloadState.Unknown,
-                DownloadState.Queued,
-                DownloadState.Paused -> DownloadState.Downloading
+    private fun MaterialButton.handleStartButton(item: HUpdateEntity, rotate: Boolean = false) {
+        val state =
+            if (rotate) {
+                when (item.state) {
+                    DownloadState.Unknown,
+                    DownloadState.Queued,
+                    DownloadState.Paused -> DownloadState.Downloading
 
-                DownloadState.Downloading -> DownloadState.Paused
+                    DownloadState.Downloading -> DownloadState.Paused
 
-                DownloadState.Finished,
-                DownloadState.Failed -> DownloadState.Unknown
+                    DownloadState.Finished,
+                    DownloadState.Failed -> DownloadState.Unknown
+                }
+            } else {
+                item.state
             }
-        } else {
-            item.state
-        }
         when (state) {
             DownloadState.Queued -> {
                 setText(R.string.already_in_queue)
@@ -209,8 +195,8 @@ class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
             }
 
             DownloadState.Downloading -> {
-//                setText(R.string.pause)
-//                setIconResource(R.drawable.ic_baseline_pause_24)
+                //                setText(R.string.pause)
+                //                setIconResource(R.drawable.ic_baseline_pause_24)
                 text = "${item.progress}%"
                 setIconResource(R.drawable.ic_baseline_pause_24)
             }
@@ -225,7 +211,8 @@ class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
                 setIconResource(R.drawable.baseline_error_outline_24)
             }
 
-            DownloadState.Finished, DownloadState.Unknown -> {} // do nothing
+            DownloadState.Finished,
+            DownloadState.Unknown -> {} // do nothing
         }
     }
 }

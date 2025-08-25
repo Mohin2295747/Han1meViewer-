@@ -14,11 +14,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-/**
- * Created by luyao
- * on 2019/7/1 16:09
- */
-
+/** Created by luyao on 2019/7/1 16:09 */
 private const val KEY_ALGORITHM = "AES"
 private const val CIPHER_ALGORITHM_DEFAULT = "AES"
 const val AES_CFB_NOPADDING = "AES/CFB/NoPadding"
@@ -26,6 +22,7 @@ const val AES_ECB_NOPADDING = "AES/ECB/NoPadding"
 
 /**
  * Aes encrypt byte array
+ *
  * @param key the encryption key
  * @param iv the IV (CFB,CBC,CTR need IV)
  * @param algorithm the algorithm parameters
@@ -33,7 +30,7 @@ const val AES_ECB_NOPADDING = "AES/ECB/NoPadding"
 fun ByteArray.aesEncrypt(
     key: ByteArray,
     iv: ByteArray = ByteArray(16),
-    algorithm: String = AES_CFB_NOPADDING
+    algorithm: String = AES_CFB_NOPADDING,
 ): ByteArray {
     val cipher = initCipher(Cipher.ENCRYPT_MODE, key, iv, algorithm)
     return cipher.doFinal(this)
@@ -41,6 +38,7 @@ fun ByteArray.aesEncrypt(
 
 /**
  * Aes decrypt byte array
+ *
  * @param key the decryption key
  * @param iv the IV (CFB,CBC,CTR need IV)
  * @param algorithm the algorithm parameters
@@ -48,7 +46,7 @@ fun ByteArray.aesEncrypt(
 fun ByteArray.aesDecrypt(
     key: ByteArray,
     iv: ByteArray = ByteArray(16),
-    algorithm: String = AES_CFB_NOPADDING
+    algorithm: String = AES_CFB_NOPADDING,
 ): ByteArray {
     val cipher = initCipher(Cipher.DECRYPT_MODE, key, iv, algorithm)
     return cipher.doFinal(this)
@@ -56,6 +54,7 @@ fun ByteArray.aesDecrypt(
 
 /**
  * Aes encrypt file
+ *
  * @param key the encryption key
  * @param iv the IV (CFB,CBC,CTR need IV)
  * @param destFilePath dest encrypted file
@@ -65,13 +64,14 @@ fun File.aesEncrypt(
     key: ByteArray,
     iv: ByteArray,
     destFilePath: String,
-    algorithm: String = AES_CFB_NOPADDING
+    algorithm: String = AES_CFB_NOPADDING,
 ): File? {
     return handleFile(Cipher.ENCRYPT_MODE, key, iv, algorithm, path, destFilePath)
 }
 
 /**
  * Aes decrypt file
+ *
  * @param key the decryption key
  * @param iv the IV (CFB,CBC,CTR need IV)
  * @param destFilePath dest decrypted file
@@ -81,14 +81,12 @@ fun File.aesDecrypt(
     key: ByteArray,
     iv: ByteArray,
     destFilePath: String,
-    algorithm: String = AES_CFB_NOPADDING
+    algorithm: String = AES_CFB_NOPADDING,
 ): File? {
     return handleFile(Cipher.DECRYPT_MODE, key, iv, algorithm, path, destFilePath)
 }
 
-/**
- * Generate aes key byte array , default size is 128
- */
+/** Generate aes key byte array , default size is 128 */
 fun initAESKey(size: Int = 128): ByteArray {
     val kg = KeyGenerator.getInstance(KEY_ALGORITHM)
     kg.init(size)
@@ -99,6 +97,7 @@ private fun toKey(key: ByteArray): Key = SecretKeySpec(key, KEY_ALGORITHM)
 
 /**
  * Init Cipher
+ *
  * @param mode the operation mode of this cipher
  * @param key the encrypt/decrypt key
  * @param iv the IV
@@ -108,17 +107,18 @@ fun initCipher(
     mode: Int,
     key: ByteArray,
     iv: ByteArray = ByteArray(16),
-    algorithm: String
+    algorithm: String,
 ): Cipher {
     val k = toKey(key)
     val cipher = Cipher.getInstance(algorithm)
     val cipherAlgorithm = algorithm.uppercase(Locale.getDefault())
-    if (cipherAlgorithm.contains("CFB") || cipherAlgorithm.contains("CBC")
-        || cipherAlgorithm.contains("CTR")
+    if (
+        cipherAlgorithm.contains("CFB") ||
+            cipherAlgorithm.contains("CBC") ||
+            cipherAlgorithm.contains("CTR")
     )
         cipher.init(mode, k, IvParameterSpec(iv))
-    else
-        cipher.init(mode, k)
+    else cipher.init(mode, k)
     return cipher
 }
 
@@ -128,7 +128,7 @@ private fun handleFile(
     iv: ByteArray,
     cipherAlgorithm: String = AES_CFB_NOPADDING,
     sourceFilePath: String,
-    destFilePath: String
+    destFilePath: String,
 ): File? {
     val sourceFile = File(sourceFilePath)
     val destFile = File(destFilePath)
@@ -146,8 +146,7 @@ private fun handleFile(
         var read: Int
         do {
             read = cin.read(b)
-            if (read > 0)
-                outputStream.write(b, 0, read)
+            if (read > 0) outputStream.write(b, 0, read)
         } while (read > 0)
 
         outputStream.flush()

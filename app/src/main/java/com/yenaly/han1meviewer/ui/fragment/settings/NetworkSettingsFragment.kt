@@ -33,12 +33,12 @@ import com.yenaly.yenaly_libs.utils.showShortToast
 import com.yenaly.yenaly_libs.utils.unsafeLazy
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/03/10 010 18:30
  */
-class NetworkSettingsFragment : YenalySettingsFragment(R.xml.settings_network),
-    IToolbarFragment<SettingsActivity> {
+class NetworkSettingsFragment :
+    YenalySettingsFragment(R.xml.settings_network), IToolbarFragment<SettingsActivity> {
 
     companion object {
         const val PROXY = "proxy"
@@ -50,16 +50,11 @@ class NetworkSettingsFragment : YenalySettingsFragment(R.xml.settings_network),
         const val PING_TEST = "ping_test"
     }
 
-    private val proxy
-            by safePreference<Preference>(PROXY)
-    private val domainName
-            by safePreference<MaterialDialogPreference>(DOMAIN_NAME)
-    private val useBuiltInHosts
-            by safePreference<MaterialSwitchPreference>(USE_BUILT_IN_HOSTS)
+    private val proxy by safePreference<Preference>(PROXY)
+    private val domainName by safePreference<MaterialDialogPreference>(DOMAIN_NAME)
+    private val useBuiltInHosts by safePreference<MaterialSwitchPreference>(USE_BUILT_IN_HOSTS)
 
-    private val proxyDialog by unsafeLazy {
-        ProxyDialog(proxy, R.layout.dialog_proxy)
-    }
+    private val proxyDialog by unsafeLazy { ProxyDialog(proxy, R.layout.dialog_proxy) }
 
     override fun onStart() {
         super.onStart()
@@ -68,21 +63,23 @@ class NetworkSettingsFragment : YenalySettingsFragment(R.xml.settings_network),
 
     override fun onPreferencesCreated(savedInstanceState: Bundle?) {
         proxy.apply {
-            summary = generateProxySummary(
-                Preferences.proxyType,
-                Preferences.proxyIp,
-                Preferences.proxyPort
-            )
+            summary =
+                generateProxySummary(
+                    Preferences.proxyType,
+                    Preferences.proxyIp,
+                    Preferences.proxyPort,
+                )
             setOnPreferenceClickListener {
                 proxyDialog.show()
                 return@setOnPreferenceClickListener true
             }
         }
         domainName.apply {
-            entries = arrayOf(
-                "$HANIME_MAIN_HOSTNAME (${getString(R.string.default_)})",
-                "$HANIME_ALTER_HOSTNAME (${getString(R.string.alternative)})"
-            )
+            entries =
+                arrayOf(
+                    "$HANIME_MAIN_HOSTNAME (${getString(R.string.default_)})",
+                    "$HANIME_ALTER_HOSTNAME (${getString(R.string.alternative)})",
+                )
             entryValues = arrayOf(HANIME_MAIN_BASE_URL, HANIME_ALTER_BASE_URL)
             if (value == null) setValueIndex(0)
 
@@ -97,9 +94,7 @@ class NetworkSettingsFragment : YenalySettingsFragment(R.xml.settings_network),
                             logout()
                             ActivityManager.restart(killProcess = true)
                         }
-                        setNegativeButton(R.string.cancel) { _, _ ->
-                            domainName.value = origin
-                        }
+                        setNegativeButton(R.string.cancel) { _, _ -> domainName.value = origin }
                     }
                 }
                 return@setOnPreferenceChangeListener true
@@ -145,13 +140,17 @@ class NetworkSettingsFragment : YenalySettingsFragment(R.xml.settings_network),
             etIp = view.findViewById(R.id.et_ip)
             etPort = view.findViewById(R.id.et_port)
             initView()
-            dialog = proxyPref.context.createAlertDialog {
-                setView(view)
-                setCancelable(false)
-                setTitle(R.string.proxy)
-                setPositiveButton(R.string.confirm, null) // Set to null. We override the onclick.
-                setNegativeButton(R.string.cancel, null)
-            }
+            dialog =
+                proxyPref.context.createAlertDialog {
+                    setView(view)
+                    setCancelable(false)
+                    setTitle(R.string.proxy)
+                    setPositiveButton(
+                        R.string.confirm,
+                        null,
+                    ) // Set to null. We override the onclick.
+                    setNegativeButton(R.string.cancel, null)
+                }
             dialog.setOnShowListener {
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                     val ip = etIp.text?.toString().orEmpty()
@@ -197,18 +196,21 @@ class NetworkSettingsFragment : YenalySettingsFragment(R.xml.settings_network),
         }
 
         private val proxyType: Int
-            get() = when (cgTypes.checkedChipId) {
-                R.id.chip_direct -> HProxySelector.TYPE_DIRECT
-                R.id.chip_system_proxy -> HProxySelector.TYPE_SYSTEM
-                R.id.chip_http -> HProxySelector.TYPE_HTTP
-                R.id.chip_socks -> HProxySelector.TYPE_SOCKS
-                else -> HProxySelector.TYPE_DIRECT
-            }
+            get() =
+                when (cgTypes.checkedChipId) {
+                    R.id.chip_direct -> HProxySelector.TYPE_DIRECT
+                    R.id.chip_system_proxy -> HProxySelector.TYPE_SYSTEM
+                    R.id.chip_http -> HProxySelector.TYPE_HTTP
+                    R.id.chip_socks -> HProxySelector.TYPE_SOCKS
+                    else -> HProxySelector.TYPE_DIRECT
+                }
 
         private fun checkValid(ip: String, port: Int): Boolean {
             return when (proxyType) {
-                HProxySelector.TYPE_DIRECT, HProxySelector.TYPE_SYSTEM -> true
-                HProxySelector.TYPE_HTTP, HProxySelector.TYPE_SOCKS -> {
+                HProxySelector.TYPE_DIRECT,
+                HProxySelector.TYPE_SYSTEM -> true
+                HProxySelector.TYPE_HTTP,
+                HProxySelector.TYPE_SOCKS -> {
                     HProxySelector.validateIp(ip) && HProxySelector.validatePort(port)
                 }
 

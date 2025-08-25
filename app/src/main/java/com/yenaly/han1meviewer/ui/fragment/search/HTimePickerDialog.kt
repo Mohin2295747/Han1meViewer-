@@ -2,7 +2,6 @@ package com.yenaly.han1meviewer.ui.fragment.search
 
 import android.content.Context
 import android.content.DialogInterface
-import android.util.Log
 import android.view.View
 import android.widget.NumberPicker
 import android.widget.TextView
@@ -14,21 +13,14 @@ import com.yenaly.han1meviewer.util.createAlertDialog
 import com.yenaly.han1meviewer.util.showWithBlurEffect
 import java.util.Calendar
 
-
-
-class HTimePickerDialog(
-    val context: Context,
-    @StringRes private val titleRes: Int,
-)
-{
+class HTimePickerDialog(val context: Context, @StringRes private val titleRes: Int) {
     enum class Mode {
-        YMD, YM, Y
+        YMD,
+        YM,
+        Y,
     }
-    data class DateSelection(
-        val year: Int? = null,
-        val month: Int? = null,
-        val day: Int? = null
-    )
+
+    data class DateSelection(val year: Int? = null, val month: Int? = null, val day: Int? = null)
 
     private val coreView = View.inflate(context, R.layout.pop_up_hanime_time_picker, null)
 
@@ -50,31 +42,29 @@ class HTimePickerDialog(
     private var oldMode: Mode = Mode.YMD
     private var mode: Mode = Mode.YMD
 
-    private val dialog = context.createAlertDialog {
-        setTitle(titleRes)
-        setPositiveButton(R.string.save) {_, _ ->
-            var date = when (mode) {
-                Mode.YMD -> DateSelection(
-                    year = yearPicker.value,
-                    month = monthPicker.value,
-                    day = dayPicker.value
-                )
-                Mode.YM -> DateSelection(
-                    year = yearPicker.value,
-                    month = monthPicker.value
-                )
-                Mode.Y -> DateSelection(
-                    year = yearPicker.value
-                )
+    private val dialog =
+        context.createAlertDialog {
+            setTitle(titleRes)
+            setPositiveButton(R.string.save) { _, _ ->
+                var date =
+                    when (mode) {
+                        Mode.YMD ->
+                            DateSelection(
+                                year = yearPicker.value,
+                                month = monthPicker.value,
+                                day = dayPicker.value,
+                            )
+                        Mode.YM -> DateSelection(year = yearPicker.value, month = monthPicker.value)
+                        Mode.Y -> DateSelection(year = yearPicker.value)
+                    }
+                onSave?.invoke(date)
             }
-            onSave?.invoke(date)
+            setNeutralButton(R.string.reset) { _, _ ->
+                var date = DateSelection()
+                onReset?.invoke(date)
+            }
+            setView(coreView)
         }
-        setNeutralButton(R.string.reset) { _, _ ->
-            var date = DateSelection()
-            onReset?.invoke(date)
-        }
-        setView(coreView)
-    }
 
     init {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
@@ -163,8 +153,6 @@ class HTimePickerDialog(
     }
 
     fun show() {
-        dialog.showWithBlurEffect({
-            onDismiss?.onDismiss(it)
-        })
+        dialog.showWithBlurEffect({ onDismiss?.onDismiss(it) })
     }
 }

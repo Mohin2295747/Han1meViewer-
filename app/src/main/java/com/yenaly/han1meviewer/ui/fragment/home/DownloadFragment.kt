@@ -18,12 +18,12 @@ import com.yenaly.yenaly_libs.utils.view.setUpFragmentStateAdapter
 /**
  * 下载影片总Fragment，暫時由[DownloadedFragment]全權托管
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/08/01 001 17:44
  */
-class DownloadFragment : YenalyFragment<FragmentTabViewPagerOnlyBinding>(),
-    IToolbarFragment<MainActivity> {
+class DownloadFragment :
+    YenalyFragment<FragmentTabViewPagerOnlyBinding>(), IToolbarFragment<MainActivity> {
 
     val viewModel by activityViewModels<DownloadViewModel>()
 
@@ -31,7 +31,7 @@ class DownloadFragment : YenalyFragment<FragmentTabViewPagerOnlyBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentTabViewPagerOnlyBinding {
         return FragmentTabViewPagerOnlyBinding.inflate(inflater, container, false)
     }

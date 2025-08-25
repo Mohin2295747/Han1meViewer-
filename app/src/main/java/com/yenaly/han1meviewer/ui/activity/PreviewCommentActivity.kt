@@ -19,8 +19,8 @@ import com.yenaly.yenaly_libs.utils.makeBundle
 import com.yenaly.yenaly_libs.utils.safeIntentExtra
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/06/28 028 12:03
  */
 class PreviewCommentActivity : YenalyActivity<ActivityPreviewCommentBinding>() {
@@ -36,15 +36,13 @@ class PreviewCommentActivity : YenalyActivity<ActivityPreviewCommentBinding>() {
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
     override fun initData(savedInstanceState: Bundle?) {
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
         supportActionBar?.let {
             it.setDisplayHomeAsUpEnabled(true)
             it.setHomeActionContentDescription(R.string.back)
@@ -55,11 +53,11 @@ class PreviewCommentActivity : YenalyActivity<ActivityPreviewCommentBinding>() {
 
         PreviewCommentPrefetcher.here().tag(PreviewCommentPrefetcher.Scope.PREVIEW_COMMENT_ACTIVITY)
 
-        val commentFragment =
-            CommentFragment().makeBundle(COMMENT_TYPE to PREVIEW_COMMENT_PREFIX)
-        supportFragmentManager.beginTransaction().apply {
-            add(R.id.fcv_pre_comment, commentFragment)
-        }.commit()
+        val commentFragment = CommentFragment().makeBundle(COMMENT_TYPE to PREVIEW_COMMENT_PREFIX)
+        supportFragmentManager
+            .beginTransaction()
+            .apply { add(R.id.fcv_pre_comment, commentFragment) }
+            .commit()
     }
 
     override fun onDestroy() {

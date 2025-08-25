@@ -8,8 +8,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/04/05 005 20:44
  */
 abstract class BaseSingleDifferAdapter<T : Any, VH : RecyclerView.ViewHolder> :
@@ -17,13 +17,14 @@ abstract class BaseSingleDifferAdapter<T : Any, VH : RecyclerView.ViewHolder> :
 
     private constructor(config: AsyncDifferConfig<T>, items: List<T>) : super(config, items)
 
-    constructor(diffCallback: DiffUtil.ItemCallback<T>) : this(
-        AsyncDifferConfig.Builder(diffCallback).build(), emptyList()
-    )
+    constructor(
+        diffCallback: DiffUtil.ItemCallback<T>
+    ) : this(AsyncDifferConfig.Builder(diffCallback).build(), emptyList())
 
-    constructor(diffCallback: DiffUtil.ItemCallback<T>, item: T) : this(
-        AsyncDifferConfig.Builder(diffCallback).build(), listOf(item)
-    )
+    constructor(
+        diffCallback: DiffUtil.ItemCallback<T>,
+        item: T,
+    ) : this(AsyncDifferConfig.Builder(diffCallback).build(), listOf(item))
 
     constructor(config: AsyncDifferConfig<T>) : this(config, emptyList())
 
@@ -37,9 +38,7 @@ abstract class BaseSingleDifferAdapter<T : Any, VH : RecyclerView.ViewHolder> :
 
     suspend fun submit(item: T?) = suspendCoroutine { cont ->
         val list = item?.let(::listOf).orEmpty()
-        submitList(list) {
-            cont.resume(Unit)
-        }
+        submitList(list) { cont.resume(Unit) }
     }
 
     protected abstract fun onBindViewHolder(holder: VH, item: T?)

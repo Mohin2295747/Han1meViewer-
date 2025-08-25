@@ -15,8 +15,8 @@ import com.yenaly.yenaly_libs.utils.activity
 /**
  * A mediator to link a BottomNavigationView with a ViewPager2. For FragmentActivity only!
  *
- * Instantiating a BottomNavigationViewMediator will only create the mediator object,
- * you must call [attach] on it first to link the BottomNavigationView and the ViewPager2 together.
+ * Instantiating a BottomNavigationViewMediator will only create the mediator object, you must call
+ * [attach] on it first to link the BottomNavigationView and the ViewPager2 together.
  *
  * @param fragmentActivity (optional)
  * @param bottomNavigationView
@@ -24,19 +24,20 @@ import com.yenaly.yenaly_libs.utils.activity
  * @param itemIdWithFragmentList fragment item id with fragment list
  * @param slide if ViewPager2 needs to slide
  * @param smoothScroll if ViewPager2 scrolls smoothly when BottomNavView is selected
- *
  * @author Yenaly Liew
  * @Time : 2022/06/03 003 11:21
  * @Description : Description...
  */
 @Suppress("unused")
-class BottomNavigationViewMediator @JvmOverloads constructor(
+class BottomNavigationViewMediator
+@JvmOverloads
+constructor(
     private val fragmentActivity: FragmentActivity,
     private val bottomNavigationView: BottomNavigationView,
     private val viewPager2: ViewPager2,
     private val itemIdWithFragmentList: List<Pair<Int, Fragment>>,
     var slide: Boolean = true,
-    var smoothScroll: Boolean = true
+    var smoothScroll: Boolean = true,
 ) {
 
     var currentFragment: Fragment? = null
@@ -47,11 +48,10 @@ class BottomNavigationViewMediator @JvmOverloads constructor(
     private val fragmentList = itemIdWithFragmentList.map { it.second }
 
     // 将list存到SparseArray里，方便后续直接通过itemId拿Fragment
-    private val itemIdWithIndexMap = SparseIntArray().also { map ->
-        itemIdWithFragmentList.forEachIndexed { index, pair ->
-            map[pair.first] = index
+    private val itemIdWithIndexMap =
+        SparseIntArray().also { map ->
+            itemIdWithFragmentList.forEachIndexed { index, pair -> map[pair.first] = index }
         }
-    }
 
     private var attached = false
     private var viewPager2Adapter: RecyclerView.Adapter<*>? = null
@@ -65,7 +65,7 @@ class BottomNavigationViewMediator @JvmOverloads constructor(
         viewPager2: ViewPager2,
         itemIdWithFragmentList: List<Pair<Int, Fragment>>,
         slide: Boolean = true,
-        smoothScroll: Boolean = true
+        smoothScroll: Boolean = true,
     ) : this(
         viewPager2.context.activity as? FragmentActivity
             ?: throw IllegalStateException("context cannot be cast to FragmentActivity!"),
@@ -73,7 +73,7 @@ class BottomNavigationViewMediator @JvmOverloads constructor(
         viewPager2,
         itemIdWithFragmentList,
         slide,
-        smoothScroll
+        smoothScroll,
     )
 
     fun attach(): BottomNavigationViewMediator {
@@ -83,34 +83,37 @@ class BottomNavigationViewMediator @JvmOverloads constructor(
         if (itemIdWithFragmentList.isEmpty()) {
             throw IllegalStateException("fragment list could not be empty!")
         }
-        viewPager2Adapter = object : FragmentStateAdapter(fragmentActivity) {
-            override fun getItemCount(): Int {
-                return itemIdWithFragmentList.size
-            }
+        viewPager2Adapter =
+            object : FragmentStateAdapter(fragmentActivity) {
+                override fun getItemCount(): Int {
+                    return itemIdWithFragmentList.size
+                }
 
-            override fun createFragment(position: Int): Fragment {
-                val softCopyFragmentList: MutableList<Fragment> = ArrayList(fragmentList)
-                return softCopyFragmentList[position]
+                override fun createFragment(position: Int): Fragment {
+                    val softCopyFragmentList: MutableList<Fragment> = ArrayList(fragmentList)
+                    return softCopyFragmentList[position]
+                }
             }
-        }
         attached = true
 
-        onItemSelectedListener = NavigationBarView.OnItemSelectedListener { item ->
-            val currentItem = itemIdWithIndexMap[item.itemId]
-            viewPager2.setCurrentItem(currentItem, smoothScroll)
-            currentFragment = itemIdWithFragmentList[currentItem].second
-            // listener?.onFragmentSelected(itemIdWithFragmentList[currentItem].second)
-            true
-        }
-        onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                val currentItem = itemIdWithFragmentList[position]
-                bottomNavigationView.selectedItemId = currentItem.first
-                currentFragment = currentItem.second
-                listener?.onFragmentChanged(currentItem.second)
+        onItemSelectedListener =
+            NavigationBarView.OnItemSelectedListener { item ->
+                val currentItem = itemIdWithIndexMap[item.itemId]
+                viewPager2.setCurrentItem(currentItem, smoothScroll)
+                currentFragment = itemIdWithFragmentList[currentItem].second
+                // listener?.onFragmentSelected(itemIdWithFragmentList[currentItem].second)
+                true
             }
-        }
+        onPageChangeCallback =
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    val currentItem = itemIdWithFragmentList[position]
+                    bottomNavigationView.selectedItemId = currentItem.first
+                    currentFragment = currentItem.second
+                    listener?.onFragmentChanged(currentItem.second)
+                }
+            }
 
         viewPager2.isUserInputEnabled = slide
         viewPager2.adapter = viewPager2Adapter
@@ -140,8 +143,8 @@ class BottomNavigationViewMediator @JvmOverloads constructor(
     }
 
     /**
-     * Set on a callback interface that is optionally
-     * implemented to listen the latest selected fragment.
+     * Set on a callback interface that is optionally implemented to listen the latest selected
+     * fragment.
      */
     fun setOnFragmentChangedListener(listener: OnFragmentChangedListener) {
         this.listener = listener

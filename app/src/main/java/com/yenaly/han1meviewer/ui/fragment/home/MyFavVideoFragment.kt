@@ -29,12 +29,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/04 004 22:43
  */
-class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
-    IToolbarFragment<MainActivity>, LoginNeededFragmentMixin, StateLayoutMixin {
+class MyFavVideoFragment :
+    YenalyFragment<FragmentPageListBinding>(),
+    IToolbarFragment<MainActivity>,
+    LoginNeededFragmentMixin,
+    StateLayoutMixin {
 
     val viewModel by activityViewModels<MyListViewModel>()
 
@@ -48,7 +51,7 @@ class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentPageListBinding {
         return FragmentPageListBinding.inflate(inflater, container, false)
     }
@@ -78,12 +81,8 @@ class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
         }
 
         binding.srlPageList.apply {
-            setOnLoadMoreListener {
-                getMyFavVideo()
-            }
-            setOnRefreshListener {
-                getNewMyFavVideo()
-            }
+            setOnLoadMoreListener { getMyFavVideo() }
+            setOnRefreshListener { getNewMyFavVideo() }
             setDisableContentWhenRefresh(true)
         }
     }
@@ -103,12 +102,14 @@ class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
 
                         is PageLoadingState.Loading -> {
                             adapter.stateView = null
-                            if (viewModel.fav.favVideoFlow.value.isEmpty()) binding.srlPageList.autoRefresh()
+                            if (viewModel.fav.favVideoFlow.value.isEmpty())
+                                binding.srlPageList.autoRefresh()
                         }
 
                         is PageLoadingState.NoMoreData -> {
                             binding.srlPageList.finishLoadMoreWithNoMoreData()
-                            if (viewModel.fav.favVideoFlow.value.isEmpty()) binding.state.showEmpty()
+                            if (viewModel.fav.favVideoFlow.value.isEmpty())
+                                binding.state.showEmpty()
                         }
 
                         is PageLoadingState.Success -> {
@@ -124,9 +125,7 @@ class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.fav.favVideoFlow.collectLatest {
-                    adapter.submitList(it)
-                }
+                viewModel.fav.favVideoFlow.collectLatest { adapter.submitList(it) }
             }
         }
 
@@ -138,8 +137,7 @@ class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
                         state.throwable.printStackTrace()
                     }
 
-                    is WebsiteState.Loading -> {
-                    }
+                    is WebsiteState.Loading -> {}
 
                     is WebsiteState.Success -> {
                         showShortToast(R.string.delete_success)
@@ -169,10 +167,8 @@ class MyFavVideoFragment : YenalyFragment<FragmentPageListBinding>(),
         val toolbar = this@MyFavVideoFragment.binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setSubtitle(R.string.fav_video)
-        this@MyFavVideoFragment.addMenu(
-            R.menu.menu_my_list_toolbar,
-            viewLifecycleOwner
-        ) { menuItem ->
+        this@MyFavVideoFragment.addMenu(R.menu.menu_my_list_toolbar, viewLifecycleOwner) { menuItem
+            ->
             when (menuItem.itemId) {
                 R.id.tb_help -> {
                     requireContext().showAlertDialog {

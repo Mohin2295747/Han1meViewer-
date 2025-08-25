@@ -13,10 +13,7 @@ typealias NewFragment = () -> Fragment
 inline val ViewPager2.innerRecyclerView
     get() = this[0] as? RecyclerView
 
-/**
- * 如果直接给ViewPager2设置overScrollMode会无效，
- * 这种方式能设置有效的overScrollMode
- */
+/** 如果直接给ViewPager2设置overScrollMode会无效， 这种方式能设置有效的overScrollMode */
 inline var ViewPager2.realOverScrollMode: Int
     get() {
         return innerRecyclerView?.overScrollMode ?: -1
@@ -25,9 +22,7 @@ inline var ViewPager2.realOverScrollMode: Int
         innerRecyclerView?.overScrollMode = value
     }
 
-/**
- * ViewPager2快速設置FragmentStateAdapter，這裏作用域為FragmentActivity
- */
+/** ViewPager2快速設置FragmentStateAdapter，這裏作用域為FragmentActivity */
 inline fun ViewPager2.setUpFragmentStateAdapter(
     fragmentActivity: FragmentActivity,
     crossinline addAction: SimpleFragmentStateAdapter.() -> Unit,
@@ -35,9 +30,7 @@ inline fun ViewPager2.setUpFragmentStateAdapter(
     adapter = SimpleFragmentStateAdapter(fragmentActivity).apply(addAction)
 }
 
-/**
- * ViewPager2快速設置FragmentStateAdapter，這裏作用域為Fragment
- */
+/** ViewPager2快速設置FragmentStateAdapter，這裏作用域為Fragment */
 inline fun ViewPager2.setUpFragmentStateAdapter(
     fragment: Fragment,
     crossinline addAction: SimpleFragmentStateAdapter.() -> Unit,

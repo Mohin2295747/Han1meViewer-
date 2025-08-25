@@ -5,7 +5,7 @@ import androidx.preference.SeekBarPreference
 fun SeekBarPreference.setSummaryConverter(
     defValue: Int,
     converter: (Int) -> CharSequence?,
-    action: ((Int) -> Unit)? = null
+    action: ((Int) -> Unit)? = null,
 ) {
     setDefaultValue(defValue)
     summary = converter(value)

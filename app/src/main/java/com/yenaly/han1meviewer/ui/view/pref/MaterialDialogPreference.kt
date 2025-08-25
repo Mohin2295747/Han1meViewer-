@@ -8,20 +8,15 @@ import com.yenaly.han1meviewer.util.getDialogDefaultDrawable
 import com.yenaly.han1meviewer.util.showWithBlurEffect
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/03/06 006 22:37
  */
 class MaterialDialogPreference : ListPreference {
 
-    constructor(
-        context: Context,
-    ) : this(context, null)
+    constructor(context: Context) : this(context, null)
 
-    constructor(
-        context: Context,
-        attrs: AttributeSet?,
-    ) : super(context, attrs) {
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         dialog = MaterialAlertDialogBuilder(context)
     }
 

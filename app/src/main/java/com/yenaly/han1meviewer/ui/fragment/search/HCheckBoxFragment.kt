@@ -29,32 +29,29 @@ class HCheckBoxFragment : FrameFragment() {
             scopeNameRes: Int,
             items: List<SearchOption>,
             spanCount: Int = DEF_SPAN_COUNT,
-        ) = HCheckBoxFragment().makeBundle(
-            SCOPE_NAME_RES to scopeNameRes,
-            ITEMS to items,
-            SPAN_COUNT to spanCount
-        )
+        ) =
+            HCheckBoxFragment()
+                .makeBundle(SCOPE_NAME_RES to scopeNameRes, ITEMS to items, SPAN_COUNT to spanCount)
     }
 
     val scopeNameRes by arguments(SCOPE_NAME_RES, UNKNOWN_ADAPTER)
     val items by arguments(ITEMS, emptyList<SearchOption>())
     val spanCount by arguments(SPAN_COUNT, DEF_SPAN_COUNT)
 
-    val adapter by unsafeLazy {
-        HMultiChoicesDialog.adapterMap?.get(scopeNameRes)
-    }
+    val adapter by unsafeLazy { HMultiChoicesDialog.adapterMap?.get(scopeNameRes) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val rv = inflater.inflate(R.layout.layout_rv_scrollbars, container, false) as RecyclerView
         rv.apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
+            layoutParams =
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                )
 
             isVerticalScrollBarEnabled = true
 

@@ -1,16 +1,16 @@
 package com.yenaly.han1meviewer.util
 
 import com.google.common.util.concurrent.ListenableFuture
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
 
 suspend fun <R> ListenableFuture<R>.await(): R {
     // Fast path
@@ -36,30 +36,28 @@ suspend fun <R> ListenableFuture<R>.await(): R {
                     }
                 }
             },
-            DirectExecutor
+            DirectExecutor,
         )
 
-        cancellableContinuation.invokeOnCancellation {
-            cancel(false)
-        }
+        cancellableContinuation.invokeOnCancellation { cancel(false) }
     }
 }
 
-/**
- * Suspend extension that allows suspend [Call] inside coroutine.
- */
+/** Suspend extension that allows suspend [Call] inside coroutine. */
 suspend fun Call.await(): Response {
     return suspendCancellableCoroutine { continuation ->
-        enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                if (continuation.isCancelled) return
-                continuation.resumeWithException(e)
-            }
+        enqueue(
+            object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    if (continuation.isCancelled) return
+                    continuation.resumeWithException(e)
+                }
 
-            override fun onResponse(call: Call, response: Response) {
-                continuation.resume(response)
+                override fun onResponse(call: Call, response: Response) {
+                    continuation.resume(response)
+                }
             }
-        })
+        )
         continuation.invokeOnCancellation { cancel() }
     }
 }

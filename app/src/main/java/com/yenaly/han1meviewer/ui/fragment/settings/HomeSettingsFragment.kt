@@ -5,8 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import androidx.annotation.RequiresApi
@@ -34,11 +32,11 @@ import com.yenaly.han1meviewer.ui.fragment.IToolbarFragment
 import com.yenaly.han1meviewer.ui.view.pref.HPrivacyPreference
 import com.yenaly.han1meviewer.ui.view.pref.MaterialDialogPreference
 import com.yenaly.han1meviewer.ui.viewmodel.AppViewModel
+import com.yenaly.han1meviewer.util.TranslationCache
 import com.yenaly.han1meviewer.util.setSummaryConverter
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.han1meviewer.util.showUpdateDialog
 import com.yenaly.han1meviewer.util.showWithBlurEffect
-import com.yenaly.han1meviewer.util.TranslationCache
 import com.yenaly.yenaly_libs.ActivityManager
 import com.yenaly.yenaly_libs.base.settings.YenalySettingsFragment
 import com.yenaly.yenaly_libs.utils.browse
@@ -56,12 +54,12 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/01 001 14:25
  */
-class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
-    IToolbarFragment<SettingsActivity> {
+class HomeSettingsFragment :
+    YenalySettingsFragment(R.xml.settings_home), IToolbarFragment<SettingsActivity> {
 
     companion object {
         const val VIDEO_LANGUAGE = "video_language"
@@ -86,39 +84,24 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
         const val ALLOW_PIP = "allow_pip"
     }
 
-    private val videoLanguage
-            by safePreference<MaterialDialogPreference>(VIDEO_LANGUAGE)
-    private val playerSettings
-            by safePreference<Preference>(PLAYER_SETTINGS)
-    private val hKeyframeSettings
-            by safePreference<Preference>(H_KEYFRAME_SETTINGS)
-    private val downloadSettings
-            by safePreference<Preference>(DOWNLOAD_SETTINGS)
-    private val update
-            by safePreference<Preference>(UPDATE)
-    private val useCIUpdateChannel
-            by safePreference<SwitchPreferenceCompat>(USE_CI_UPDATE_CHANNEL)
-    private val updatePopupIntervalDays
-            by safePreference<SeekBarPreference>(UPDATE_POPUP_INTERVAL_DAYS)
-    private val about
-            by safePreference<Preference>(ABOUT)
-    private val clearCache
-            by safePreference<Preference>(CLEAR_CACHE)
-    private val translationCache
-        by safePreference<Preference>(TRANSLATION_CACHE)
-    private val submitBug
-            by safePreference<Preference>(SUBMIT_BUG)
-    private val forum
-            by safePreference<Preference>(FORUM)
-    private val networkSettings
-            by safePreference<Preference>(NETWORK_SETTINGS)
-    private val applyDeepLinks
-            by safePreference<Preference>(APPLY_DEEP_LINKS)
-    private val useAnalytics
-            by safePreference<HPrivacyPreference>(USE_ANALYTICS)
+    private val videoLanguage by safePreference<MaterialDialogPreference>(VIDEO_LANGUAGE)
+    private val playerSettings by safePreference<Preference>(PLAYER_SETTINGS)
+    private val hKeyframeSettings by safePreference<Preference>(H_KEYFRAME_SETTINGS)
+    private val downloadSettings by safePreference<Preference>(DOWNLOAD_SETTINGS)
+    private val update by safePreference<Preference>(UPDATE)
+    private val useCIUpdateChannel by safePreference<SwitchPreferenceCompat>(USE_CI_UPDATE_CHANNEL)
+    private val updatePopupIntervalDays by
+        safePreference<SeekBarPreference>(UPDATE_POPUP_INTERVAL_DAYS)
+    private val about by safePreference<Preference>(ABOUT)
+    private val clearCache by safePreference<Preference>(CLEAR_CACHE)
+    private val translationCache by safePreference<Preference>(TRANSLATION_CACHE)
+    private val submitBug by safePreference<Preference>(SUBMIT_BUG)
+    private val forum by safePreference<Preference>(FORUM)
+    private val networkSettings by safePreference<Preference>(NETWORK_SETTINGS)
+    private val applyDeepLinks by safePreference<Preference>(APPLY_DEEP_LINKS)
+    private val useAnalytics by safePreference<HPrivacyPreference>(USE_ANALYTICS)
 
-    private val allowPIP
-            by safePreference<SwitchPreferenceCompat>(ALLOW_PIP)
+    private val allowPIP by safePreference<SwitchPreferenceCompat>(ALLOW_PIP)
 
     private var checkUpdateTimes = 0
 
@@ -131,10 +114,11 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
         videoLanguage.apply {
 
             // 從 xml 轉移至此
-            entries = arrayOf(
-                getString(R.string.traditional_chinese),
-                getString(R.string.simplified_chinese)
-            )
+            entries =
+                arrayOf(
+                    getString(R.string.traditional_chinese),
+                    getString(R.string.simplified_chinese),
+                )
             entryValues = arrayOf("zh-CHT", "zh-CHS")
             // 不能直接用 defaultValue 设置，没效果
             if (value == null) setValueIndex(0)
@@ -147,7 +131,7 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
                         setMessage(
                             getString(
                                 R.string.restart_or_not_working,
-                                getString(R.string.video_language)
+                                getString(R.string.video_language),
                             )
                         )
                         setPositiveButton(R.string.confirm) { _, _ ->
@@ -285,11 +269,12 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
             setOnPreferenceChangeListener { preference, newValue ->
                 val enabled = newValue as Boolean
                 if (enabled) {
-                    val hasPip = context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+                    val hasPip =
+                        context.packageManager.hasSystemFeature(
+                            PackageManager.FEATURE_PICTURE_IN_PICTURE
+                        )
 
-                    preference.sharedPreferences?.edit {
-                        putBoolean(preference.key, hasPip)
-                    }
+                    preference.sharedPreferences?.edit { putBoolean(preference.key, hasPip) }
 
                     if (preference is SwitchPreferenceCompat) {
                         preference.isChecked = hasPip
@@ -360,13 +345,15 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
                 // #issue-197: 有些手机不支持直接从应用里跳转到深层链接界面
                 // 这个权限是一个系统级权限，所以没办法，不支持的手机只能自己找地方开了。
                 try {
-                    val intent = Intent().apply {
-                        action = Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
-                        addCategory(Intent.CATEGORY_DEFAULT)
-                        data = "package:${context.packageName}".toUri()
-                        flags = Intent.FLAG_ACTIVITY_NO_HISTORY or
-                                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    }
+                    val intent =
+                        Intent().apply {
+                            action = Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
+                            addCategory(Intent.CATEGORY_DEFAULT)
+                            data = "package:${context.packageName}".toUri()
+                            flags =
+                                Intent.FLAG_ACTIVITY_NO_HISTORY or
+                                    Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                        }
                     requireActivity().startActivity(intent)
                 } catch (e: Exception) {
                     // 竟然还有手机不支持打开的
@@ -391,13 +378,13 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
 
     private fun generateClearCacheSummary(size: Long): CharSequence {
         return getString(R.string.cache_usage_summary, size.formatFileSizeV2()).parseAsHtml()
-//        return spannable {
-//            size.formatFileSizeV2().span {
-//                style(Typeface.BOLD)
-//            }
-//            " ".text()
-//            getString(R.string.cache_occupy).text()
-//        }
+        //        return spannable {
+        //            size.formatFileSizeV2().span {
+        //                style(Typeface.BOLD)
+        //            }
+        //            " ".text()
+        //            getString(R.string.cache_occupy).text()
+        //        }
     }
 
     private fun generateTranslationCacheSummary(): CharSequence {
@@ -405,19 +392,19 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
         return getString(R.string.pref_translation_cache_summary, usedMB)
     }
 
-
     private fun toIntervalDaysPrettyString(value: Int): String {
         val lastUpdatePopupTime = Preferences.lastUpdatePopupTime
-        val msg = if (lastUpdatePopupTime == 0L) {
-            getString(R.string.no_update_popup_yet)
-        } else {
-            getString(
-                R.string.last_update_popup_check_time,
-                Instant.fromEpochSeconds(Preferences.lastUpdatePopupTime)
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .format(LocalDateTime.Formats.ISO)
-            )
-        }
+        val msg =
+            if (lastUpdatePopupTime == 0L) {
+                getString(R.string.no_update_popup_yet)
+            } else {
+                getString(
+                    R.string.last_update_popup_check_time,
+                    Instant.fromEpochSeconds(Preferences.lastUpdatePopupTime)
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .format(LocalDateTime.Formats.ISO),
+                )
+            }
         return when (value) {
             0 -> getString(R.string.at_any_time)
             else -> getString(R.string.which_days, value)

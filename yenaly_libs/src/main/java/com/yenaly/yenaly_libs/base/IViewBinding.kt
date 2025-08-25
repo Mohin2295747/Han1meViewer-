@@ -9,5 +9,4 @@ interface IViewBinding<DB : ViewDataBinding> {
     val binding: DB
 
     fun getViewBinding(inflater: LayoutInflater, container: ViewGroup?): DB
-
 }

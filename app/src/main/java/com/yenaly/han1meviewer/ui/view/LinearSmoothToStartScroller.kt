@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 /**
  * https://stackoverflow.com/questions/31235183
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/04/04 004 17:49
  */
 class LinearSmoothToStartScroller(context: Context?) : LinearSmoothScroller(context) {

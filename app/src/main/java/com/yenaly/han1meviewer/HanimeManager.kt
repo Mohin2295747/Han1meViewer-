@@ -8,17 +8,15 @@ import com.yenaly.han1meviewer.logic.network.HCookieJar
 import com.yenaly.han1meviewer.util.CookieString
 import kotlinx.serialization.json.Json
 
-@JvmField
-val HJson = Json {
-    ignoreUnknownKeys = true
-}
+@JvmField val HJson = Json { ignoreUnknownKeys = true }
 
 /**
  * 给用户显示的错误信息
  *
  * ぴえん化
  */
-val Throwable.pienization: CharSequence get() = "🥺\n$localizedMessage"
+val Throwable.pienization: CharSequence
+    get() = "🥺\n$localizedMessage"
 
 // base
 
@@ -27,25 +25,18 @@ private const val HANIME_TITLE_HTML =
 
 val hanimeSpannedTitle = HANIME_TITLE_HTML.parseAsHtml()
 
-/**
- * 獲取 Hanime 影片地址
- */
+/** 獲取 Hanime 影片地址 */
 fun getHanimeVideoLink(videoCode: String) = HANIME_BASE_URL + "watch?v=" + videoCode
 
-/**
- * 獲取 Hanime 影片分享文本
- */
+/** 獲取 Hanime 影片分享文本 */
 fun getHanimeShareText(title: String, videoCode: String): String = buildString {
     appendLine(title)
     appendLine(getHanimeVideoLink(videoCode))
     append("- From Han1meViewer -")
 }
 
-/**
- * 獲取 Hanime 影片**官方**下載地址
- */
-fun getHanimeVideoDownloadLink(videoCode: String) =
-    HANIME_BASE_URL + "download?v=" + videoCode
+/** 獲取 Hanime 影片**官方**下載地址 */
+fun getHanimeVideoDownloadLink(videoCode: String) = HANIME_BASE_URL + "download?v=" + videoCode
 
 val videoUrlRegex = Regex("""hanime1\.(?:com|me)/watch\?v=(\d+)""")
 
@@ -66,7 +57,5 @@ fun login(cookies: String) {
 }
 
 fun login(cookies: List<String>) {
-    login(cookies.joinToString(";") {
-        it.substringBefore(';')
-    })
+    login(cookies.joinToString(";") { it.substringBefore(';') })
 }

@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.logic.NetworkRepo
 import com.yenaly.han1meviewer.logic.model.CommentPlace
+import com.yenaly.han1meviewer.logic.model.TranslatableText
 import com.yenaly.han1meviewer.logic.model.VideoCommentArgs
 import com.yenaly.han1meviewer.logic.model.VideoComments
-import com.yenaly.han1meviewer.logic.model.TranslatableText
 import com.yenaly.han1meviewer.logic.state.WebsiteState
 import com.yenaly.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import com.yenaly.han1meviewer.util.TranslationManager
@@ -21,10 +21,12 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
     lateinit var code: String
     var currentUserId: String? = null
 
-    private val _videoCommentStateFlow = MutableStateFlow<WebsiteState<VideoComments>>(WebsiteState.Loading)
+    private val _videoCommentStateFlow =
+        MutableStateFlow<WebsiteState<VideoComments>>(WebsiteState.Loading)
     val videoCommentStateFlow = _videoCommentStateFlow.asStateFlow()
 
-    private val _videoReplyStateFlow = MutableStateFlow<WebsiteState<VideoComments>>(WebsiteState.Loading)
+    private val _videoReplyStateFlow =
+        MutableStateFlow<WebsiteState<VideoComments>>(WebsiteState.Loading)
     val videoReplyStateFlow = _videoReplyStateFlow.asStateFlow()
 
     private val _videoCommentFlow = MutableStateFlow<List<VideoComments.VideoComment>>(emptyList())
@@ -62,7 +64,7 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
                         // Trigger batch translation in background
                         launch {
                             TranslationManager.translateBatch(textsToTranslate)
-                            
+
                             // Update flow again when translations complete
                             _videoCommentFlow.value = state.info.videoComment
                         }
@@ -91,7 +93,7 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
                         // Trigger batch translation in background
                         launch {
                             TranslationManager.translateBatch(textsToTranslate)
-                            
+
                             // Update flow again when translations complete
                             _videoReplyFlow.value = state.info.videoComment
                         }
@@ -116,11 +118,17 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
         }
     }
 
-    fun likeComment(isPositive: Boolean, commentPosition: Int, comment: VideoComments.VideoComment) =
-        likeCommentInternal(CommentPlace.COMMENT, isPositive, commentPosition, comment)
+    fun likeComment(
+        isPositive: Boolean,
+        commentPosition: Int,
+        comment: VideoComments.VideoComment,
+    ) = likeCommentInternal(CommentPlace.COMMENT, isPositive, commentPosition, comment)
 
-    fun likeChildComment(isPositive: Boolean, commentPosition: Int, comment: VideoComments.VideoComment) =
-        likeCommentInternal(CommentPlace.CHILD_COMMENT, isPositive, commentPosition, comment)
+    fun likeChildComment(
+        isPositive: Boolean,
+        commentPosition: Int,
+        comment: VideoComments.VideoComment,
+    ) = likeCommentInternal(CommentPlace.CHILD_COMMENT, isPositive, commentPosition, comment)
 
     private fun likeCommentInternal(
         place: CommentPlace,
@@ -130,26 +138,37 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
     ) {
         viewModelScope.launch {
             NetworkRepo.likeComment(
-                csrfToken, place, comment.post.foreignId, isPositive,
-                comment.post.likeUserId, comment.post.commentLikesCount ?: 0,
-                comment.post.commentLikesSum ?: 0, comment.post.likeCommentStatus,
-                comment.post.unlikeCommentStatus, position, comment
-            )
+                    csrfToken,
+                    place,
+                    comment.post.foreignId,
+                    isPositive,
+                    comment.post.likeUserId,
+                    comment.post.commentLikesCount ?: 0,
+                    comment.post.commentLikesSum ?: 0,
+                    comment.post.likeCommentStatus,
+                    comment.post.unlikeCommentStatus,
+                    position,
+                    comment,
+                )
                 .catch { _commentLikeFlow.emit(WebsiteState.Error(it)) }
                 .collectLatest { argState ->
                     _commentLikeFlow.emit(argState)
                     if (argState is WebsiteState.Success) {
                         when (place) {
-                            CommentPlace.COMMENT -> _videoCommentFlow.update {
-                                it.toMutableList().apply {
-                                    this[position] = this[position].handleCommentLike(argState.info)
+                            CommentPlace.COMMENT ->
+                                _videoCommentFlow.update {
+                                    it.toMutableList().apply {
+                                        this[position] =
+                                            this[position].handleCommentLike(argState.info)
+                                    }
                                 }
-                            }
-                            CommentPlace.CHILD_COMMENT -> _videoReplyFlow.update {
-                                it.toMutableList().apply {
-                                    this[position] = this[position].handleCommentLike(argState.info)
+                            CommentPlace.CHILD_COMMENT ->
+                                _videoReplyFlow.update {
+                                    it.toMutableList().apply {
+                                        this[position] =
+                                            this[position].handleCommentLike(argState.info)
+                                    }
                                 }
-                            }
                         }
                     }
                 }
@@ -161,12 +180,15 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
         else decLikesCount(cancel = post.unlikeCommentStatus)
 
     fun handleCommentLike(args: VideoCommentArgs) {
-        val msg = when {
-            args.isPositive && args.comment.post.likeCommentStatus -> R.string.cancel_thumb_up_success
-            args.isPositive -> R.string.thumb_up_success
-            !args.isPositive && args.comment.post.unlikeCommentStatus -> R.string.cancel_thumb_down_success
-            else -> R.string.thumb_down_success
-        }
+        val msg =
+            when {
+                args.isPositive && args.comment.post.likeCommentStatus ->
+                    R.string.cancel_thumb_up_success
+                args.isPositive -> R.string.thumb_up_success
+                !args.isPositive && args.comment.post.unlikeCommentStatus ->
+                    R.string.cancel_thumb_down_success
+                else -> R.string.thumb_down_success
+            }
         showShortToast(msg)
     }
 
@@ -176,12 +198,10 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
             val currentComments = _videoCommentFlow.value
             if (currentComments.isNotEmpty()) {
                 val textsToTranslate = mutableListOf<TranslatableText>()
-                currentComments.forEach { comment ->
-                    textsToTranslate.add(comment.content)
-                }
+                currentComments.forEach { comment -> textsToTranslate.add(comment.content) }
 
                 TranslationManager.translateBatch(textsToTranslate)
-                
+
                 // Update flow to trigger UI refresh
                 _videoCommentFlow.value = currentComments
             }
@@ -194,12 +214,10 @@ class CommentViewModel(application: Application) : YenalyViewModel(application) 
             val currentReplies = _videoReplyFlow.value
             if (currentReplies.isNotEmpty()) {
                 val textsToTranslate = mutableListOf<TranslatableText>()
-                currentReplies.forEach { reply ->
-                    textsToTranslate.add(reply.content)
-                }
+                currentReplies.forEach { reply -> textsToTranslate.add(reply.content) }
 
                 TranslationManager.translateBatch(textsToTranslate)
-                
+
                 // Update flow to trigger UI refresh
                 _videoReplyFlow.value = currentReplies
             }

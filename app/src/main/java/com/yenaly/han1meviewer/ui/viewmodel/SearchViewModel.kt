@@ -19,13 +19,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/13 013 22:29
  */
 class SearchViewModel(application: Application) : YenalyViewModel(application) {
@@ -83,9 +82,16 @@ class SearchViewModel(application: Application) : YenalyViewModel(application) {
     fun clearHanimeSearchResult() = _searchStateFlow.update { PageLoadingState.Loading }
 
     fun getHanimeSearchResult(
-        page: Int, query: String?, genre: String?,
-        sort: String?, broad: Boolean, year: Int?, month: Int?,
-        duration: String?, tags: Set<String>, brands: Set<String>,
+        page: Int,
+        query: String?,
+        genre: String?,
+        sort: String?,
+        broad: Boolean,
+        year: Int?,
+        month: Int?,
+        duration: String?,
+        tags: Set<String>,
+        brands: Set<String>,
     ) {
         viewModelScope.launch {
             var date: String? = null
@@ -96,50 +102,57 @@ class SearchViewModel(application: Application) : YenalyViewModel(application) {
                 date = "$year 年"
             }
             NetworkRepo.getHanimeSearchResult(
-                page, query, genre,
-                sort, broad, date,
-                duration, tags, brands
-            ).collect { state ->
-                when (state) {
-                    is PageLoadingState.Success -> {
-                        // Update flow with search results first (shows raw text immediately)
-                        _searchStateFlow.value = PageLoadingState.Success(state.info)
-                        _searchFlow.update { prevList ->
-                            if (page == 1) state.info else prevList + state.info
-                        }
-
-                        // Collect translatable texts and trigger batch translation
-                        val textsToTranslate = mutableListOf<TranslatableText>()
-                        state.info.forEach { hanimeInfo ->
-                            textsToTranslate.add(hanimeInfo.title)
-                        }
-
-                        // Trigger batch translation in background
-                        launch {
-                            TranslationManager.translateBatch(textsToTranslate)
-                            
-                            // Update flow again when translations complete
+                    page,
+                    query,
+                    genre,
+                    sort,
+                    broad,
+                    date,
+                    duration,
+                    tags,
+                    brands,
+                )
+                .collect { state ->
+                    when (state) {
+                        is PageLoadingState.Success -> {
+                            // Update flow with search results first (shows raw text immediately)
                             _searchStateFlow.value = PageLoadingState.Success(state.info)
-                            _searchFlow.update { currentList ->
-                                // Return current list to trigger UI update
-                                currentList
+                            _searchFlow.update { prevList ->
+                                if (page == 1) state.info else prevList + state.info
+                            }
+
+                            // Collect translatable texts and trigger batch translation
+                            val textsToTranslate = mutableListOf<TranslatableText>()
+                            state.info.forEach { hanimeInfo ->
+                                textsToTranslate.add(hanimeInfo.title)
+                            }
+
+                            // Trigger batch translation in background
+                            launch {
+                                TranslationManager.translateBatch(textsToTranslate)
+
+                                // Update flow again when translations complete
+                                _searchStateFlow.value = PageLoadingState.Success(state.info)
+                                _searchFlow.update { currentList ->
+                                    // Return current list to trigger UI update
+                                    currentList
+                                }
                             }
                         }
-                    }
-                    is PageLoadingState.Loading -> {
-                        _searchStateFlow.value = state
-                        if (page == 1) {
-                            _searchFlow.value = emptyList()
+                        is PageLoadingState.Loading -> {
+                            _searchStateFlow.value = state
+                            if (page == 1) {
+                                _searchFlow.value = emptyList()
+                            }
+                        }
+                        is PageLoadingState.Error -> {
+                            _searchStateFlow.value = state
+                        }
+                        is PageLoadingState.NoMoreData -> {
+                            _searchStateFlow.value = state
                         }
                     }
-                    is PageLoadingState.Error -> {
-                        _searchStateFlow.value = state
-                    }
-                    is PageLoadingState.NoMoreData -> {
-                        _searchStateFlow.value = state
-                    }
                 }
-            }
         }
     }
 
@@ -149,12 +162,10 @@ class SearchViewModel(application: Application) : YenalyViewModel(application) {
             val currentResults = _searchFlow.value
             if (currentResults.isNotEmpty()) {
                 val textsToTranslate = mutableListOf<TranslatableText>()
-                currentResults.forEach { hanimeInfo ->
-                    textsToTranslate.add(hanimeInfo.title)
-                }
+                currentResults.forEach { hanimeInfo -> textsToTranslate.add(hanimeInfo.title) }
 
                 TranslationManager.translateBatch(textsToTranslate)
-                
+
                 // Update state to trigger UI refresh
                 _searchStateFlow.value = PageLoadingState.Success(currentResults)
                 _searchFlow.update { it } // Trigger flow update

@@ -28,8 +28,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/21 021 22:58
  */
 class ChildCommentPopupFragment :
@@ -37,9 +37,7 @@ class ChildCommentPopupFragment :
 
     val commentId by arguments<String>(COMMENT_ID)
     val viewModel by viewModels<CommentViewModel>()
-    private val replyAdapter by unsafeLazy {
-        VideoCommentRvAdapter(this)
-    }
+    private val replyAdapter by unsafeLazy { VideoCommentRvAdapter(this) }
 
     override fun getViewBinding(layoutInflater: LayoutInflater) =
         PopUpFragmentChildCommentBinding.inflate(layoutInflater)

@@ -20,7 +20,7 @@ fun Drawable.toByteArrayOrNull(): ByteArray? {
 fun Bitmap.saveTo(
     file: File,
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
-    quality: Int = 100
+    quality: Int = 100,
 ): Boolean {
     return try {
         file.outputStream().buffered().use { stream ->
@@ -36,7 +36,7 @@ fun Bitmap.saveTo(
 fun Drawable.saveTo(
     file: File,
     format: Bitmap.CompressFormat = Bitmap.CompressFormat.PNG,
-    quality: Int = 100
+    quality: Int = 100,
 ): Boolean {
     return toBitmapOrNull()?.saveTo(file, format, quality) == true
 }

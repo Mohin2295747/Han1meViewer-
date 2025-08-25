@@ -16,9 +16,11 @@ import com.yenaly.yenaly_libs.utils.applicationContext
 import com.yenaly.yenaly_libs.utils.showShortToast
 import java.io.File
 
-val Context.updateFile: File get() = File(applicationContext.cacheDir, "update.apk")
+val Context.updateFile: File
+    get() = File(applicationContext.cacheDir, "update.apk")
 
-val UPDATE_ZIP_PATH: File get() = File(applicationContext.cacheDir, "update.zip")
+val UPDATE_ZIP_PATH: File
+    get() = File(applicationContext.cacheDir, "update.zip")
 
 fun checkNeedUpdate(versionName: String): Boolean {
     val latestVersionCode = versionName.substringAfter("+", "").toIntOrNull() ?: Int.MAX_VALUE
@@ -46,10 +48,11 @@ suspend fun Context.showUpdateDialog(latest: Latest) {
         setMessage(spannable)
         setCancelable(false)
     }
-    val res = dialog.await(
-        positiveText = getString(R.string.update),
-        negativeText = getString(R.string.cancel),
-    )
+    val res =
+        dialog.await(
+            positiveText = getString(R.string.update),
+            negativeText = getString(R.string.cancel),
+        )
     if (res == AlertDialog.BUTTON_POSITIVE) {
         val update = this.getUpdateIfExists(latest)
         if (update != null) {
@@ -74,11 +77,12 @@ suspend fun Context.installApkPackage(file: File) {
     val canInstall = requestInstallPermission()
     if (canInstall) {
         val uri = FileProvider.getUriForFile(this.applicationContext, FILE_PROVIDER_AUTHORITY, file)
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(uri, "application/vnd.android.package-archive")
-        }
+        val intent =
+            Intent(Intent.ACTION_VIEW).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                setDataAndType(uri, "application/vnd.android.package-archive")
+            }
         startActivity(intent)
     }
 }

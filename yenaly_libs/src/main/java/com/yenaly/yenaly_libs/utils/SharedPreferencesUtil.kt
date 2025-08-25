@@ -6,7 +6,6 @@ package com.yenaly.yenaly_libs.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -22,7 +21,7 @@ import java.net.URLEncoder
  */
 private fun Context.sp(
     name: String = packageName,
-    mode: Int = Context.MODE_PRIVATE
+    mode: Int = Context.MODE_PRIVATE,
 ): SharedPreferences {
     return getSharedPreferences(name, mode)
 }
@@ -30,17 +29,13 @@ private fun Context.sp(
 /**
  * 把值存入SharedPreferences内
  *
- * @param Ace   泛型
- * @param key   储存键
+ * @param Ace 泛型
+ * @param key 储存键
  * @param value 储存值
- * @param name  sp名称
+ * @param name sp名称
  */
 @JvmOverloads
-fun <Ace> putSpValue(
-    key: String,
-    value: Ace,
-    name: String = applicationContext.packageName
-) {
+fun <Ace> putSpValue(key: String, value: Ace, name: String = applicationContext.packageName) {
     applicationContext.sp(name = name).edit {
         when (value) {
             is Long -> putLong(key, value)
@@ -56,28 +51,28 @@ fun <Ace> putSpValue(
 /**
  * 把值从SharedPreferences取出
  *
- * @param Taffy   泛型
- * @param key     储存键
+ * @param Taffy 泛型
+ * @param key 储存键
  * @param default 缺省值
- * @param name    sp名称
- *
+ * @param name sp名称
  * @return 储存值
  */
 @JvmOverloads
 fun <Taffy> getSpValue(
     key: String,
     default: Taffy,
-    name: String = applicationContext.packageName
+    name: String = applicationContext.packageName,
 ): Taffy {
     return applicationContext.sp(name = name).run {
-        val result = when (default) {
-            is Long -> getLong(key, default)
-            is String -> getString(key, default)
-            is Int -> getInt(key, default)
-            is Boolean -> getBoolean(key, default)
-            is Float -> getFloat(key, default)
-            else -> deSerialization(getString(key, serialize(default)))
-        }
+        val result =
+            when (default) {
+                is Long -> getLong(key, default)
+                is String -> getString(key, default)
+                is Int -> getInt(key, default)
+                is Boolean -> getBoolean(key, default)
+                is Float -> getFloat(key, default)
+                else -> deSerialization(getString(key, serialize(default)))
+            }
         result as Taffy
     }
 }
@@ -85,32 +80,23 @@ fun <Taffy> getSpValue(
 /**
  * 通过委托方式懒加载获取sp值
  *
- * @param Taffy   泛型
- * @param key     储存键
+ * @param Taffy 泛型
+ * @param key 储存键
  * @param default 缺省值
- * @param name    sp名称
+ * @param name sp名称
  */
 @JvmOverloads
-fun <Taffy> spValue(
-    key: String,
-    default: Taffy,
-    name: String = applicationContext.packageName
-) =
-    lazy(LazyThreadSafetyMode.NONE) {
-        getSpValue(key, default, name)
-    }
+fun <Taffy> spValue(key: String, default: Taffy, name: String = applicationContext.packageName) =
+    lazy(LazyThreadSafetyMode.NONE) { getSpValue(key, default, name) }
 
 /**
  * 删除sp内特定值
  *
- * @param key  储存键
+ * @param key 储存键
  * @param name sp名称
  */
 @JvmOverloads
-fun removeSpValue(
-    key: String,
-    name: String = applicationContext.packageName
-) {
+fun removeSpValue(key: String, name: String = applicationContext.packageName) {
     applicationContext.sp(name = name).edit { remove(key) }
 }
 
@@ -120,15 +106,11 @@ fun removeSpValue(
  * @param name sp名称
  */
 @JvmOverloads
-fun clearSharedPreferences(
-    name: String = applicationContext.packageName
-) {
+fun clearSharedPreferences(name: String = applicationContext.packageName) {
     applicationContext.sp(name = name).edit { clear() }
 }
 
-/**
- * 序列化
- */
+/** 序列化 */
 private fun <Nyaru> serialize(obj: Nyaru): String {
     val byteArrayOutputStream = ByteArrayOutputStream()
     val objectOutputStream = ObjectOutputStream(byteArrayOutputStream)
@@ -140,9 +122,7 @@ private fun <Nyaru> serialize(obj: Nyaru): String {
     return serStr
 }
 
-/**
- * 反序列化
- */
+/** 反序列化 */
 private fun <Bekki> deSerialization(str: String?): Bekki {
     val redStr = URLDecoder.decode(str, "UTF-8")
     val byteArrayInputStream = ByteArrayInputStream(redStr.toByteArray(charset("ISO-8859-1")))

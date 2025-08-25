@@ -23,17 +23,19 @@ import com.yenaly.yenaly_libs.utils.decodeFromStringByBase64
 import com.yenaly.yenaly_libs.utils.showShortToast
 import com.yenaly.yenaly_libs.utils.textFromClipboard
 import com.yenaly.yenaly_libs.utils.unsafeLazy
+import kotlin.concurrent.thread
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlin.concurrent.thread
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/13 013 18:46
  */
-class HKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
-    IToolbarFragment<SettingsActivity>, StateLayoutMixin {
+class HKeyframesFragment :
+    YenalyFragment<FragmentHKeyframesBinding>(),
+    IToolbarFragment<SettingsActivity>,
+    StateLayoutMixin {
 
     val viewModel by activityViewModels<SettingsViewModel>()
 
@@ -43,7 +45,7 @@ class HKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentHKeyframesBinding {
         return FragmentHKeyframesBinding.inflate(inflater, container, false)
     }
@@ -63,10 +65,9 @@ class HKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
 
     override fun bindDataObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAllHKeyframes().flowWithLifecycle(lifecycle)
-                .collect { entity ->
-                    adapter.submitList(entity)
-                }
+            viewModel.loadAllHKeyframes().flowWithLifecycle(lifecycle).collect { entity ->
+                adapter.submitList(entity)
+            }
         }
     }
 
@@ -83,27 +84,30 @@ class HKeyframesFragment : YenalyFragment<FragmentHKeyframesBinding>(),
                             setTitle(R.string.h_keyframes_shared_by_other_detected)
                             setMessage(
                                 getString(
-                                    R.string.shared_h_keyframe_detected_msg,
-                                    entity.title,
-                                    entity.videoCode,
-                                    entity.keyframes.size
-                                ).trimIndent()
+                                        R.string.shared_h_keyframe_detected_msg,
+                                        entity.title,
+                                        entity.videoCode,
+                                        entity.keyframes.size,
+                                    )
+                                    .trimIndent()
                             )
                             setPositiveButton(R.string.confirm) { _, _ ->
-                                viewModel.insertHKeyframes(entity.copy(lastModifiedTime = System.currentTimeMillis()))
+                                viewModel.insertHKeyframes(
+                                    entity.copy(lastModifiedTime = System.currentTimeMillis())
+                                )
                             }
                             setNegativeButton(R.string.cancel, null)
                         }
                     }
-
                 } else {
                     activity?.runOnUiThread {
                         showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
                     }
                 }
-            } ?: activity?.runOnUiThread {
-                showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
             }
+                ?: activity?.runOnUiThread {
+                    showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
+                }
         }
     }
 

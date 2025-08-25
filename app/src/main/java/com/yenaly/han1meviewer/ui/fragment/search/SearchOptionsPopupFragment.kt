@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.Checkable
 import androidx.core.util.isNotEmpty
 import androidx.core.view.isVisible
@@ -19,8 +18,6 @@ import com.google.firebase.analytics.logEvent
 import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.core.BasePopupView
 import com.lxj.xpopup.interfaces.SimpleCallback
-import com.lxj.xpopupext.listener.TimePickerListener
-import com.lxj.xpopupext.popup.TimePickerPopup
 import com.yenaly.han1meviewer.FirebaseConstants
 import com.yenaly.han1meviewer.Preferences.isAlreadyLogin
 import com.yenaly.han1meviewer.R
@@ -29,7 +26,6 @@ import com.yenaly.han1meviewer.logic.model.SearchOption.Companion.get
 import com.yenaly.han1meviewer.logic.state.WebsiteState
 import com.yenaly.han1meviewer.ui.activity.SearchActivity
 import com.yenaly.han1meviewer.ui.adapter.HSubscriptionAdapter
-import com.yenaly.han1meviewer.ui.popup.HTimePickerPopup
 import com.yenaly.han1meviewer.ui.viewmodel.MyListViewModel
 import com.yenaly.han1meviewer.ui.viewmodel.SearchViewModel
 import com.yenaly.han1meviewer.util.showAlertDialog
@@ -38,12 +34,10 @@ import com.yenaly.yenaly_libs.utils.mapToArray
 import com.yenaly.yenaly_libs.utils.showShortToast
 import com.yenaly.yenaly_libs.utils.unsafeLazy
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import java.util.Date
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/08/08 008 17:04
  */
 class SearchOptionsPopupFragment :
@@ -63,9 +57,7 @@ class SearchOptionsPopupFragment :
     private var sortOptions: Array<String>? = null
     private var durations: Array<String>? = null
 
-    private val subscriptionAdapter by unsafeLazy {
-        HSubscriptionAdapter()
-    }
+    private val subscriptionAdapter by unsafeLazy { HSubscriptionAdapter() }
 
     var onSearchListener: () -> Unit = {}
 
@@ -74,7 +66,7 @@ class SearchOptionsPopupFragment :
 
     override fun initData(savedInstanceState: Bundle?, dialog: Dialog) {
         // #issue-199: 片长搜索官网取消了
-//        binding.duration.isAvailable = false
+        //        binding.duration.isAvailable = false
         // 简单的厂商搜索官网取消了
         binding.brand.isAvailable = false
 
@@ -99,12 +91,10 @@ class SearchOptionsPopupFragment :
                 if (genres == null) {
                     genres = viewModel.genres.mapToArray { it.value }
                 }
-                requireContext().showAlertDialog(DialogInterface.OnDismissListener {
-                    logAdvSearchEvent("genres")
-                }) {
-                    val index = viewModel.genres.indexOfFirst {
-                        it.searchKey == viewModel.genre
-                    }
+                requireContext().showAlertDialog(
+                    DialogInterface.OnDismissListener { logAdvSearchEvent("genres") }
+                ) {
+                    val index = viewModel.genres.indexOfFirst { it.searchKey == viewModel.genre }
                     setTitle(R.string.type)
                     setSingleChoiceItems(genres, index) { _, which ->
                         viewModel.genre = viewModel.genres.getOrNull(which)?.searchKey
@@ -129,20 +119,21 @@ class SearchOptionsPopupFragment :
         // deprecated
         binding.brand.apply {
             setOnClickListener {
-                HMultiChoicesDialog(context, R.string.brand, hasSingleItem = true).apply {
-                    addTagScope(null, viewModel.brands, spanCount = 2)
-                }.apply {
-                    loadSavedTags(viewModel.brandMap)
-                    setOnSaveListener {
-                        viewModel.brandMap = collectCheckedTags()
-                        initOptionsChecked()
-                        it.dismiss()
+                HMultiChoicesDialog(context, R.string.brand, hasSingleItem = true)
+                    .apply { addTagScope(null, viewModel.brands, spanCount = 2) }
+                    .apply {
+                        loadSavedTags(viewModel.brandMap)
+                        setOnSaveListener {
+                            viewModel.brandMap = collectCheckedTags()
+                            initOptionsChecked()
+                            it.dismiss()
+                        }
+                        setOnResetListener {
+                            clearAllChecks()
+                            initOptionsChecked()
+                        }
                     }
-                    setOnResetListener {
-                        clearAllChecks()
-                        initOptionsChecked()
-                    }
-                }.show()
+                    .show()
             }
             setOnLongClickListener lc@{
                 showClearAllTagsDialog {
@@ -154,49 +145,44 @@ class SearchOptionsPopupFragment :
         }
         binding.tag.apply {
             setOnClickListener {
-                HMultiChoicesDialog(context, R.string.tag).apply {
-                    addTagScope(
-                        R.string.video_attr,
-                        viewModel.tags[R.string.video_attr],
-                        spanCount = 1
-                    )
-                    addTagScope(
-                        R.string.relationship,
-                        viewModel.tags[R.string.relationship],
-                        spanCount = 2
-                    )
-                    addTagScope(
-                        R.string.characteristics,
-                        viewModel.tags[R.string.characteristics]
-                    )
-                    addTagScope(
-                        R.string.appearance_and_figure,
-                        viewModel.tags[R.string.appearance_and_figure]
-                    )
-                    addTagScope(
-                        R.string.story_plot,
-                        viewModel.tags[R.string.story_plot]
-                    )
-                    addTagScope(
-                        R.string.sex_position,
-                        viewModel.tags[R.string.sex_position]
-                    )
-                }.apply {
-                    loadSavedTags(viewModel.tagMap)
-                    setOnSaveListener {
-                        viewModel.tagMap = collectCheckedTags()
-                        initOptionsChecked()
-                        isUserUsed = true
-                        it.dismiss()
+                HMultiChoicesDialog(context, R.string.tag)
+                    .apply {
+                        addTagScope(
+                            R.string.video_attr,
+                            viewModel.tags[R.string.video_attr],
+                            spanCount = 1,
+                        )
+                        addTagScope(
+                            R.string.relationship,
+                            viewModel.tags[R.string.relationship],
+                            spanCount = 2,
+                        )
+                        addTagScope(
+                            R.string.characteristics,
+                            viewModel.tags[R.string.characteristics],
+                        )
+                        addTagScope(
+                            R.string.appearance_and_figure,
+                            viewModel.tags[R.string.appearance_and_figure],
+                        )
+                        addTagScope(R.string.story_plot, viewModel.tags[R.string.story_plot])
+                        addTagScope(R.string.sex_position, viewModel.tags[R.string.sex_position])
                     }
-                    setOnResetListener {
-                        clearAllChecks()
-                        initOptionsChecked()
+                    .apply {
+                        loadSavedTags(viewModel.tagMap)
+                        setOnSaveListener {
+                            viewModel.tagMap = collectCheckedTags()
+                            initOptionsChecked()
+                            isUserUsed = true
+                            it.dismiss()
+                        }
+                        setOnResetListener {
+                            clearAllChecks()
+                            initOptionsChecked()
+                        }
+                        setOnDismissListener { logAdvSearchEvent("tags") }
                     }
-                    setOnDismissListener {
-                        logAdvSearchEvent("tags")
-                    }
-                }.show()
+                    .show()
             }
             setOnLongClickListener lc@{
                 showClearAllTagsDialog {
@@ -212,12 +198,11 @@ class SearchOptionsPopupFragment :
                 if (sortOptions == null) {
                     sortOptions = viewModel.sortOptions.mapToArray { it.value }
                 }
-                requireContext().showAlertDialog(DialogInterface.OnDismissListener {
-                    logAdvSearchEvent("sort_options")
-                }) {
-                    val index = viewModel.sortOptions.indexOfFirst {
-                        it.searchKey == viewModel.sort
-                    }
+                requireContext().showAlertDialog(
+                    DialogInterface.OnDismissListener { logAdvSearchEvent("sort_options") }
+                ) {
+                    val index =
+                        viewModel.sortOptions.indexOfFirst { it.searchKey == viewModel.sort }
                     setTitle(R.string.sort_option)
                     setSingleChoiceItems(sortOptions, index) { _, which ->
                         viewModel.sort = viewModel.sortOptions.getOrNull(which)?.searchKey
@@ -246,12 +231,11 @@ class SearchOptionsPopupFragment :
                 if (durations == null) {
                     durations = viewModel.durations.mapToArray { it.value }
                 }
-                requireContext().showAlertDialog(DialogInterface.OnDismissListener {
-                    initOptionsChecked()
-                }) {
-                    val index = viewModel.durations.indexOfFirst {
-                        it.searchKey == viewModel.duration
-                    }
+                requireContext().showAlertDialog(
+                    DialogInterface.OnDismissListener { initOptionsChecked() }
+                ) {
+                    val index =
+                        viewModel.durations.indexOfFirst { it.searchKey == viewModel.duration }
                     setTitle(R.string.duration)
                     setSingleChoiceItems(durations, index) { _, which ->
                         viewModel.duration = viewModel.durations.getOrNull(which)?.searchKey
@@ -274,27 +258,24 @@ class SearchOptionsPopupFragment :
         }
         binding.releaseDate.apply {
             setOnClickListener {
-                HTimePickerDialog(requireContext(), R.string.release_date).apply {
-                    setMode(HTimePickerDialog.Mode.YM)
-                    setDate(
-                        year = viewModel.year,
-                        month = viewModel.month
-                    )
-                    setOnSaveListener { dateSelection ->
-                        viewModel.year = dateSelection.year
-                        viewModel.month = dateSelection.month
-                        initOptionsChecked()
-                        isUserUsed = true
+                HTimePickerDialog(requireContext(), R.string.release_date)
+                    .apply {
+                        setMode(HTimePickerDialog.Mode.YM)
+                        setDate(year = viewModel.year, month = viewModel.month)
+                        setOnSaveListener { dateSelection ->
+                            viewModel.year = dateSelection.year
+                            viewModel.month = dateSelection.month
+                            initOptionsChecked()
+                            isUserUsed = true
+                        }
+                        setOnDismissListener { logAdvSearchEvent("release_dates") }
+                        setonResetListener {
+                            viewModel.year = null
+                            viewModel.month = null
+                            initOptionsChecked()
+                        }
                     }
-                    setOnDismissListener {
-                        logAdvSearchEvent("release_dates")
-                    }
-                    setonResetListener {
-                        viewModel.year = null
-                        viewModel.month = null
-                        initOptionsChecked()
-                    }
-                }.show()
+                    .show()
             }
             setOnLongClickListener lc@{
                 showClearAllTagsDialog {
@@ -306,9 +287,7 @@ class SearchOptionsPopupFragment :
             }
         }
 
-        binding.search.setOnClickListener {
-            onSearchListener.invoke()
-        }
+        binding.search.setOnClickListener { onSearchListener.invoke() }
     }
 
     private fun initSubscription() {
@@ -320,12 +299,14 @@ class SearchOptionsPopupFragment :
             lifecycleScope.launch {
                 myListViewModel.subscription.subscriptionFlow.collect {
                     binding.llSubscription.isVisible = it.isNotEmpty()
-                    subscriptionAdapter.submitList(it.map { subscription ->
-                        subscription.copy(
-                            isDeleteVisible = false,
-                            isCheckBoxVisible = subscription.name == viewModel.subscriptionBrand
-                        )
-                    })
+                    subscriptionAdapter.submitList(
+                        it.map { subscription ->
+                            subscription.copy(
+                                isDeleteVisible = false,
+                                isCheckBoxVisible = subscription.name == viewModel.subscriptionBrand,
+                            )
+                        }
+                    )
                 }
             }
             lifecycleScope.launch {
@@ -365,15 +346,17 @@ class SearchOptionsPopupFragment :
     }
 
     private fun XPopup.Builder.setOptionsCheckedCallback(type: String) = apply {
-        setPopupCallback(object : SimpleCallback() {
-            override fun beforeDismiss(popupView: BasePopupView?) {
-                initOptionsChecked()
-            }
+        setPopupCallback(
+            object : SimpleCallback() {
+                override fun beforeDismiss(popupView: BasePopupView?) {
+                    initOptionsChecked()
+                }
 
-            override fun onDismiss(popupView: BasePopupView?) {
-                logAdvSearchEvent(type)
+                override fun onDismiss(popupView: BasePopupView?) {
+                    logAdvSearchEvent(type)
+                }
             }
-        })
+        )
     }
 
     private fun logAdvSearchEvent(type: String, used: Boolean = isUserUsed) {

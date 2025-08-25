@@ -8,19 +8,23 @@ import com.yenaly.han1meviewer.logic.network.service.HanimeMyListService
 import com.yenaly.han1meviewer.logic.network.service.HanimeSubscriptionService
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/08 008 22:35
  */
 object HanimeNetwork {
     var hanimeService = _hanimeService
         private set
+
     var githubService = _githubService
         private set
+
     var commentService = _commentService
         private set
+
     var myListService = _myListService
         private set
+
     var subscriptionService = _subscriptionService
         private set
 

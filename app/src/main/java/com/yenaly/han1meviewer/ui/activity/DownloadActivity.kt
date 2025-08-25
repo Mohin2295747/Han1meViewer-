@@ -32,9 +32,7 @@ class DownloadActivity : YenalyActivity<ActivityDownloadBinding>() {
 
     override fun initData(savedInstanceState: Bundle?) {
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
         supportActionBar?.let {
             it.title = hbSpannedTitle
             it.setDisplayHomeAsUpEnabled(true)
@@ -45,12 +43,12 @@ class DownloadActivity : YenalyActivity<ActivityDownloadBinding>() {
             overrideActivityTransition(
                 OVERRIDE_TRANSITION_OPEN,
                 R.anim.slide_in_from_bottom,
-                R.anim.fade_out
+                R.anim.fade_out,
             )
             overrideActivityTransition(
                 OVERRIDE_TRANSITION_CLOSE,
                 R.anim.fade_in,
-                R.anim.slide_out_to_bottom
+                R.anim.slide_out_to_bottom,
             )
         }
 
@@ -63,25 +61,25 @@ class DownloadActivity : YenalyActivity<ActivityDownloadBinding>() {
             tab.setText(tabNameArray[position])
         }
 
-        binding.hanidock.hanidokitems = listOf(
-            Hanidokitem.create {
-                icon = R.drawable.ic_baseline_access_time_24
-                text = R.string.title
-                viewAction = View.OnClickListener {
-                    showShortToast("test")
-                }
-            },
-            Hanidokitem.create {
-                icon = R.drawable.baseline_add_24
-                text = R.string.add
-                subitems = listOf(
-                    Hanidokitem.create {
-                        icon = R.drawable.ic_baseline_access_time_24
-                        text = R.string.title
-                    }
-                )
-            }
-        )
+        binding.hanidock.hanidokitems =
+            listOf(
+                Hanidokitem.create {
+                    icon = R.drawable.ic_baseline_access_time_24
+                    text = R.string.title
+                    viewAction = View.OnClickListener { showShortToast("test") }
+                },
+                Hanidokitem.create {
+                    icon = R.drawable.baseline_add_24
+                    text = R.string.add
+                    subitems =
+                        listOf(
+                            Hanidokitem.create {
+                                icon = R.drawable.ic_baseline_access_time_24
+                                text = R.string.title
+                            }
+                        )
+                },
+            )
     }
 
     override fun finish() {
@@ -92,8 +90,5 @@ class DownloadActivity : YenalyActivity<ActivityDownloadBinding>() {
         }
     }
 
-
-    override fun bindDataObservers() {
-
-    }
+    override fun bindDataObservers() {}
 }

@@ -15,30 +15,28 @@ import com.yenaly.han1meviewer.VIDEO_CODE
 import com.yenaly.han1meviewer.ui.activity.VideoActivity
 import com.yenaly.yenaly_libs.utils.applicationContext
 import com.yenaly.yenaly_libs.utils.showShortToast
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
-import java.io.File
-import java.io.InputStream
-import java.io.OutputStream
 
 @Deprecated(
     "Use alternative",
     ReplaceWith(
         "HFileManager.appDownloadFolder",
-        imports = ["com.yenaly.han1meviewer.HFileManager"]
-    )
+        imports = ["com.yenaly.han1meviewer.HFileManager"],
+    ),
 )
-val hanimeVideoLocalFolder get() = applicationContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+val hanimeVideoLocalFolder
+    get() = applicationContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
 
 @Deprecated(
     "Use alternative",
-    ReplaceWith(
-        "HFileManager.DEF_VIDEO_TYPE",
-        imports = ["com.yenaly.han1meviewer.HFileManager"]
-    )
+    ReplaceWith("HFileManager.DEF_VIDEO_TYPE", imports = ["com.yenaly.han1meviewer.HFileManager"]),
 )
 const val DEF_VIDEO_TYPE = "mp4"
 
@@ -46,8 +44,8 @@ const val DEF_VIDEO_TYPE = "mp4"
     "Use alternative",
     ReplaceWith(
         "HFileManager.createVideoName(title, quality, suffix)",
-        imports = ["com.yenaly.han1meviewer.HFileManager"]
-    )
+        imports = ["com.yenaly.han1meviewer.HFileManager"],
+    ),
 )
 fun createDownloadName(title: String, quality: String, suffix: String = DEF_VIDEO_TYPE) =
     "${title}_${quality}.${suffix}"
@@ -56,8 +54,8 @@ fun createDownloadName(title: String, quality: String, suffix: String = DEF_VIDE
     "Use alternative",
     ReplaceWith(
         "HFileManager.getDownloadVideoFile(videoCode, title, quality, suffix)",
-        imports = ["com.yenaly.han1meviewer.HFileManager"]
-    )
+        imports = ["com.yenaly.han1meviewer.HFileManager"],
+    ),
 )
 fun getDownloadedHanimeFile(title: String, quality: String, suffix: String = DEF_VIDEO_TYPE): File {
     return File(hanimeVideoLocalFolder, createDownloadName(title, quality, suffix))
@@ -70,20 +68,14 @@ fun checkDownloadedHanimeFile(startsWith: String): Boolean {
     } == true
 }
 
-/**
- * Must be Activity Context!
- */
-fun Context.openDownloadedHanimeVideoLocally(
-    uri: String, onFileNotFound: (() -> Unit)? = null,
-) {
+/** Must be Activity Context! */
+fun Context.openDownloadedHanimeVideoLocally(uri: String, onFileNotFound: (() -> Unit)? = null) {
     val videoFile = uri.toUri().toFile()
     if (!videoFile.exists()) {
         onFileNotFound?.invoke()
         return
     }
-    val fileUri = FileProvider.getUriForFile(
-        this, FILE_PROVIDER_AUTHORITY, videoFile
-    )
+    val fileUri = FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITY, videoFile)
     val intent = Intent(Intent.ACTION_VIEW)
     intent.setDataAndType(fileUri, "video/*")
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -102,9 +94,7 @@ fun Context.openDownloadedHanimeVideoInActivity(videoCode: String) {
     startActivity(intent)
 }
 
-/**
- * copyTo with progress
- */
+/** copyTo with progress */
 suspend fun InputStream.copyTo(
     out: OutputStream,
     contentLength: Long,
@@ -137,8 +127,10 @@ suspend fun InputStream.copyTo(
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-inline fun <reified T> loadAssetAs(filePath: String): T? = runCatching {
-    applicationContext.assets.open(filePath).use { inputStream ->
-        HJson.decodeFromStream<T>(inputStream)
-    }
-}.getOrNull()
+inline fun <reified T> loadAssetAs(filePath: String): T? =
+    runCatching {
+            applicationContext.assets.open(filePath).use { inputStream ->
+                HJson.decodeFromStream<T>(inputStream)
+            }
+        }
+        .getOrNull()

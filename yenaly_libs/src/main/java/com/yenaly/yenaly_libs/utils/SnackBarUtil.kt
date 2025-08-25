@@ -13,7 +13,7 @@ inline fun Activity.showSnackBar(
     message: CharSequence,
     length: Int = Snackbar.LENGTH_SHORT,
     view: View = findViewById(android.R.id.content),
-    action: Snackbar.() -> Unit = {}
+    action: Snackbar.() -> Unit = {},
 ) {
     Snackbar.make(view, message, length).apply(action).show()
 }
@@ -23,7 +23,7 @@ inline fun Activity.showSnackBar(
     @StringRes message: Int,
     length: Int = Snackbar.LENGTH_SHORT,
     view: View = findViewById(android.R.id.content),
-    action: Snackbar.() -> Unit = {}
+    action: Snackbar.() -> Unit = {},
 ) {
     Snackbar.make(view, message, length).apply(action).show()
 }
@@ -33,7 +33,7 @@ inline fun Fragment.showSnackBar(
     message: CharSequence,
     length: Int = Snackbar.LENGTH_SHORT,
     view: View = requireView(),
-    action: Snackbar.() -> Unit = {}
+    action: Snackbar.() -> Unit = {},
 ) {
     Snackbar.make(view, message, length).apply(action).show()
 }
@@ -43,9 +43,7 @@ inline fun Fragment.showSnackBar(
     @StringRes message: Int,
     length: Int = Snackbar.LENGTH_SHORT,
     view: View = requireView(),
-    action: Snackbar.() -> Unit = {}
+    action: Snackbar.() -> Unit = {},
 ) {
     Snackbar.make(view, message, length).apply(action).show()
 }
-
-

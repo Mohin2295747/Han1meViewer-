@@ -1,25 +1,20 @@
 package com.yenaly.han1meviewer.ui.view.funcbar
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
  * @since 2025/3/11 22:06
+ * @project Han1meViewer
  */
 class Hanidontroller {
 
-    /**
-     * 当前层级
-     *
-     */
+    /** 当前层级 */
     var level = 0
         private set
 
     private val navigationStack = ArrayDeque<Hanidokitem>()
     private val pastStack = ArrayDeque<Hanidokitem?>()
 
-    /**
-     * 初始化
-     */
+    /** 初始化 */
     fun initialize(hanidokitems: List<Hanidokitem>) {
         navigationStack.clear()
         pastStack.clear()
@@ -50,7 +45,8 @@ class Hanidontroller {
     /**
      * 返回事件
      *
-     * @return true 如果存在上一个层级，且 UI 需要更新。true if there is a previous level and the UI needs to be updated.
+     * @return true 如果存在上一个层级，且 UI 需要更新。true if there is a previous level and the UI needs to be
+     *   updated.
      */
     fun onBackPressed(): Boolean {
         if (level > 0) {
@@ -68,8 +64,7 @@ class Hanidontroller {
         return false
     }
 
-    /**
-     * 当前层级的 Hanidokitem 列表
-     */
-    val currentHanidokitems: List<Hanidokitem> get() = navigationStack.toList()
+    /** 当前层级的 Hanidokitem 列表 */
+    val currentHanidokitems: List<Hanidokitem>
+        get() = navigationStack.toList()
 }

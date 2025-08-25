@@ -7,7 +7,6 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -63,8 +62,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/08 008 17:35
  */
 class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
@@ -74,7 +73,8 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
     lateinit var navHostFragment: NavHostFragment
     lateinit var navController: NavController
 
-    val currentFragment get() = navHostFragment.childFragmentManager.primaryNavigationFragment
+    val currentFragment
+        get() = navHostFragment.childFragmentManager.primaryNavigationFragment
 
     // 登錄完了後讓activity刷新主頁
     private val loginDataLauncher =
@@ -92,7 +92,7 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
@@ -100,12 +100,9 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
         logScreenViewEvent(fragment)
     }
 
-    /**
-     * 初始化数据
-     */
+    /** 初始化数据 */
     override fun initData(savedInstanceState: Bundle?) {
-        navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment
+        navHostFragment = supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment
         navController = navHostFragment.navController
         if (binding.nvMain is NavigationView) {
             (binding.nvMain as NavigationView).setupWithNavController(navController)
@@ -229,7 +226,7 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
                     RenderEffect.createBlurEffect(
                         6.dp * slideOffset,
                         6.dp * slideOffset,
-                        Shader.TileMode.CLAMP
+                        Shader.TileMode.CLAMP,
                     )
                 )
             }
@@ -242,19 +239,13 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
         }
     }
 
-    override fun onDrawerOpened(drawerView: View) {
+    override fun onDrawerOpened(drawerView: View) {}
 
-    }
-
-    override fun onDrawerStateChanged(newState: Int) {
-
-    }
+    override fun onDrawerStateChanged(newState: Int) {}
 
     private fun showFindRelatedLinkSnackBar(videoCode: String) {
         showSnackBar(R.string.detect_ha1_related_link_in_clipboard, Snackbar.LENGTH_LONG) {
-            setAction(R.string.enter) {
-                startActivity<VideoActivity>(VIDEO_CODE to videoCode)
-            }
+            setAction(R.string.enter) { startActivity<VideoActivity>(VIDEO_CODE to videoCode) }
         }
     }
 
@@ -283,9 +274,7 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
                 headerAvatar.setOnClickListener {
                     showAlertDialog {
                         setTitle(R.string.sure_to_logout)
-                        setPositiveButton(R.string.sure) { _, _ ->
-                            logoutWithRefresh()
-                        }
+                        setPositiveButton(R.string.sure) { _, _ -> logoutWithRefresh() }
                         setNegativeButton(R.string.no, null)
                     }
                 }
@@ -295,15 +284,11 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
                     transformations(CircleCropTransformation())
                 }
                 headerUsername.setText(R.string.not_logged_in)
-                headerAvatar.setOnClickListener {
-                    gotoLoginActivity()
-                }
+                headerAvatar.setOnClickListener { gotoLoginActivity() }
             }
         }
         if (binding.nvMain is NavigationView) {
-            (binding.nvMain as NavigationView).getHeaderView(0)?.let { view ->
-                setAvatar(view)
-            }
+            (binding.nvMain as NavigationView).getHeaderView(0)?.let { view -> setAvatar(view) }
         }
         if (binding.nvMain is NavigationRailView) {
             val nvMain = (binding.nvMain as NavigationRailView)
@@ -332,14 +317,15 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
 
     // #issue-225: 侧滑选单双重点击异常，不能从 xml 里直接定义 activity 块，需要在代码里初始化
     private fun initNavActivity() {
-        val menu = when (binding.nvMain) {
-            is NavigationView -> {
-                (binding.nvMain as NavigationView).menu
+        val menu =
+            when (binding.nvMain) {
+                is NavigationView -> {
+                    (binding.nvMain as NavigationView).menu
+                }
+                else -> {
+                    (binding.nvMain as NavigationRailView).menu
+                }
             }
-            else -> {
-                (binding.nvMain as NavigationRailView).menu
-            }
-        }
         menu.apply {
             findItem(R.id.nv_settings).setOnMenuItemClickListener {
                 SettingsRouter.with(navController).toSettingsActivity()
@@ -365,18 +351,17 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
         intArrayOf(R.id.nv_fav_video, R.id.nv_watch_later, R.id.nv_playlist)
 
     private fun initMenu() {
-        val menu = when (binding.nvMain) {
-            is NavigationView -> {
-                (binding.nvMain as NavigationView).menu
+        val menu =
+            when (binding.nvMain) {
+                is NavigationView -> {
+                    (binding.nvMain as NavigationView).menu
+                }
+                else -> {
+                    (binding.nvMain as NavigationRailView).menu
+                }
             }
-            else -> {
-                (binding.nvMain as NavigationRailView).menu
-            }
-        }
         if (isAlreadyLogin) {
-            loginNeededFragmentList.forEach {
-                menu.findItem(it).setOnMenuItemClickListener(null)
-            }
+            loginNeededFragmentList.forEach { menu.findItem(it).setOnMenuItemClickListener(null) }
         } else {
             loginNeededFragmentList.forEach {
                 menu.findItem(it).setOnMenuItemClickListener {
@@ -406,9 +391,8 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
     fun Toolbar.setupWithMainNavController() {
         supportActionBar!!.title = hanimeSpannedTitle
         if (binding.dlMain is DrawerLayout) {
-            val appBarConfiguration = AppBarConfiguration(setOf(R.id.nv_home_page),
-                binding.dlMain as Openable?
-            )
+            val appBarConfiguration =
+                AppBarConfiguration(setOf(R.id.nv_home_page), binding.dlMain as Openable?)
             this.setupWithNavController(navController, appBarConfiguration)
         }
     }

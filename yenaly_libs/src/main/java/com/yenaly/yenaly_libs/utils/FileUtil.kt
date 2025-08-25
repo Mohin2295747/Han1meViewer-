@@ -13,7 +13,7 @@ import java.security.MessageDigest
 fun InputStream.copyTo(
     out: OutputStream,
     bufferSize: Int = DEFAULT_BUFFER_SIZE,
-    progress: (Long) -> Unit
+    progress: (Long) -> Unit,
 ): Long {
     var bytesCopied: Long = 0
     val buffer = ByteArray(bufferSize)

@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.Surface
-import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -36,10 +35,9 @@ import com.yenaly.han1meviewer.util.AnimeShaders
 import `is`.xyz.mpv.MPVLib
 import kotlin.math.absoluteValue
 
-
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/04/21 021 16:57
  */
 sealed interface HMediaKernel {
@@ -68,10 +66,9 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
 
     private var _exoPlayer: ExoPlayer? = null
 
-    /**
-     * 尽量少用，用了之后容易出bug
-     */
-    private val exoPlayer get() = _exoPlayer!!
+    /** 尽量少用，用了之后容易出bug */
+    private val exoPlayer
+        get() = _exoPlayer!!
 
     private var prevSeek = 0L
 
@@ -81,44 +78,47 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         val context = jzvd.context
 
         release()
-//        mMediaHandlerThread = HandlerThread("JZVD")
-//        mMediaHandlerThread.start()
-//        mMediaHandler = Handler(mMediaHandlerThread.looper)
-//        handler = Handler(Looper.getMainLooper())
+        //        mMediaHandlerThread = HandlerThread("JZVD")
+        //        mMediaHandlerThread.start()
+        //        mMediaHandler = Handler(mMediaHandlerThread.looper)
+        //        handler = Handler(Looper.getMainLooper())
 
         val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory()
         val trackSelector = DefaultTrackSelector(context, videoTrackSelectionFactory)
 
-        val loadControl: LoadControl = DefaultLoadControl.Builder()
-            // .setBufferDurationsMs(360000, 600000, 1000, 5000)
-            // .setPrioritizeTimeOverSizeThresholds(false)
-            // .setTargetBufferBytes(C.LENGTH_UNSET)
-            .build()
-
+        val loadControl: LoadControl =
+            DefaultLoadControl.Builder()
+                // .setBufferDurationsMs(360000, 600000, 1000, 5000)
+                // .setPrioritizeTimeOverSizeThresholds(false)
+                // .setTargetBufferBytes(C.LENGTH_UNSET)
+                .build()
 
         val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
         // 2. Create the player
         val renderersFactory = DefaultRenderersFactory(context)
-        _exoPlayer = ExoPlayer.Builder(context, renderersFactory)
-            .setTrackSelector(trackSelector)
-            .setLoadControl(loadControl)
-            .setBandwidthMeter(bandwidthMeter)
-            .build()
+        _exoPlayer =
+            ExoPlayer.Builder(context, renderersFactory)
+                .setTrackSelector(trackSelector)
+                .setLoadControl(loadControl)
+                .setBandwidthMeter(bandwidthMeter)
+                .build()
         // Produces DataSource instances through which media data is loaded.
-        val dataSourceFactory = DefaultDataSource.Factory(
-            context,
-            DefaultHttpDataSource.Factory()
-                .setDefaultRequestProperties(jzvd.jzDataSource.headerMap)
-        )
+        val dataSourceFactory =
+            DefaultDataSource.Factory(
+                context,
+                DefaultHttpDataSource.Factory()
+                    .setDefaultRequestProperties(jzvd.jzDataSource.headerMap),
+            )
 
         val currUrl = jzvd.jzDataSource.currentUrl.toString()
-        val videoSource = if (currUrl.contains(".m3u8")) {
-            HlsMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(currUrl))
-        } else {
-            ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(currUrl))
-        }
+        val videoSource =
+            if (currUrl.contains(".m3u8")) {
+                HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(currUrl))
+            } else {
+                ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(currUrl))
+            }
 
         Log.e(TAG, "URL Link = $currUrl")
 
@@ -136,7 +136,6 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
 
         val surfaceTexture = jzvd.textureView?.surfaceTexture
         surfaceTexture?.let { exoPlayer.setVideoSurface(Surface(it)) }
-
     }
 
     override fun start() {
@@ -147,12 +146,12 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         val realWidth = videoSize.width * videoSize.pixelWidthHeightRatio
         val realHeight = videoSize.height
         jzvd.onVideoSizeChanged(realWidth.toInt(), realHeight)
-//        val ratio = realWidth / realHeight // > 1 橫屏， < 1 竖屏
-//        if (ratio > 1) {
-//            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-//        } else {
-//            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-//        }
+        //        val ratio = realWidth / realHeight // > 1 橫屏， < 1 竖屏
+        //        if (ratio > 1) {
+        //            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        //        } else {
+        //            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        //        }
     }
 
     override fun onRenderedFirstFrame() {
@@ -181,12 +180,12 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun release() {
-        if (_exoPlayer != null) { //不知道有没有妖孽
-//            val tmpHandlerThread = mMediaHandlerThread
+        if (_exoPlayer != null) { // 不知道有没有妖孽
+            //            val tmpHandlerThread = mMediaHandlerThread
             val tmpMediaPlayer = exoPlayer
             SAVED_SURFACE = null
-            tmpMediaPlayer.release() //release就不能放到主线程里，界面会卡顿
-//            tmpHandlerThread.quit()
+            tmpMediaPlayer.release() // release就不能放到主线程里，界面会卡顿
+            //            tmpHandlerThread.quit()
             _exoPlayer = null
         }
     }
@@ -259,7 +258,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun setSurface(surface: Surface?) {
-        Log.e(TAG, "setSurface: ", )
+        Log.e(TAG, "setSurface: ")
         _exoPlayer?.setVideoSurface(surface)
     }
 
@@ -279,21 +278,23 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture) = Unit
 
-
     private fun onBufferingUpdate() {
         _exoPlayer?.bufferedPercentage?.let { per ->
             jzvd.setBufferProgress(per)
-//                if (per < 100) {
-//                    mMediaHandler.postDelayed(this, 300)
-//                } else {
-//                    mMediaHandler.removeCallbacks(this)
-//                }
+            //                if (per < 100) {
+            //                    mMediaHandler.postDelayed(this, 300)
+            //                } else {
+            //                    mMediaHandler.removeCallbacks(this)
+            //                }
         }
-//            mMediaHandler.removeCallbacks(this)
+        //            mMediaHandler.removeCallbacks(this)
     }
 
-    override val width: Int get() = _exoPlayer?.videoSize?.width ?: 0
-    override val height: Int get() = _exoPlayer?.videoSize?.height ?: 0
+    override val width: Int
+        get() = _exoPlayer?.videoSize?.width ?: 0
+
+    override val height: Int
+        get() = _exoPlayer?.videoSize?.height ?: 0
 }
 
 class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel, IMedia {
@@ -328,9 +329,7 @@ class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel, IMedia 
 
     // #issue-139: 部分机型暂停报错，没判空导致的
     override fun pause() {
-        mMediaHandler?.post {
-            mediaPlayer?.pause()
-        }
+        mMediaHandler?.post { mediaPlayer?.pause() }
     }
 
     // #issue-crashlytics-c8636c4bb0b8516675cbeb9e8776bf0b:
@@ -339,8 +338,11 @@ class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel, IMedia 
         return mediaPlayer?.isPlaying == true
     }
 
-    override val width: Int get() = mediaPlayer?.videoWidth ?: 0
-    override val height: Int get() = mediaPlayer?.videoHeight ?: 0
+    override val width: Int
+        get() = mediaPlayer?.videoWidth ?: 0
+
+    override val height: Int
+        get() = mediaPlayer?.videoHeight ?: 0
 }
 
 class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), HMediaKernel, IMedia {
@@ -435,7 +437,11 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), HMediaKernel, IMedia 
         MPVLib.attachSurface(surface)
     }
 
-    override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+    override fun onSurfaceTextureAvailable(
+        surfaceTexture: SurfaceTexture,
+        width: Int,
+        height: Int,
+    ) {
         if (SAVED_SURFACE == null) {
             SAVED_SURFACE = surfaceTexture
             prepare()
@@ -449,7 +455,11 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), HMediaKernel, IMedia 
         MPVLib.setPropertyString("android-surface-size", "${width}x${height}")
     }
 
-    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+    override fun onSurfaceTextureSizeChanged(
+        surfaceTexture: SurfaceTexture,
+        width: Int,
+        height: Int,
+    ) {
         Log.d(TAG, "onSurfaceTextureSizeChanged ${width}x${height}")
         updateSurFaceSize(width, height)
     }
@@ -458,67 +468,75 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), HMediaKernel, IMedia 
 
     override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {}
 
-
     private fun clearSuperResolution() {
         MPVLib.command(arrayOf("change-list", "glsl-shaders", "clr", ""))
     }
+
     fun setSuperResolution(index: Int) {
         if (index != 0) {
-            val cmd = arrayOf("change-list", "glsl-shaders", "set", AnimeShaders.getShader(jzvd.context, index))
+            val cmd =
+                arrayOf(
+                    "change-list",
+                    "glsl-shaders",
+                    "set",
+                    AnimeShaders.getShader(jzvd.context, index),
+                )
             MPVLib.command(cmd)
         } else {
             clearSuperResolution()
         }
     }
 
-    private val mpvEventObserver = object : MPVLib.EventObserver {
-        override fun eventProperty(property: String) {
-//            Log.d(TAG, "eventProperty: $property")
-        }
+    private val mpvEventObserver =
+        object : MPVLib.EventObserver {
+            override fun eventProperty(property: String) {
+                //            Log.d(TAG, "eventProperty: $property")
+            }
 
-        override fun eventProperty(property: String, value: Long) {
+            override fun eventProperty(property: String, value: Long) {}
 
-        }
+            override fun eventProperty(property: String, value: Boolean) {
+                //            Log.d(TAG, "eventProperty: $property $value")
+            }
 
-        override fun eventProperty(property: String, value: Boolean) {
-//            Log.d(TAG, "eventProperty: $property $value")
-        }
+            override fun eventProperty(property: String, value: String) {
+                //            Log.d(TAG, "eventProperty: $property $value")
+            }
 
-        override fun eventProperty(property: String, value: String) {
-//            Log.d(TAG, "eventProperty: $property $value")
-        }
+            override fun eventProperty(property: String, value: Double) {
+                //            Log.d(TAG, "eventProperty: $property $value")
+            }
 
-        override fun eventProperty(property: String, value: Double) {
-//            Log.d(TAG, "eventProperty: $property $value")
-        }
-
-        override fun event(eventId: Int) {
-            handler.post {
-                when (eventId) {
-                    MPVLib.mpvEventId.MPV_EVENT_START_FILE -> {
-                        // 文件开始加载
-                        jzvd.onStatePreparing()
-                    }
-                    MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
-                        // 文件加载成功
-                        jzvd.onPrepared()
-                    }
-                    MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> {
-                        // 播放重新开始
-                        jzvd.onStatePlaying()
-                    }
-                    MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
-                        // 播放结束
-                        jzvd.onCompletion()
-                    }
-                    MPVLib.mpvEventId.MPV_EVENT_SHUTDOWN -> {
-                        Log.e(TAG, "event: $eventId")
+            override fun event(eventId: Int) {
+                handler.post {
+                    when (eventId) {
+                        MPVLib.mpvEventId.MPV_EVENT_START_FILE -> {
+                            // 文件开始加载
+                            jzvd.onStatePreparing()
+                        }
+                        MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
+                            // 文件加载成功
+                            jzvd.onPrepared()
+                        }
+                        MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> {
+                            // 播放重新开始
+                            jzvd.onStatePlaying()
+                        }
+                        MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
+                            // 播放结束
+                            jzvd.onCompletion()
+                        }
+                        MPVLib.mpvEventId.MPV_EVENT_SHUTDOWN -> {
+                            Log.e(TAG, "event: $eventId")
+                        }
                     }
                 }
             }
         }
-    }
 
-    override val width: Int get() = MPVLib.getPropertyInt("video-params/w") ?: 0
-    override val height: Int get() = MPVLib.getPropertyInt("video-params/h") ?: 0
+    override val width: Int
+        get() = MPVLib.getPropertyInt("video-params/w") ?: 0
+
+    override val height: Int
+        get() = MPVLib.getPropertyInt("video-params/h") ?: 0
 }

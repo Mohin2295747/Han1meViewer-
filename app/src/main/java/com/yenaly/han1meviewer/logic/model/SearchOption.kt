@@ -5,21 +5,18 @@ import android.util.SparseArray
 import androidx.core.util.valueIterator
 import com.yenaly.han1meviewer.R
 import com.yenaly.yenaly_libs.utils.LanguageHelper
+import java.util.Locale
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.Locale
 
 @Suppress("EqualsOrHashCode")
 @Serializable
 @Parcelize
 data class SearchOption(
-    @SerialName("lang")
-    val lang: Language? = null,
-    @SerialName("name")
-    val name: String? = null,
-    @SerialName("search_key")
-    val searchKey: String? = null,
+    @SerialName("lang") val lang: Language? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("search_key") val searchKey: String? = null,
 ) : Parcelable {
 
     companion object {
@@ -42,45 +39,46 @@ data class SearchOption(
             }
         }
 
-        fun toScopeKey(raw: String): Int = when (raw) {
-            "video_attributes" -> R.string.video_attr
-            "character_relationships" -> R.string.relationship
-            "characteristics" -> R.string.characteristics
-            "appearance_and_figure" -> R.string.appearance_and_figure
-            "story_plot" -> R.string.story_plot
-            "sex_positions" -> R.string.sex_position
-            else -> error("Unknown scope name: $raw")
-        }
+        fun toScopeKey(raw: String): Int =
+            when (raw) {
+                "video_attributes" -> R.string.video_attr
+                "character_relationships" -> R.string.relationship
+                "characteristics" -> R.string.characteristics
+                "appearance_and_figure" -> R.string.appearance_and_figure
+                "story_plot" -> R.string.story_plot
+                "sex_positions" -> R.string.sex_position
+                else -> error("Unknown scope name: $raw")
+            }
     }
 
     @Serializable
     @Parcelize
     data class Language(
-        @SerialName("zh-rCN")
-        val zhrCN: String? = null,
-        @SerialName("zh-rTW")
-        val zhrTW: String? = null,
-        @SerialName("en")
-        val en: String? = null,
+        @SerialName("zh-rCN") val zhrCN: String? = null,
+        @SerialName("zh-rTW") val zhrTW: String? = null,
+        @SerialName("en") val en: String? = null,
     ) : Parcelable
 
     override fun hashCode(): Int = searchKey.hashCode()
 
     val value: String
-        get() = when {
-            lang == null -> name.orEmpty()
-            name == null -> LanguageHelper.preferredLanguage.let { pl ->
-                when (pl.language) {
-                    Locale.CHINESE.language -> when (pl.country) {
-                        Locale.SIMPLIFIED_CHINESE.country -> lang.zhrCN
-                        else -> lang.zhrTW
-                    }
+        get() =
+            when {
+                lang == null -> name.orEmpty()
+                name == null ->
+                    LanguageHelper.preferredLanguage.let { pl ->
+                        when (pl.language) {
+                            Locale.CHINESE.language ->
+                                when (pl.country) {
+                                    Locale.SIMPLIFIED_CHINESE.country -> lang.zhrCN
+                                    else -> lang.zhrTW
+                                }
 
-                    Locale.ENGLISH.language -> lang.en
-                    else -> lang.zhrTW
-                }
-            } ?: lang.zhrTW.orEmpty()
+                            Locale.ENGLISH.language -> lang.en
+                            else -> lang.zhrTW
+                        }
+                    } ?: lang.zhrTW.orEmpty()
 
-            else -> throw IllegalArgumentException("Unknown lang type: ${lang.javaClass.name}")
-        }
+                else -> throw IllegalArgumentException("Unknown lang type: ${lang.javaClass.name}")
+            }
 }

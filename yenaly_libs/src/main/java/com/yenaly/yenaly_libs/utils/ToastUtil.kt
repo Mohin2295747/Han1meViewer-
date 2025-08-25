@@ -14,17 +14,10 @@ fun showLongToast(text: String?) {
 }
 
 fun showShortToast(@StringRes text: Int) {
-    Toast.makeText(
-        applicationContext,
-        applicationContext.getString(text),
-        Toast.LENGTH_SHORT
-    ).show()
+    Toast.makeText(applicationContext, applicationContext.getString(text), Toast.LENGTH_SHORT)
+        .show()
 }
 
 fun showLongToast(@StringRes text: Int) {
-    Toast.makeText(
-        applicationContext,
-        applicationContext.getString(text),
-        Toast.LENGTH_LONG
-    ).show()
+    Toast.makeText(applicationContext, applicationContext.getString(text), Toast.LENGTH_LONG).show()
 }

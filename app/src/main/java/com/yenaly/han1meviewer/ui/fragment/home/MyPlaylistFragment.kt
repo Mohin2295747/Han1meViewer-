@@ -38,12 +38,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/04 004 22:43
  */
-class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
-    IToolbarFragment<MainActivity>, LoginNeededFragmentMixin, StateLayoutMixin {
+class MyPlaylistFragment :
+    YenalyFragment<FragmentPlaylistBinding>(),
+    IToolbarFragment<MainActivity>,
+    LoginNeededFragmentMixin,
+    StateLayoutMixin {
 
     val viewModel by activityViewModels<MyListViewModel>()
 
@@ -77,14 +80,12 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
     private val adapter by unsafeLazy { HanimeMyListVideoAdapter() }
     private val playlistsAdapter by unsafeLazy { PlaylistRvAdapter(this) }
 
-    /**
-     * 用於判斷是否需要 setExpanded，防止重複喚出 AppBar
-     */
+    /** 用於判斷是否需要 setExpanded，防止重複喚出 AppBar */
     private var isAfterRefreshing = false
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentPlaylistBinding {
         return FragmentPlaylistBinding.inflate(inflater, container, false)
     }
@@ -94,9 +95,7 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
         (activity as MainActivity).setupToolbar()
         binding.statePlaylist.init {
             loadingLayout = R.layout.layout_empty_view
-            onLoading {
-                findViewById<TextView>(R.id.tv_empty).setText(R.string.loading)
-            }
+            onLoading { findViewById<TextView>(R.id.tv_empty).setText(R.string.loading) }
         }
         binding.statePageList.init {
             loadingLayout = R.layout.layout_empty_view
@@ -147,21 +146,16 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
                 setPositiveButton(R.string.confirm) { _, _ ->
                     viewModel.playlist.createPlaylist(
                         etTitle.text.toString(),
-                        etDesc.text.toString()
+                        etDesc.text.toString(),
                     )
                 }
                 setNegativeButton(R.string.cancel, null)
-
             }
         }
 
         binding.srlPageList.apply {
-            setOnLoadMoreListener {
-                getPlaylistItems()
-            }
-            setOnRefreshListener {
-                getNewPlaylistItems()
-            }
+            setOnLoadMoreListener { getPlaylistItems() }
+            setOnRefreshListener { getNewPlaylistItems() }
             setDisableContentWhenRefresh(true)
         }
     }
@@ -206,7 +200,8 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
                             binding.srlPageList.finishLoadMoreWithNoMoreData()
                             binding.srlPageList.finishRefresh()
                             if (viewModel.playlist.playlistFlow.value.isEmpty()) {
-                                adapter.notifyDataSetChanged() // 這裡要用notifyDataSetChanged()，不然不會出現空白頁，而且crash
+                                adapter
+                                    .notifyDataSetChanged() // 這裡要用notifyDataSetChanged()，不然不會出現空白頁，而且crash
                                 binding.statePageList.showEmpty()
                             }
                         }
@@ -269,8 +264,7 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
                         showShortToast(R.string.delete_failed)
                     }
 
-                    is WebsiteState.Loading -> {
-                    }
+                    is WebsiteState.Loading -> {}
 
                     is WebsiteState.Success -> {
                         showShortToast(R.string.delete_success)
@@ -286,8 +280,7 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
                         showShortToast(R.string.modify_failed)
                     }
 
-                    is WebsiteState.Loading -> {
-                    }
+                    is WebsiteState.Loading -> {}
 
                     is WebsiteState.Success -> {
                         showShortToast(R.string.modify_success)
@@ -351,9 +344,8 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
         val dlPlaylist = this@MyPlaylistFragment.binding.dlPlaylist
         setSupportActionBar(toolbar)
         supportActionBar!!.setSubtitle(R.string.play_list)
-        this@MyPlaylistFragment.addMenu(
-            R.menu.menu_playlist_toolbar, viewLifecycleOwner
-        ) { menuItem ->
+        this@MyPlaylistFragment.addMenu(R.menu.menu_playlist_toolbar, viewLifecycleOwner) { menuItem
+            ->
             when (menuItem.itemId) {
                 R.id.tb_open_drawer -> {
                     dlPlaylist.openDrawer(GravityCompat.END)
@@ -376,7 +368,10 @@ class MyPlaylistFragment : YenalyFragment<FragmentPlaylistBinding>(),
         binding.playlistHeader.onDeleteActionListener = {
             listCode?.let { listCode ->
                 viewModel.playlist.modifyPlaylist(
-                    listCode, listTitle.orEmpty(), listDesc.orEmpty(), delete = true
+                    listCode,
+                    listTitle.orEmpty(),
+                    listDesc.orEmpty(),
+                    delete = true,
                 )
             }
         }

@@ -10,8 +10,8 @@ import com.yenaly.han1meviewer.logic.model.Playlists
 import com.yenaly.han1meviewer.ui.fragment.home.MyPlaylistFragment
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 16:30
  */
 class PlaylistRvAdapter(private val fragment: Fragment) :

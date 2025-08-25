@@ -5,8 +5,8 @@ import retrofit2.Response
 import retrofit2.http.*
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/09/19 019 17:44
  */
 interface HanimeCommentService {
@@ -17,9 +17,7 @@ interface HanimeCommentService {
     ): Response<ResponseBody>
 
     @GET("loadReplies")
-    suspend fun getCommentReply(
-        @Query("id") commentId: String,
-    ): Response<ResponseBody>
+    suspend fun getCommentReply(@Query("id") commentId: String): Response<ResponseBody>
 
     @FormUrlEncoded
     @POST("createComment")

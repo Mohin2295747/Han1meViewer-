@@ -16,8 +16,8 @@ import retrofit2.http.Query
  *
  * Playlist 是指 自定义的播放列表
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/08/26 026 16:30
  */
 interface HanimeMyListService {
@@ -47,8 +47,7 @@ interface HanimeMyListService {
         @Header("X-CSRF-TOKEN") csrfToken_1: String? = csrfToken,
     ): Response<ResponseBody>
 
-    @GET("playlists")
-    suspend fun getPlaylists(): Response<ResponseBody>
+    @GET("playlists") suspend fun getPlaylists(): Response<ResponseBody>
 
     @FormUrlEncoded
     @POST("createPlaylist")

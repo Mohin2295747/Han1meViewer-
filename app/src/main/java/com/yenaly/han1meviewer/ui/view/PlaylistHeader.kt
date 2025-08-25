@@ -14,13 +14,12 @@ import com.yenaly.han1meviewer.util.showAlertDialog
 /**
  * 用于播放清單的標題和介紹
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/08/30 030 00:28
  */
-class PlaylistHeader @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
-) : FrameLayout(context, attrs) {
+class PlaylistHeader @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    FrameLayout(context, attrs) {
 
     private val tvTitle: TextView
     private val btnDelete: Button
@@ -59,9 +58,7 @@ class PlaylistHeader @JvmOverloads constructor(
             context.showAlertDialog {
                 setTitle(R.string.delete_the_playlist)
                 setMessage(R.string.sure_to_delete)
-                setPositiveButton(R.string.confirm) { _, _ ->
-                    onDeleteActionListener?.invoke()
-                }
+                setPositiveButton(R.string.confirm) { _, _ -> onDeleteActionListener?.invoke() }
                 setNegativeButton(R.string.cancel, null)
             }
         }
@@ -77,10 +74,7 @@ class PlaylistHeader @JvmOverloads constructor(
                 etDesc.setText(description)
                 setView(etView)
                 setPositiveButton(R.string.confirm) { _, _ ->
-                    onChangedListener?.invoke(
-                        etTitle.text.toString(),
-                        etDesc.text.toString()
-                    )
+                    onChangedListener?.invoke(etTitle.text.toString(), etDesc.text.toString())
                 }
                 setNegativeButton(R.string.cancel, null)
             }

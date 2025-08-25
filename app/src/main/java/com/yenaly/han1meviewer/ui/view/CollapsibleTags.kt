@@ -27,18 +27,15 @@ import com.yenaly.yenaly_libs.utils.startActivity
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
-
 /**
  * 可折叠 TAG 栏
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/08/06 006 21:46
  */
-class CollapsibleTags @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
-) : FrameLayout(context, attrs) {
-
+class CollapsibleTags @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    FrameLayout(context, attrs) {
 
     companion object {
         val animInterpolator = FastOutSlowInInterpolator()
@@ -52,10 +49,7 @@ class CollapsibleTags @JvmOverloads constructor(
      */
     var lifecycle: Lifecycle? = null
 
-    /**
-     * 设置当前是否折叠，同时作为监听器，
-     * 修改这里的值会改变折叠状态
-     */
+    /** 设置当前是否折叠，同时作为监听器， 修改这里的值会改变折叠状态 */
     var isCollapsed = false
         set(value) {
             field = value
@@ -71,15 +65,12 @@ class CollapsibleTags @JvmOverloads constructor(
     /**
      * 從這裏設置tags
      *
-     * post很重要，因為要等到View被加入到Window才能取得父View的寬度，
-     * 在RecyclerView中不這麽設置會出現問題。
+     * post很重要，因為要等到View被加入到Window才能取得父View的寬度， 在RecyclerView中不這麽設置會出現問題。
      */
     var tags: List<String>? = null
         set(value) {
             field = value
-            post {
-                setTagsInternal(value ?: emptyList())
-            }
+            post { setTagsInternal(value ?: emptyList()) }
         }
 
     private var tagViewList: MutableList<Chip>? = null
@@ -109,54 +100,74 @@ class CollapsibleTags @JvmOverloads constructor(
         // default
         toggleButton.isVisible = isCollapsedEnabled
         chipGroup.visibility = VISIBLE
-        toggleButton.setOnClickListener {
-            isCollapsed = !isCollapsed
-        }
+        toggleButton.setOnClickListener { isCollapsed = !isCollapsed }
 
         post {
-            toggleButton.animate().rotation(if (isCollapsed) 0F else 180F)
+            toggleButton
+                .animate()
+                .rotation(if (isCollapsed) 0F else 180F)
                 .setDuration(ANIM_DURATION)
-                .setInterpolator(animInterpolator).start()
+                .setInterpolator(animInterpolator)
+                .start()
         }
     }
 
     private fun setTagsInternal(tags: List<String>) {
         lifecycle?.coroutineScope?.launch {
-            tagViewList = tags.map { tag ->
-                (LayoutInflater.from(context).inflate(
-                    R.layout.item_video_tag_chip, this@CollapsibleTags, false
-                ) as Chip).apply {
-                    text = tag
-                    setOnClickListener {
-                        context?.activity?.startActivity<SearchActivity>(ADVANCED_SEARCH_MAP to tag)
+            tagViewList =
+                tags
+                    .map { tag ->
+                        (LayoutInflater.from(context)
+                                .inflate(R.layout.item_video_tag_chip, this@CollapsibleTags, false)
+                                as Chip)
+                            .apply {
+                                text = tag
+                                setOnClickListener {
+                                    context
+                                        ?.activity
+                                        ?.startActivity<SearchActivity>(ADVANCED_SEARCH_MAP to tag)
+                                }
+                                setOnLongClickListener {
+                                    tag.copyToClipboard()
+                                    showShortToast(
+                                        context.getString(R.string.s_copy_to_clipboard, tag)
+                                    )
+                                    return@setOnLongClickListener true
+                                }
+                            }
                     }
-                    setOnLongClickListener {
-                        tag.copyToClipboard()
-                        showShortToast(context.getString(R.string.s_copy_to_clipboard, tag))
-                        return@setOnLongClickListener true
-                    }
-                }
-            }.toMutableList()
+                    .toMutableList()
         }
     }
 
     private fun handleWhenCollapsed(isCollapsed: Boolean) {
-        toggleButton.animate().rotation(if (isCollapsed) 0F else 180F).setDuration(ANIM_DURATION)
-            .setInterpolator(animInterpolator).start()
+        toggleButton
+            .animate()
+            .rotation(if (isCollapsed) 0F else 180F)
+            .setDuration(ANIM_DURATION)
+            .setInterpolator(animInterpolator)
+            .start()
 
         if (isCollapsed) {
-            chipGroup.animate().setDuration(ANIM_DURATION).setInterpolator(animInterpolator)
-                .alpha(0F).withStartAction {
-                    collapseValueAnimator?.start()
-                }.withEndAction {
-                    chipGroup.visibility = INVISIBLE
-                }.start()
+            chipGroup
+                .animate()
+                .setDuration(ANIM_DURATION)
+                .setInterpolator(animInterpolator)
+                .alpha(0F)
+                .withStartAction { collapseValueAnimator?.start() }
+                .withEndAction { chipGroup.visibility = INVISIBLE }
+                .start()
         } else {
-            chipGroup.animate().setDuration(ANIM_DURATION).setInterpolator(animInterpolator)
-                .alpha(1F).withStartAction {
+            chipGroup
+                .animate()
+                .setDuration(ANIM_DURATION)
+                .setInterpolator(animInterpolator)
+                .alpha(1F)
+                .withStartAction {
                     chipGroup.visibility = VISIBLE
                     expandValueAnimator?.start()
-                }.start()
+                }
+                .start()
         }
     }
 
@@ -174,9 +185,7 @@ class CollapsibleTags @JvmOverloads constructor(
             interpolator = animInterpolator
             addUpdateListener(lifecycle) {
                 val value = it.animatedValue as Int
-                chipGroup.updateLayoutParams {
-                    height = value
-                }
+                chipGroup.updateLayoutParams { height = value }
             }
         }
     }
@@ -184,7 +193,10 @@ class CollapsibleTags @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable {
         return SavedState(
             super.onSaveInstanceState(),
-            isCollapsed, isCollapsedEnabled, chipGroupMeasureHeight, tags
+            isCollapsed,
+            isCollapsedEnabled,
+            chipGroupMeasureHeight,
+            tags,
         )
     }
 
@@ -207,6 +219,6 @@ class CollapsibleTags @JvmOverloads constructor(
         val isCollapsed: Boolean,
         val isCollapsedEnabled: Boolean,
         val chipGroupMeasureHeight: Int,
-        val tags: List<String>?
+        val tags: List<String>?,
     ) : BaseSavedState(ss)
 }

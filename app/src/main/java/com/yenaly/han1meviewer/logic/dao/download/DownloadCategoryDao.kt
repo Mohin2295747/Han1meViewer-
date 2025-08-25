@@ -14,8 +14,8 @@ abstract class DownloadCategoryDao {
     @Transaction
     @Query(
         "SELECT * FROM HanimeDownloadEntity " +
-                "INNER JOIN HanimeCategoryCrossRef ON HanimeDownloadEntity.id = HanimeCategoryCrossRef.videoId " +
-                "WHERE HanimeCategoryCrossRef.categoryId = :categoryId AND HanimeDownloadEntity.downloadedLength == HanimeDownloadEntity.length"
+            "INNER JOIN HanimeCategoryCrossRef ON HanimeDownloadEntity.id = HanimeCategoryCrossRef.videoId " +
+            "WHERE HanimeCategoryCrossRef.categoryId = :categoryId AND HanimeDownloadEntity.downloadedLength == HanimeDownloadEntity.length"
     )
     abstract fun getVideosForCategory(categoryId: Int): Flow<List<HanimeDownloadEntity>>
 

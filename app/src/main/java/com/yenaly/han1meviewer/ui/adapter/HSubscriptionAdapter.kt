@@ -65,7 +65,7 @@ class HSubscriptionAdapter : BaseDifferAdapter<Subscription, QuickViewHolder>(CO
         holder: QuickViewHolder,
         position: Int,
         item: Subscription?,
-        payloads: List<Any>
+        payloads: List<Any>,
     ) {
         item ?: return
         if (payloads.isEmpty()) {
@@ -91,7 +91,7 @@ class HSubscriptionAdapter : BaseDifferAdapter<Subscription, QuickViewHolder>(CO
     override fun onCreateViewHolder(
         context: Context,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): QuickViewHolder {
         return QuickViewHolder(R.layout.item_h_subscription, parent).apply {
             itemView.setOnClickListener {
@@ -122,19 +122,19 @@ class HSubscriptionAdapter : BaseDifferAdapter<Subscription, QuickViewHolder>(CO
                 if (context is SearchActivity) {
                     val btnDelete = getView<View>(R.id.btn_delete)
                     if (btnDelete.isGone) {
-                        submitList(items.map {
-                            it.copy(
-                                isDeleteVisible = true,
-                                isCheckBoxVisible = false
-                            )
-                        })
+                        submitList(
+                            items.map { it.copy(isDeleteVisible = true, isCheckBoxVisible = false) }
+                        )
                     } else {
-                        submitList(items.map {
-                            it.copy(
-                                isDeleteVisible = false,
-                                isCheckBoxVisible = it.name == context.viewModel.subscriptionBrand
-                            )
-                        })
+                        submitList(
+                            items.map {
+                                it.copy(
+                                    isDeleteVisible = false,
+                                    isCheckBoxVisible =
+                                        it.name == context.viewModel.subscriptionBrand,
+                                )
+                            }
+                        )
                     }
                 }
                 true
@@ -148,7 +148,8 @@ class HSubscriptionAdapter : BaseDifferAdapter<Subscription, QuickViewHolder>(CO
                     setPositiveButton(R.string.confirm) { _, _ ->
                         if (context is SearchActivity) {
                             context.myListViewModel.subscription.deleteSubscription(
-                                item.artistId, position
+                                item.artistId,
+                                position,
                             )
                         }
                     }

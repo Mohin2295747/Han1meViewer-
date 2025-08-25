@@ -1,11 +1,11 @@
 package com.yenaly.han1meviewer.logic.network
 
-import okhttp3.Dns
 import java.net.InetAddress
+import okhttp3.Dns
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/03/29 029 17:14
  */
 object GitHubDns : Dns {

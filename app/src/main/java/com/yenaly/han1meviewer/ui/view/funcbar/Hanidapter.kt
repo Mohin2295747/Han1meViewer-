@@ -12,9 +12,9 @@ import com.yenaly.han1meviewer.R
 import com.yenaly.yenaly_libs.utils.logFieldsChange
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
  * @since 2025/3/11 22:05
+ * @project Han1meViewer
  */
 class Hanidapter : BaseDifferAdapter<Hanidokitem, QuickViewHolder>(Hanidiff) {
 
@@ -82,14 +82,13 @@ class Hanidapter : BaseDifferAdapter<Hanidokitem, QuickViewHolder>(Hanidiff) {
                 action.onClick(view)
             }
         }
-
     }
 
     override fun onBindViewHolder(
         holder: QuickViewHolder,
         position: Int,
         item: Hanidokitem?,
-        payloads: List<Any>
+        payloads: List<Any>,
     ) {
         item ?: return
         if (payloads.isEmpty() || payloads.first() == 0) {
@@ -135,7 +134,7 @@ class Hanidapter : BaseDifferAdapter<Hanidokitem, QuickViewHolder>(Hanidiff) {
     override fun onCreateViewHolder(
         context: Context,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): QuickViewHolder {
         // MaterialButton 构成
         val view = View.inflate(context, R.layout.item_hanidock, null)

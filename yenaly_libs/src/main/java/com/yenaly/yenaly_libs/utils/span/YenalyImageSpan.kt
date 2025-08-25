@@ -7,32 +7,27 @@ import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.text.style.ImageSpan
 
-/**
- * Created by luyao
- * on 2019/8/14 9:17
- */
+/** Created by luyao on 2019/8/14 9:17 */
 class YenalyImageSpan(
     drawable: Drawable,
     verticalAlignment: Int = ALIGN_MIDDLE,
     fontWidthMultiple: Float = -1f,
     marginLeft: Int = 0,
-    marginRight: Int = 0
+    marginRight: Int = 0,
 ) : ImageSpan(drawable, verticalAlignment) {
-
 
     companion object {
         const val ALIGN_MIDDLE = -100 // 不要和父类重复
 
         /**
-         * A constant indicating that the bottom of this span should be aligned
-         * with the bottom of the surrounding text, i.e., at the same level as the
-         * lowest descender in the text.
+         * A constant indicating that the bottom of this span should be aligned with the bottom of
+         * the surrounding text, i.e., at the same level as the lowest descender in the text.
          */
         const val ALIGN_BOTTOM = 0
 
         /**
-         * A constant indicating that the bottom of this span should be aligned
-         * with the baseline of the surrounding text.
+         * A constant indicating that the bottom of this span should be aligned with the baseline of
+         * the surrounding text.
          */
         const val ALIGN_BASELINE = 1
     }
@@ -49,10 +44,11 @@ class YenalyImageSpan(
         text: CharSequence?,
         start: Int,
         end: Int,
-        fm: Paint.FontMetricsInt?
+        fm: Paint.FontMetricsInt?,
     ): Int {
-        mWidth = if (mAvoidSuperChangeFontMetrics) drawable.bounds.right
-        else super.getSize(paint, text, start, end, fm)
+        mWidth =
+            if (mAvoidSuperChangeFontMetrics) drawable.bounds.right
+            else super.getSize(paint, text, start, end, fm)
 
         if (mFontWidthMultiple > 0) {
             mWidth = (paint.measureText("子") * mFontWidthMultiple).toInt()
@@ -74,7 +70,7 @@ class YenalyImageSpan(
         top: Int,
         y: Int,
         bottom: Int,
-        paint: Paint
+        paint: Paint,
     ) {
         if (sVerticalAlignment == ALIGN_MIDDLE) {
             canvas.save()
@@ -86,7 +82,6 @@ class YenalyImageSpan(
             canvas.translate(x + mMarginLeft, iconTop.toFloat())
             drawable.draw(canvas)
             canvas.restore()
-        } else
-            super.draw(canvas, text, start, end, x + mMarginLeft, top, y, bottom, paint)
+        } else super.draw(canvas, text, start, end, x + mMarginLeft, top, y, bottom, paint)
     }
 }

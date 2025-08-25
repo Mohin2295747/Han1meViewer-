@@ -22,12 +22,13 @@ class HSearchTagAdapter : BaseQuickAdapter<SearchOption, QuickViewHolder>() {
     override fun onCreateViewHolder(
         context: Context,
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): QuickViewHolder {
-        val checkBox = MaterialCheckBox(context).apply {
-            maxLines = 2
-            ellipsize = TextUtils.TruncateAt.END
-        }
+        val checkBox =
+            MaterialCheckBox(context).apply {
+                maxLines = 2
+                ellipsize = TextUtils.TruncateAt.END
+            }
         return QuickViewHolder(checkBox).apply {
             checkBox.setOnCheckedChangeListener { _, isChecked ->
                 val position = bindingAdapterPosition

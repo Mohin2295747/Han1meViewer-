@@ -10,10 +10,9 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
+import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
-import com.google.mlkit.nl.translate.TranslateLanguage
-import com.google.mlkit.nl.translate.Translator
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.MaterialHeader
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
@@ -29,8 +28,8 @@ import com.yenaly.yenaly_libs.utils.LanguageHelper
 import `is`.xyz.mpv.MPVLib
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/08 008 17:32
  */
 class HanimeApplication : YenalyApplication() {
@@ -48,9 +47,7 @@ class HanimeApplication : YenalyApplication() {
         }
     }
 
-    /**
-     * 已经在 [HInitializer] 中处理了
-     */
+    /** 已经在 [HInitializer] 中处理了 */
     override val isDefaultCrashHandlerEnabled: Boolean = false
 
     override fun onCreate() {
@@ -70,23 +67,25 @@ class HanimeApplication : YenalyApplication() {
         if (AnimeShaders.copyShaderAssets(applicationContext) <= 0) {
             Log.w(TAG, "Shader 复制失败")
         }
-        val zhOptions = TranslatorOptions.Builder()
-        .setSourceLanguage(TranslateLanguage.CHINESE)
-        .setTargetLanguage(TranslateLanguage.ENGLISH)
-        .build()
-    val zhTranslator = Translation.getClient(zhOptions)
-    zhTranslator.downloadModelIfNeeded()
+        val zhOptions =
+            TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.CHINESE)
+                .setTargetLanguage(TranslateLanguage.ENGLISH)
+                .build()
+        val zhTranslator = Translation.getClient(zhOptions)
+        zhTranslator.downloadModelIfNeeded()
 
-    // Japanese → English
-    val jaOptions = TranslatorOptions.Builder()
-        .setSourceLanguage(TranslateLanguage.JAPANESE)
-        .setTargetLanguage(TranslateLanguage.ENGLISH)
-        .build()
-    val jaTranslator = Translation.getClient(jaOptions)
-    jaTranslator.downloadModelIfNeeded()
+        // Japanese → English
+        val jaOptions =
+            TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.JAPANESE)
+                .setTargetLanguage(TranslateLanguage.ENGLISH)
+                .build()
+        val jaTranslator = Translation.getClient(jaOptions)
+        jaTranslator.downloadModelIfNeeded()
 
-    TranslatorProvider.zhTranslator = zhTranslator
-    TranslatorProvider.jaTranslator = jaTranslator
+        TranslatorProvider.zhTranslator = zhTranslator
+        TranslatorProvider.jaTranslator = jaTranslator
     }
 
     private fun initFirebase() {
@@ -98,20 +97,19 @@ class HanimeApplication : YenalyApplication() {
             setCustomKeys {
                 key(
                     FirebaseConstants.APP_LANGUAGE,
-                    LanguageHelper.preferredLanguage.toLanguageTag()
+                    LanguageHelper.preferredLanguage.toLanguageTag(),
                 )
-                key(
-                    FirebaseConstants.VERSION_SOURCE,
-                    BuildConfig.HA1_VERSION_SOURCE
-                )
+                key(FirebaseConstants.VERSION_SOURCE, BuildConfig.HA1_VERSION_SOURCE)
             }
         }
         // 用于处理 Firebase Remote Config 初始化
         Firebase.remoteConfig.apply {
-            setConfigSettingsAsync(remoteConfigSettings {
-                minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0 else 3 * 60 * 60
-                fetchTimeoutInSeconds = 10
-            })
+            setConfigSettingsAsync(
+                remoteConfigSettings {
+                    minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0 else 3 * 60 * 60
+                    fetchTimeoutInSeconds = 10
+                }
+            )
             setDefaultsAsync(FirebaseConstants.remoteConfigDefaults)
             fetchAndActivate().addOnCompleteListener {
                 AppViewModel.getLatestVersion(delayMillis = 200)
@@ -122,16 +120,22 @@ class HanimeApplication : YenalyApplication() {
     private fun initNotificationChannel() {
         val nm = NotificationManagerCompat.from(this)
 
-        val hanimeDownloadChannel = NotificationChannelCompat.Builder(
-            DOWNLOAD_NOTIFICATION_CHANNEL,
-            NotificationManagerCompat.IMPORTANCE_HIGH
-        ).setName("Hanime Download").build()
+        val hanimeDownloadChannel =
+            NotificationChannelCompat.Builder(
+                    DOWNLOAD_NOTIFICATION_CHANNEL,
+                    NotificationManagerCompat.IMPORTANCE_HIGH,
+                )
+                .setName("Hanime Download")
+                .build()
         nm.createNotificationChannel(hanimeDownloadChannel)
 
-        val appUpdateChannel = NotificationChannelCompat.Builder(
-            UPDATE_NOTIFICATION_CHANNEL,
-            NotificationManagerCompat.IMPORTANCE_HIGH
-        ).setName("App Update").build()
+        val appUpdateChannel =
+            NotificationChannelCompat.Builder(
+                    UPDATE_NOTIFICATION_CHANNEL,
+                    NotificationManagerCompat.IMPORTANCE_HIGH,
+                )
+                .setName("App Update")
+                .build()
         nm.createNotificationChannel(appUpdateChannel)
     }
 }

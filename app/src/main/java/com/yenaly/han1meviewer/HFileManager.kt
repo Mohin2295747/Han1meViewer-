@@ -12,27 +12,26 @@ object HFileManager {
     private val illegalCharsRegex = Regex("""["*/:<>?\\|\x00-\x1F\x7F]""")
 
     val appExternalDownloadFolder: File
-        get() = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            APP_NAME
-        ).also { file -> file.makeFolderNoMedia() }
+        get() =
+            File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    APP_NAME,
+                )
+                .also { file -> file.makeFolderNoMedia() }
 
     val appDownloadFolder: File
-        get() = File(
-            applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-            APP_NAME
-        ).also { file -> file.makeFolderNoMedia() }
+        get() =
+            File(applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APP_NAME)
+                .also { file -> file.makeFolderNoMedia() }
 
     const val DEF_VIDEO_TYPE = "mp4"
     const val DEF_VIDEO_COVER_TYPE = "png"
 
-    fun createVideoName(
-        title: String, quality: String, suffix: String = DEF_VIDEO_TYPE
-    ) = "${title.replaceAllIllegalChars()}_${quality}.${suffix}"
+    fun createVideoName(title: String, quality: String, suffix: String = DEF_VIDEO_TYPE) =
+        "${title.replaceAllIllegalChars()}_${quality}.${suffix}"
 
-    fun createVideoCoverName(
-        title: String, suffix: String = DEF_VIDEO_COVER_TYPE
-    ) = "${title.replaceAllIllegalChars()}.${suffix}"
+    fun createVideoCoverName(title: String, suffix: String = DEF_VIDEO_COVER_TYPE) =
+        "${title.replaceAllIllegalChars()}.${suffix}"
 
     fun getDownloadFolder(again: Boolean = false): File {
         return if (again) {
@@ -48,15 +47,18 @@ object HFileManager {
     }
 
     fun getDownloadVideoFile(
-        videoCode: String, title: String, quality: String,
-        suffix: String = DEF_VIDEO_TYPE
+        videoCode: String,
+        title: String,
+        quality: String,
+        suffix: String = DEF_VIDEO_TYPE,
     ): File {
         return File(getDownloadVideoFolder(videoCode), createVideoName(title, quality, suffix))
     }
 
     fun getDownloadVideoCoverFile(
-        videoCode: String, title: String,
-        suffix: String = DEF_VIDEO_COVER_TYPE
+        videoCode: String,
+        title: String,
+        suffix: String = DEF_VIDEO_COVER_TYPE,
     ): File {
         return File(getDownloadVideoFolder(videoCode), createVideoCoverName(title, suffix))
     }

@@ -29,12 +29,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/04 004 22:42
  */
-class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
-    IToolbarFragment<MainActivity>, LoginNeededFragmentMixin, StateLayoutMixin {
+class MyWatchLaterFragment :
+    YenalyFragment<FragmentPageListBinding>(),
+    IToolbarFragment<MainActivity>,
+    LoginNeededFragmentMixin,
+    StateLayoutMixin {
 
     val viewModel by activityViewModels<MyListViewModel>()
 
@@ -48,7 +51,7 @@ class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentPageListBinding {
         return FragmentPageListBinding.inflate(inflater, container, false)
     }
@@ -77,12 +80,8 @@ class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
         }
 
         binding.srlPageList.apply {
-            setOnLoadMoreListener {
-                getMyWatchLater()
-            }
-            setOnRefreshListener {
-                getNewMyWatchLater()
-            }
+            setOnLoadMoreListener { getMyWatchLater() }
+            setOnRefreshListener { getNewMyWatchLater() }
             setDisableContentWhenRefresh(true)
         }
     }
@@ -102,12 +101,14 @@ class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
 
                         is PageLoadingState.Loading -> {
                             adapter.stateView = null
-                            if (viewModel.watchLater.watchLaterFlow.value.isEmpty()) binding.srlPageList.autoRefresh()
+                            if (viewModel.watchLater.watchLaterFlow.value.isEmpty())
+                                binding.srlPageList.autoRefresh()
                         }
 
                         is PageLoadingState.NoMoreData -> {
                             binding.srlPageList.finishLoadMoreWithNoMoreData()
-                            if (viewModel.watchLater.watchLaterFlow.value.isEmpty()) binding.state.showEmpty()
+                            if (viewModel.watchLater.watchLaterFlow.value.isEmpty())
+                                binding.state.showEmpty()
                         }
 
                         is PageLoadingState.Success -> {
@@ -123,9 +124,7 @@ class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.watchLater.watchLaterFlow.collectLatest {
-                    adapter.submitList(it)
-                }
+                viewModel.watchLater.watchLaterFlow.collectLatest { adapter.submitList(it) }
             }
         }
 
@@ -137,8 +136,7 @@ class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
                         state.throwable.printStackTrace()
                     }
 
-                    is WebsiteState.Loading -> {
-                    }
+                    is WebsiteState.Loading -> {}
 
                     is WebsiteState.Success -> {
                         showShortToast(R.string.delete_success)
@@ -168,10 +166,8 @@ class MyWatchLaterFragment : YenalyFragment<FragmentPageListBinding>(),
         val toolbar = this@MyWatchLaterFragment.binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setSubtitle(R.string.watch_later)
-        this@MyWatchLaterFragment.addMenu(
-            R.menu.menu_my_list_toolbar,
-            viewLifecycleOwner
-        ) { menuItem ->
+        this@MyWatchLaterFragment.addMenu(R.menu.menu_my_list_toolbar, viewLifecycleOwner) {
+            menuItem ->
             when (menuItem.itemId) {
                 R.id.tb_help -> {
                     requireContext().showAlertDialog {

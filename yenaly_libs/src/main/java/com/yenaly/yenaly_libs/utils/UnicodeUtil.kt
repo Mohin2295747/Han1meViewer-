@@ -18,7 +18,7 @@ fun stringDecodeToUnicode(src: String): String {
         // Kotlin >= 1.5
         var s = Integer.toHexString(element.code)
 
-        if (s.length == 2) {// 英文转16进制后只有两位，补全4位
+        if (s.length == 2) { // 英文转16进制后只有两位，补全4位
             s = "00$s"
         }
         builder.append("\\u$s")

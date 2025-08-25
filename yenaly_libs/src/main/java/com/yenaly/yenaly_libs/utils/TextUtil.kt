@@ -24,7 +24,8 @@ fun Long.secondToTimeCase(): String {
     val secondString = if (second < 10) "0$second" else second.toString()
     val minuteString = if (minute < 10) "0$minute" else minute.toString()
     val hourString = if (hour < 10) "0$hour" else hour.toString()
-    return if (hour != 0L) "$hourString:$minuteString:$secondString" else "$minuteString:$secondString"
+    return if (hour != 0L) "$hourString:$minuteString:$secondString"
+    else "$minuteString:$secondString"
 }
 
 /**
@@ -38,19 +39,16 @@ fun Long.formatPlayCount(): String {
     return when {
         this < 0 -> "0"
         this < 1_0000 -> this.toString()
-        this < 1_0000_0000 -> String.format(
-            Locale.getDefault(),
-            "%d.%02d万",
-            this / 1_0000,
-            this % 1_0000 / 100
-        )
+        this < 1_0000_0000 ->
+            String.format(Locale.getDefault(), "%d.%02d万", this / 1_0000, this % 1_0000 / 100)
 
-        else -> String.format(
-            Locale.getDefault(),
-            "%d.%02d亿",
-            this / 1_0000_0000,
-            this % 1_0000_0000 / 100_0000
-        )
+        else ->
+            String.format(
+                Locale.getDefault(),
+                "%d.%02d亿",
+                this / 1_0000_0000,
+                this % 1_0000_0000 / 100_0000,
+            )
     }
 }
 

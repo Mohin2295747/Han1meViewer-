@@ -27,9 +27,7 @@ fun com.chad.library.adapter4.BaseQuickAdapter<*, *>.setStateViewLayout(
     stateView = view
 }
 
-/**
- * 设置状态视图
- */
+/** 设置状态视图 */
 fun com.chad.library.adapter4.BaseQuickAdapter<*, *>.setStateViewLayout(
     view: View,
     text: String? = null,
@@ -41,22 +39,16 @@ fun com.chad.library.adapter4.BaseQuickAdapter<*, *>.setStateViewLayout(
 
 suspend fun <T : Any> BaseDifferAdapter<T, *>.awaitSubmitList(list: List<T>?) =
     suspendCoroutine { cont ->
-        submitList(list) {
-            cont.resume(Unit)
-        }
+        submitList(list) { cont.resume(Unit) }
     }
 
 /**
- * BRVAH4 的 getItem() 现在开始会返回 null 值了，为了避免各种 null 检查，
- * 我们直接在这里加一个非空断言，这样就不用每次都检查了。
- * 而且一般情况下不会为 null
+ * BRVAH4 的 getItem() 现在开始会返回 null 值了，为了避免各种 null 检查， 我们直接在这里加一个非空断言，这样就不用每次都检查了。 而且一般情况下不会为 null
  */
 @OptIn(ExperimentalContracts::class)
 @Suppress("NOTHING_TO_INLINE")
 @Deprecated("Use safe call instead, this can easily cause NPE.", ReplaceWith("this ?: return"))
 inline fun <T> T?.notNull(): T {
-    contract {
-        returns() implies (this@notNull != null)
-    }
+    contract { returns() implies (this@notNull != null) }
     return checkNotNull(this)
 }

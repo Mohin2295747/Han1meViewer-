@@ -18,8 +18,8 @@ import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.startActivity
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 16:38
  */
 class HanimeMyListVideoAdapter : BaseDifferAdapter<HanimeInfo, QuickViewHolder>(COMPARATOR) {
@@ -29,29 +29,22 @@ class HanimeMyListVideoAdapter : BaseDifferAdapter<HanimeInfo, QuickViewHolder>(
     }
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<HanimeInfo>() {
-            override fun areItemsTheSame(
-                oldItem: HanimeInfo,
-                newItem: HanimeInfo,
-            ): Boolean {
-                return oldItem.videoCode == newItem.videoCode
-            }
+        val COMPARATOR =
+            object : DiffUtil.ItemCallback<HanimeInfo>() {
+                override fun areItemsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
+                    return oldItem.videoCode == newItem.videoCode
+                }
 
-            override fun areContentsTheSame(
-                oldItem: HanimeInfo,
-                newItem: HanimeInfo,
-            ): Boolean {
-                return oldItem == newItem
+                override fun areContentsTheSame(oldItem: HanimeInfo, newItem: HanimeInfo): Boolean {
+                    return oldItem == newItem
+                }
             }
-        }
     }
 
     override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HanimeInfo?) {
         item ?: return
         holder.getView<TextView>(R.id.title).text = item.title
-        holder.getView<ImageView>(R.id.cover).load(item.coverUrl) {
-            crossfade(true)
-        }
+        holder.getView<ImageView>(R.id.cover).load(item.coverUrl) { crossfade(true) }
     }
 
     override fun onCreateViewHolder(
@@ -60,10 +53,11 @@ class HanimeMyListVideoAdapter : BaseDifferAdapter<HanimeInfo, QuickViewHolder>(
         viewType: Int,
     ): QuickViewHolder {
         return QuickViewHolder(R.layout.item_hanime_video_simplified, parent).also { viewHolder ->
-            viewHolder.getView<View>(R.id.frame).layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            viewHolder.getView<View>(R.id.frame).layoutParams =
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                )
             viewHolder.getView<ImageView>(R.id.cover).scaleType = ImageView.ScaleType.CENTER_CROP
             viewHolder.itemView.apply {
                 setOnClickListener {

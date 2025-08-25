@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 
 class VideoViewModel(application: Application) : YenalyViewModel(application) {
 
-    private val _videoDetailFlow = MutableStateFlow<VideoLoadingState<HanimeVideo>>(VideoLoadingState.Loading)
+    private val _videoDetailFlow =
+        MutableStateFlow<VideoLoadingState<HanimeVideo>>(VideoLoadingState.Loading)
     val videoDetailFlow = _videoDetailFlow.asStateFlow()
 
     fun loadVideoDetail(code: String) {
@@ -24,21 +25,19 @@ class VideoViewModel(application: Application) : YenalyViewModel(application) {
             _videoDetailFlow.value = VideoLoadingState.Loading
 
             NetworkRepo.getVideoDetail(code)
-                .catch { exception ->
-                    _videoDetailFlow.value = VideoLoadingState.Error(exception)
-                }
+                .catch { exception -> _videoDetailFlow.value = VideoLoadingState.Error(exception) }
                 .collectLatest { video ->
                     // Collect all translatable text fields
                     val textsToTranslate = mutableListOf<TranslatableText>()
                     textsToTranslate.add(video.title)
                     video.introduction?.let { textsToTranslate.add(it) }
                     video.tags.forEach { tag -> textsToTranslate.add(tag) }
-                    
+
                     // Also collect from related videos
                     video.relatedHanimes.forEach { relatedVideo ->
                         textsToTranslate.add(relatedVideo.title)
                     }
-                    
+
                     // Also collect from playlist videos
                     video.playlist?.video?.forEach { playlistVideo ->
                         textsToTranslate.add(playlistVideo.title)
@@ -50,7 +49,7 @@ class VideoViewModel(application: Application) : YenalyViewModel(application) {
                     // Trigger batch translation in background
                     launch {
                         TranslationManager.translateBatch(textsToTranslate)
-                        
+
                         // Update flow again when translations complete
                         // This will trigger UI recomposition with translated text
                         _videoDetailFlow.value = VideoLoadingState.Success(video)
@@ -66,17 +65,17 @@ class VideoViewModel(application: Application) : YenalyViewModel(application) {
             textsToTranslate.add(video.title)
             video.introduction?.let { textsToTranslate.add(it) }
             video.tags.forEach { tag -> textsToTranslate.add(tag) }
-            
+
             video.relatedHanimes.forEach { relatedVideo ->
                 textsToTranslate.add(relatedVideo.title)
             }
-            
+
             video.playlist?.video?.forEach { playlistVideo ->
                 textsToTranslate.add(playlistVideo.title)
             }
 
             TranslationManager.translateBatch(textsToTranslate)
-            
+
             // Update state to trigger UI refresh
             _videoDetailFlow.value = VideoLoadingState.Success(video)
         }

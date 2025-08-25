@@ -12,13 +12,14 @@ import com.yenaly.han1meviewer.logic.entity.WatchHistoryEntity
 import com.yenaly.yenaly_libs.utils.applicationContext
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/22 022 22:46
  */
 @Database(
     entities = [SearchHistoryEntity::class, WatchHistoryEntity::class],
-    version = 2, exportSchema = false
+    version = 2,
+    exportSchema = false,
 )
 abstract class HistoryDatabase : RoomDatabase() {
 
@@ -28,31 +29,30 @@ abstract class HistoryDatabase : RoomDatabase() {
 
     companion object {
         val instance by lazy {
-            Room.databaseBuilder(
-                applicationContext,
-                HistoryDatabase::class.java,
-                "history.db"
-            ).addMigrations(Migration1To2).build()
+            Room.databaseBuilder(applicationContext, HistoryDatabase::class.java, "history.db")
+                .addMigrations(Migration1To2)
+                .build()
         }
     }
 
     object Migration1To2 : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
 
-            val cursor = db.query(
-                """SELECT id, redirectLink FROM WatchHistoryEntity"""
-            )
+            val cursor = db.query("""SELECT id, redirectLink FROM WatchHistoryEntity""")
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val url = cursor.getString(cursor.getColumnIndexOrThrow("redirectLink"))
                 val videoCode =
-                    url.substringAfter("v=") // 不用 String.toVideoCode() 的原因是，防止該拓展函數因不可抗力改變導致 migrate 失敗
+                    url.substringAfter(
+                        "v="
+                    ) // 不用 String.toVideoCode() 的原因是，防止該拓展函數因不可抗力改變導致 migrate 失敗
                 val values = contentValuesOf("redirectLink" to videoCode)
                 db.update(
                     "WatchHistoryEntity",
                     SQLiteDatabase.CONFLICT_REPLACE,
                     values,
-                    "id = ?", arrayOf(id)
+                    "id = ?",
+                    arrayOf(id),
                 )
             }
             db.execSQL(
@@ -62,6 +62,3 @@ abstract class HistoryDatabase : RoomDatabase() {
         }
     }
 }
-
-
-

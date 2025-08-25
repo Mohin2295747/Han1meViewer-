@@ -9,8 +9,8 @@ import com.yenaly.yenaly_libs.utils.dp
 /**
  * 用于计算视频封面的大小动态调整！
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/04/08 008 21:54
  */
 @SuppressLint("StaticFieldLeak")
@@ -20,31 +20,25 @@ object VideoCoverSize {
 
     private val context = applicationContext
 
-    private val screenWidth get() = context.resources.displayMetrics.widthPixels
+    private val screenWidth
+        get() = context.resources.displayMetrics.widthPixels
 
-    private val videoCoverWidth =
-        context.resources.getDimension(R.dimen.video_cover_width)
+    private val videoCoverWidth = context.resources.getDimension(R.dimen.video_cover_width)
     private val simplifiedVideoCoverWidth =
         context.resources.getDimension(R.dimen.video_cover_simplified_width)
 
     // Ratio of the video cover's width to its height
     private const val RATIO = 15 / 22.0
 
-    /**
-     * 自带的一个Margin
-     */
+    /** 自带的一个Margin */
     private val margin = 4.dp
 
-    /**
-     * 通常父View也会有一个Margin，所以这里也加上
-     */
+    /** 通常父View也会有一个Margin，所以这里也加上 */
     private val parentMargin = 8.dp
 
     object Normal {
 
-        /**
-         * 最少显示几个视频
-         */
+        /** 最少显示几个视频 */
         private const val AT_LEAST = 2
 
         val videoInOneLine
@@ -67,9 +61,7 @@ object VideoCoverSize {
 
     object Simplified {
 
-        /**
-         * 最少显示几个视频
-         */
+        /** 最少显示几个视频 */
         private const val AT_LEAST = 3
 
         val videoInOneLine

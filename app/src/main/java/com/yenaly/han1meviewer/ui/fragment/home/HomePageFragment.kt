@@ -56,12 +56,12 @@ import com.yenaly.yenaly_libs.utils.startActivity
 import kotlinx.coroutines.launch
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/12 012 12:31
  */
-class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
-    IToolbarFragment<MainActivity>, StateLayoutMixin {
+class HomePageFragment :
+    YenalyFragment<FragmentHomePageBinding>(), IToolbarFragment<MainActivity>, StateLayoutMixin {
 
     companion object {
         private val animInterpolator = FastOutSlowInInterpolator()
@@ -78,50 +78,47 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
     private val hanimeCurrentAdapter = HanimeVideoRvAdapter()
     private val hotHanimeMonthlyAdapter = HanimeVideoRvAdapter()
 
-    private val concatAdapter = ConcatAdapter(
-        latestHanimeAdapter.withTitleSection(R.string.latest_hanime) {
-            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.GENRE to "裏番"))
-        },
-        latestReleaseAdapter.withTitleSection(R.string.latest_release) {
-            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上市"))
-        },
-        latestUploadAdapter.withTitleSection(R.string.latest_upload) {
-            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上傳"))
-        },
-        chineseSubtitleAdapter.withTitleSection(R.string.chinese_subtitle) {
-            toSearchActivity(
-                advancedSearchMapOf(
-                    HAdvancedSearch.TAGS to hashMapOf<Int, Any>(R.string.video_attr to "中文字幕"),
-                    HAdvancedSearch.SORT to "最新上傳"
+    private val concatAdapter =
+        ConcatAdapter(
+            latestHanimeAdapter.withTitleSection(R.string.latest_hanime) {
+                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.GENRE to "裏番"))
+            },
+            latestReleaseAdapter.withTitleSection(R.string.latest_release) {
+                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上市"))
+            },
+            latestUploadAdapter.withTitleSection(R.string.latest_upload) {
+                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上傳"))
+            },
+            chineseSubtitleAdapter.withTitleSection(R.string.chinese_subtitle) {
+                toSearchActivity(
+                    advancedSearchMapOf(
+                        HAdvancedSearch.TAGS to hashMapOf<Int, Any>(R.string.video_attr to "中文字幕"),
+                        HAdvancedSearch.SORT to "最新上傳",
+                    )
                 )
-            )
-        },
-        hanimeTheyWatchedAdapter.withTitleSection(R.string.they_watched) {
-            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "他們在看"))
-        },
-        hanimeCurrentAdapter.withTitleSection(R.string.ranking_today) {
-            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本日排行"))
-        },
-        hotHanimeMonthlyAdapter.withTitleSection(R.string.ranking_this_month) {
-            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本月排行"))
-        }
-    )
+            },
+            hanimeTheyWatchedAdapter.withTitleSection(R.string.they_watched) {
+                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "他們在看"))
+            },
+            hanimeCurrentAdapter.withTitleSection(R.string.ranking_today) {
+                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本日排行"))
+            },
+            hotHanimeMonthlyAdapter.withTitleSection(R.string.ranking_this_month) {
+                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本月排行"))
+            },
+        )
 
-    /**
-     * 用於判斷是否需要 setExpanded，防止重複喚出 AppBar
-     */
+    /** 用於判斷是否需要 setExpanded，防止重複喚出 AppBar */
     private var isAfterRefreshing = false
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentHomePageBinding {
         return FragmentHomePageBinding.inflate(inflater, container, false)
     }
 
-    /**
-     * 初始化数据
-     */
+    /** 初始化数据 */
     override fun initData(savedInstanceState: Bundle?) {
 
         (activity as MainActivity).setupToolbar()
@@ -134,21 +131,21 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
         binding.rv.adapter = concatAdapter
         binding.rv.clipToPadding = false
         if (binding.rv.layoutManager is GridLayoutManager) {
-            (binding.rv.layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return if (position == 0) 2 else 1
+            (binding.rv.layoutManager as GridLayoutManager).spanSizeLookup =
+                object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        return if (position == 0) 2 else 1
+                    }
                 }
-            }
             binding.rv.addItemDecoration(
                 GridSpacingDecoration(
                     spanCount = 2,
                     spacing = 16.dpToPx(),
                     start = 1,
-                    includeEdge = false
+                    includeEdge = false,
                 )
             )
         }
-
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.rv) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
@@ -230,7 +227,7 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
                         it.toBitmapOrNull()?.let(Palette::Builder)?.generate { p ->
                             p?.let(::handlePalette)
                         }
-                    }
+                    },
                 )
             }
             binding.btnBanner.isEnabled = banner.videoCode != null
@@ -250,17 +247,21 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
             val buttonBgColor =
                 p.darkVibrantSwatch?.rgb ?: p.darkMutedSwatch?.rgb ?: Color.TRANSPARENT
             val darkVibrantForContentScrim =
-                p.darkVibrantSwatch?.rgb ?: p.darkMutedSwatch?.rgb ?: p.lightVibrantSwatch?.rgb
-                ?: p.lightMutedSwatch?.rgb ?: Color.BLACK
+                p.darkVibrantSwatch?.rgb
+                    ?: p.darkMutedSwatch?.rgb
+                    ?: p.lightVibrantSwatch?.rgb
+                    ?: p.lightMutedSwatch?.rgb
+                    ?: Color.BLACK
             binding.collapsingToolbar.setContentScrimColor(darkVibrantForContentScrim)
-            binding.btnBanner.background = GradientDrawable().apply {
-                colors = intArrayOf(Color.TRANSPARENT, buttonBgColor)
-                orientation = GradientDrawable.Orientation.LEFT_RIGHT
-            }
+            binding.btnBanner.background =
+                GradientDrawable().apply {
+                    colors = intArrayOf(Color.TRANSPARENT, buttonBgColor)
+                    orientation = GradientDrawable.Orientation.LEFT_RIGHT
+                }
             binding.ivBanner.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
             colorTransition(
                 fromColor = (binding.aColor.background as ColorDrawable).color,
-                toColor = lightVibrant
+                toColor = lightVibrant,
             ) {
                 interpolator = animInterpolator
                 duration = ANIM_DURATION
@@ -276,18 +277,13 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
         startActivity<SearchActivity>(ADVANCED_SEARCH_MAP to advancedSearchMap)
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private var easterEggCount = 1f
+    @RequiresApi(Build.VERSION_CODES.S) private var easterEggCount = 1f
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun easterEgg() {
         binding.cover.setOnClickListener {
             binding.cover.setRenderEffect(
-                RenderEffect.createBlurEffect(
-                    easterEggCount,
-                    easterEggCount,
-                    Shader.TileMode.CLAMP
-                )
+                RenderEffect.createBlurEffect(easterEggCount, easterEggCount, Shader.TileMode.CLAMP)
             )
             easterEggCount++
         }

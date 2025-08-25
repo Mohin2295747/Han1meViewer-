@@ -21,12 +21,12 @@ import com.yenaly.yenaly_libs.utils.unsafeLazy
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/01 001 21:23
  */
-class WatchHistoryFragment : YenalyFragment<FragmentPageListBinding>(),
-    IToolbarFragment<MainActivity>, StateLayoutMixin {
+class WatchHistoryFragment :
+    YenalyFragment<FragmentPageListBinding>(), IToolbarFragment<MainActivity>, StateLayoutMixin {
 
     val viewModel by activityViewModels<MainViewModel>()
 
@@ -34,7 +34,7 @@ class WatchHistoryFragment : YenalyFragment<FragmentPageListBinding>(),
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentPageListBinding {
         return FragmentPageListBinding.inflate(inflater, container, false)
     }
@@ -53,9 +53,7 @@ class WatchHistoryFragment : YenalyFragment<FragmentPageListBinding>(),
             requireContext().showAlertDialog {
                 setTitle(R.string.delete_history)
                 setMessage(getString(R.string.sure_to_delete_s, data.title))
-                setPositiveButton(R.string.confirm) { _, _ ->
-                    viewModel.deleteWatchHistory(data)
-                }
+                setPositiveButton(R.string.confirm) { _, _ -> viewModel.deleteWatchHistory(data) }
                 setNegativeButton(R.string.cancel, null)
             }
             return@setOnItemLongClickListener true
@@ -64,11 +62,10 @@ class WatchHistoryFragment : YenalyFragment<FragmentPageListBinding>(),
 
     override fun bindDataObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAllWatchHistories()
+            viewModel
+                .loadAllWatchHistories()
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-                .collect {
-                    historyAdapter.submitList(it)
-                }
+                .collect { historyAdapter.submitList(it) }
         }
     }
 
@@ -76,10 +73,8 @@ class WatchHistoryFragment : YenalyFragment<FragmentPageListBinding>(),
         val toolbar = this@WatchHistoryFragment.binding.toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setSubtitle(R.string.watch_history)
-        this@WatchHistoryFragment.addMenu(
-            R.menu.menu_watch_history_toolbar,
-            viewLifecycleOwner
-        ) { item ->
+        this@WatchHistoryFragment.addMenu(R.menu.menu_watch_history_toolbar, viewLifecycleOwner) {
+            item ->
             when (item.itemId) {
                 R.id.tb_delete -> {
                     requireContext().showAlertDialog {

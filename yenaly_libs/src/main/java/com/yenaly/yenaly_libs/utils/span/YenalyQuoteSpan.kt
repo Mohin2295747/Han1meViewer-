@@ -14,10 +14,12 @@ import androidx.annotation.ColorInt
  * @Time : 2022/04/28 028 22:37
  * @Description : Description...
  */
-class YenalyQuoteSpan @JvmOverloads constructor(
+class YenalyQuoteSpan
+@JvmOverloads
+constructor(
     @ColorInt private val color: Int = STANDARD_COLOR,
     private val stripeWidth: Int = STANDARD_STRIPE_WIDTH_PX,
-    private val gapWidth: Int = STANDARD_GAP_WIDTH_PX
+    private val gapWidth: Int = STANDARD_GAP_WIDTH_PX,
 ) : LeadingMarginSpan {
 
     /**
@@ -25,8 +27,7 @@ class YenalyQuoteSpan @JvmOverloads constructor(
      *
      * @return the color of the quote stripe.
      */
-    @ColorInt
-    fun getColor() = this.color
+    @ColorInt fun getColor() = this.color
 
     /**
      * Get the width of the quote stripe.
@@ -58,7 +59,7 @@ class YenalyQuoteSpan @JvmOverloads constructor(
         start: Int,
         end: Int,
         first: Boolean,
-        layout: Layout
+        layout: Layout,
     ) {
         val style = p.style
         val color = p.color
@@ -71,7 +72,7 @@ class YenalyQuoteSpan @JvmOverloads constructor(
             top.toFloat(),
             (x + dir * this.stripeWidth).toFloat(),
             bottom.toFloat(),
-            p
+            p,
         )
 
         p.style = style
@@ -79,20 +80,13 @@ class YenalyQuoteSpan @JvmOverloads constructor(
     }
 
     companion object {
-        /**
-         * Default stripe width in pixels.
-         */
+        /** Default stripe width in pixels. */
         const val STANDARD_STRIPE_WIDTH_PX = 2
 
-        /**
-         * Default gap width in pixels.
-         */
+        /** Default gap width in pixels. */
         const val STANDARD_GAP_WIDTH_PX = 2
 
-        /**
-         * Default color for the quote stripe.
-         */
-        @ColorInt
-        const val STANDARD_COLOR = -0xffff01
+        /** Default color for the quote stripe. */
+        @ColorInt const val STANDARD_COLOR = -0xffff01
     }
 }

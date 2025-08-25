@@ -15,12 +15,13 @@ import com.yenaly.yenaly_libs.base.frame.FrameActivity
 abstract class YenalyActivity<DB : ViewDataBinding> : FrameActivity(), IViewBinding<DB> {
 
     private var _binding: DB? = null
-    override val binding get() = _binding!!
-    val bindingOrNull get() = _binding
+    override val binding
+        get() = _binding!!
 
-    /**
-     * 取代之前的反射方式，太消耗性能了
-     */
+    val bindingOrNull
+        get() = _binding
+
+    /** 取代之前的反射方式，太消耗性能了 */
     abstract fun getViewBinding(layoutInflater: LayoutInflater): DB
 
     final override fun getViewBinding(inflater: LayoutInflater, container: ViewGroup?): DB {
@@ -47,13 +48,9 @@ abstract class YenalyActivity<DB : ViewDataBinding> : FrameActivity(), IViewBind
         binding.lifecycleOwner = this
     }
 
-    /**
-     * 用于绑定数据观察器 (optional)
-     */
+    /** 用于绑定数据观察器 (optional) */
     open fun bindDataObservers() = Unit
 
-    /**
-     * 初始化数据
-     */
+    /** 初始化数据 */
     abstract fun initData(savedInstanceState: Bundle?)
 }

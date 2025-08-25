@@ -15,12 +15,12 @@ import com.yenaly.han1meviewer.util.setSummaryConverter
 import com.yenaly.yenaly_libs.base.settings.YenalySettingsFragment
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/15 015 10:59
  */
-class HKeyframeSettingsFragment : YenalySettingsFragment(R.xml.settings_h_keyframe),
-    IToolbarFragment<SettingsActivity> {
+class HKeyframeSettingsFragment :
+    YenalySettingsFragment(R.xml.settings_h_keyframe), IToolbarFragment<SettingsActivity> {
 
     companion object {
         const val H_KEYFRAMES_ENABLE = "h_keyframes_enable"
@@ -36,29 +36,22 @@ class HKeyframeSettingsFragment : YenalySettingsFragment(R.xml.settings_h_keyfra
         const val H_KEYFRAME_CUSTOM_CATEGORY = "h_keyframe_custom_category"
     }
 
-    private val hKeyframesEnable
-            by safePreference<SwitchPreferenceCompat>(H_KEYFRAMES_ENABLE)
-    private val hKeyframeManage
-            by safePreference<Preference>(H_KEYFRAME_MANAGE)
+    private val hKeyframesEnable by safePreference<SwitchPreferenceCompat>(H_KEYFRAMES_ENABLE)
+    private val hKeyframeManage by safePreference<Preference>(H_KEYFRAME_MANAGE)
 
-    private val sharedHKeyframesEnable
-            by safePreference<SwitchPreferenceCompat>(SHARED_H_KEYFRAMES_ENABLE)
-    private val sharedHKeyframesUseFirst
-            by safePreference<SwitchPreferenceCompat>(SHARED_H_KEYFRAMES_USE_FIRST)
-    private val sharedHKeyframesManage
-            by safePreference<Preference>(SHARED_H_KEYFRAME_MANAGE)
+    private val sharedHKeyframesEnable by
+        safePreference<SwitchPreferenceCompat>(SHARED_H_KEYFRAMES_ENABLE)
+    private val sharedHKeyframesUseFirst by
+        safePreference<SwitchPreferenceCompat>(SHARED_H_KEYFRAMES_USE_FIRST)
+    private val sharedHKeyframesManage by safePreference<Preference>(SHARED_H_KEYFRAME_MANAGE)
 
-    private val showCommentWhenCountdown
-            by safePreference<SwitchPreferenceCompat>(SHOW_COMMENT_WHEN_COUNTDOWN)
-    private val whenCountdownRemind
-            by safePreference<SeekBarPreference>(WHEN_COUNTDOWN_REMIND)
+    private val showCommentWhenCountdown by
+        safePreference<SwitchPreferenceCompat>(SHOW_COMMENT_WHEN_COUNTDOWN)
+    private val whenCountdownRemind by safePreference<SeekBarPreference>(WHEN_COUNTDOWN_REMIND)
 
-    private val manageCategory
-            by safePreference<PreferenceCategory>(H_KEYFRAME_MANAGE_CATEGORY)
-    private val sharedCategory
-            by safePreference<PreferenceCategory>(H_KEYFRAME_SHARED_CATEGORY)
-    private val customCategory
-            by safePreference<PreferenceCategory>(H_KEYFRAME_CUSTOM_CATEGORY)
+    private val manageCategory by safePreference<PreferenceCategory>(H_KEYFRAME_MANAGE_CATEGORY)
+    private val sharedCategory by safePreference<PreferenceCategory>(H_KEYFRAME_SHARED_CATEGORY)
+    private val customCategory by safePreference<PreferenceCategory>(H_KEYFRAME_CUSTOM_CATEGORY)
 
     override fun onStart() {
         super.onStart()
@@ -107,7 +100,7 @@ class HKeyframeSettingsFragment : YenalySettingsFragment(R.xml.settings_h_keyfra
         whenCountdownRemind.apply {
             setSummaryConverter(
                 defValue = HJzvdStd.DEF_COUNTDOWN_SEC,
-                converter = ::toPrettyCountdownRemindString
+                converter = ::toPrettyCountdownRemindString,
             )
         }
     }
@@ -116,15 +109,17 @@ class HKeyframeSettingsFragment : YenalySettingsFragment(R.xml.settings_h_keyfra
         return buildString {
             val countdown = value
             append(getString(R.string.will_remind_before_d_seconds, countdown))
-            if (countdown == HJzvdStd.DEF_COUNTDOWN_SEC) append(" (${getString(R.string.default_)})")
+            if (countdown == HJzvdStd.DEF_COUNTDOWN_SEC)
+                append(" (${getString(R.string.default_)})")
         }
     }
 
-    private fun keyframeTip(isChecked: Boolean) = if (isChecked) {
-        getString(R.string.h_keyframes_enable_tip)
-    } else {
-        getString(R.string.h_keyframes_disable_tip)
-    }
+    private fun keyframeTip(isChecked: Boolean) =
+        if (isChecked) {
+            getString(R.string.h_keyframes_enable_tip)
+        } else {
+            getString(R.string.h_keyframes_disable_tip)
+        }
 
     override fun SettingsActivity.setupToolbar() {
         supportActionBar!!.setTitle(R.string.h_keyframe_settings)

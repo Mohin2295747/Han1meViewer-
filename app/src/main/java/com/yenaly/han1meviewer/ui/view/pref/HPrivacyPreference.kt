@@ -17,36 +17,35 @@ import com.yenaly.yenaly_libs.base.preference.LongClickableSwitchPreference
  *
  * @since 2024/10/16
  */
-class HPrivacyPreference(
-    context: Context,
-    attrs: AttributeSet? = null
-) : LongClickableSwitchPreference(context, attrs) {
+class HPrivacyPreference(context: Context, attrs: AttributeSet? = null) :
+    LongClickableSwitchPreference(context, attrs) {
 
-    val privacyDialog = createAnalyticsDialog(context).apply {
-        setOnShowListener {
-            // support link click
-            val ad = it as AlertDialog
-            val anchorView = ad.getButton(AlertDialog.BUTTON_POSITIVE)
-            val contentView = anchorView.rootView as ViewGroup
-            contentView.findViewById<TextView>(android.R.id.message).apply {
-                movementMethod = LinkMovementMethodCompat.getInstance()
-            }
+    val privacyDialog =
+        createAnalyticsDialog(context).apply {
+            setOnShowListener {
+                // support link click
+                val ad = it as AlertDialog
+                val anchorView = ad.getButton(AlertDialog.BUTTON_POSITIVE)
+                val contentView = anchorView.rootView as ViewGroup
+                contentView.findViewById<TextView>(android.R.id.message).apply {
+                    movementMethod = LinkMovementMethodCompat.getInstance()
+                }
 
-            // set click listener
-            ad.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                if (callChangeListener(true)) {
-                    isChecked = true
+                // set click listener
+                ad.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    if (callChangeListener(true)) {
+                        isChecked = true
+                    }
+                    ad.dismiss()
                 }
-                ad.dismiss()
-            }
-            ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                if (callChangeListener(false)) {
-                    isChecked = false
+                ad.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                    if (callChangeListener(false)) {
+                        isChecked = false
+                    }
+                    ad.dismiss()
                 }
-                ad.dismiss()
             }
         }
-    }
 
     override fun onClick() {
         if (isChecked) {

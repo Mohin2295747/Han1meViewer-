@@ -5,9 +5,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
  * @since 2025/3/11 22:10
+ * @project Han1meViewer
  */
 data class Hanidokitem(
     @DrawableRes var icon: Int = 0,

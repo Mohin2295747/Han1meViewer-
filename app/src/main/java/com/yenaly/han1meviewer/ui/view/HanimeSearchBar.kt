@@ -28,13 +28,12 @@ import kotlinx.parcelize.Parcelize
 /**
  * 搜索界面的搜索栏
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/08/11 011 15:20
  */
-class HanimeSearchBar @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
-) : FrameLayout(context, attrs) {
+class HanimeSearchBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    FrameLayout(context, attrs) {
 
     companion object {
         val animInterpolator = FastOutSlowInInterpolator()
@@ -50,18 +49,17 @@ class HanimeSearchBar @JvmOverloads constructor(
     private val rvHistory: RecyclerView = findViewById(R.id.rv_history)
     private val etSearch: TextInputEditText = findViewById(R.id.et_search)
 
-    /**
-     * 历史记录是否折叠
-     */
+    /** 历史记录是否折叠 */
     private var isCollapsed = true
 
     init {
         // init
-        root.layoutTransition = LayoutTransition().apply {
-            enableTransitionType(LayoutTransition.CHANGING)
-            setDuration(LayoutTransition.CHANGING, ANIM_DURATION)
-            setInterpolator(LayoutTransition.CHANGING, animInterpolator)
-        }
+        root.layoutTransition =
+            LayoutTransition().apply {
+                enableTransitionType(LayoutTransition.CHANGING)
+                setDuration(LayoutTransition.CHANGING, ANIM_DURATION)
+                setInterpolator(LayoutTransition.CHANGING, animInterpolator)
+            }
         rvHistory.layoutManager = LinearLayoutManager(context)
 
         // #issue-176: 禁用默认动画，涉及到许多崩溃，到现在官方也没解决问题，不得不牺牲体验
@@ -94,7 +92,6 @@ class HanimeSearchBar @JvmOverloads constructor(
             field = value
             rvHistory.adapter = value
         }
-
 
     var onBackClickListener: ((View) -> Unit)? = null
         set(value) {
@@ -130,14 +127,13 @@ class HanimeSearchBar @JvmOverloads constructor(
             etSearch.setSelection(etSearch.length())
         }
 
-    /**
-     * 文字修改或者获得焦点的Flow
-     */
+    /** 文字修改或者获得焦点的Flow */
     fun textChangeFlow() = callbackFlow {
-        val watcher = etSearch.addTextChangedListener { text ->
-            trySend(text?.toString())
-            Log.d("HanimeSearchBar", "watcher: $text")
-        }
+        val watcher =
+            etSearch.addTextChangedListener { text ->
+                trySend(text?.toString())
+                Log.d("HanimeSearchBar", "watcher: $text")
+            }
 
         etSearch.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -156,15 +152,16 @@ class HanimeSearchBar @JvmOverloads constructor(
     }
 
     fun showHistory() {
-//        val slide = Slide(Gravity.BOTTOM).apply {
-//            duration = animDuration
-//            interpolator = animInterpolator
-//            addTarget(rvHistory)
-//        }
-//        TransitionManager.beginDelayedTransition(searchBar, slide)
+        //        val slide = Slide(Gravity.BOTTOM).apply {
+        //            duration = animDuration
+        //            interpolator = animInterpolator
+        //            addTarget(rvHistory)
+        //        }
+        //        TransitionManager.beginDelayedTransition(searchBar, slide)
 
         rvHistory.visibility = VISIBLE
-        back.animate()
+        back
+            .animate()
             .setInterpolator(animInterpolator)
             .setDuration(ANIM_DURATION)
             .rotation(45F)
@@ -176,15 +173,16 @@ class HanimeSearchBar @JvmOverloads constructor(
         if (isCollapsed) return false
         etSearch.hideIme(window)
         Log.d("HanimeSearchBar", "History Height: ${rvHistory.height}")
-//        val slide = Slide(Gravity.TOP).apply {
-//            duration = animDuration
-//            interpolator = animInterpolator
-//            addTarget(rvHistory)
-//        }
-//        TransitionManager.beginDelayedTransition(searchBar, slide)
+        //        val slide = Slide(Gravity.TOP).apply {
+        //            duration = animDuration
+        //            interpolator = animInterpolator
+        //            addTarget(rvHistory)
+        //        }
+        //        TransitionManager.beginDelayedTransition(searchBar, slide)
 
         rvHistory.visibility = GONE
-        back.animate()
+        back
+            .animate()
             .setInterpolator(animInterpolator)
             .setDuration(ANIM_DURATION)
             .rotation(0F)
@@ -222,8 +220,5 @@ class HanimeSearchBar @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class SavedState(
-        val ss: Parcelable?,
-        val isCollapsed: Boolean
-    ) : BaseSavedState(ss)
+    data class SavedState(val ss: Parcelable?, val isCollapsed: Boolean) : BaseSavedState(ss)
 }

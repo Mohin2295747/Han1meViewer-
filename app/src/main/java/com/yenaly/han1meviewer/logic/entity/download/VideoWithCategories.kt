@@ -5,16 +5,16 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 data class VideoWithCategories(
-    @Embedded
-    val video: HanimeDownloadEntity,
+    @Embedded val video: HanimeDownloadEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
-        associateBy = Junction(
-            value = HanimeCategoryCrossRef::class,
-            parentColumn = "videoId",
-            entityColumn = "categoryId"
-        )
+        associateBy =
+            Junction(
+                value = HanimeCategoryCrossRef::class,
+                parentColumn = "videoId",
+                entityColumn = "categoryId",
+            ),
     )
     val categories: List<DownloadCategoryEntity>,
 )

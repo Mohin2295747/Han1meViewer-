@@ -8,14 +8,20 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
 
 open class CenterLinearLayoutManager : LinearLayoutManager {
-    constructor(context: Context)
-            : super(context)
+    constructor(context: Context) : super(context)
 
-    constructor(context: Context, orientation: Int, reverseLayout: Boolean)
-            : super(context, orientation, reverseLayout)
+    constructor(
+        context: Context,
+        orientation: Int,
+        reverseLayout: Boolean,
+    ) : super(context, orientation, reverseLayout)
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int)
-            : super(context, attrs, defStyleAttr, defStyleRes)
+    constructor(
+        context: Context,
+        attrs: AttributeSet,
+        defStyleAttr: Int,
+        defStyleRes: Int,
+    ) : super(context, attrs, defStyleAttr, defStyleRes)
 
     companion object {
         // Shrink the cards around the center up to 15%

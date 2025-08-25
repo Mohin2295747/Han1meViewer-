@@ -21,8 +21,8 @@ import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.startActivity
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/04/03 003 21:40
  */
 class SharedHKeyframesRvAdapter : BaseDifferAdapter<HKeyframeType, QuickViewHolder>(COMPARATOR) {
@@ -31,39 +31,35 @@ class SharedHKeyframesRvAdapter : BaseDifferAdapter<HKeyframeType, QuickViewHold
     }
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<HKeyframeType>() {
-            override fun areItemsTheSame(
-                oldItem: HKeyframeType,
-                newItem: HKeyframeType,
-            ) = when {
-                oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
-                    oldItem.videoCode == newItem.videoCode
-                }
+        val COMPARATOR =
+            object : DiffUtil.ItemCallback<HKeyframeType>() {
+                override fun areItemsTheSame(oldItem: HKeyframeType, newItem: HKeyframeType) =
+                    when {
+                        oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
+                            oldItem.videoCode == newItem.videoCode
+                        }
 
-                oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
-                    oldItem.title == newItem.title
-                }
+                        oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
+                            oldItem.title == newItem.title
+                        }
 
-                else -> false
+                        else -> false
+                    }
+
+                @SuppressLint("DiffUtilEquals")
+                override fun areContentsTheSame(oldItem: HKeyframeType, newItem: HKeyframeType) =
+                    when {
+                        oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
+                            oldItem == newItem
+                        }
+
+                        oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
+                            oldItem == newItem
+                        }
+
+                        else -> false
+                    }
             }
-
-            @SuppressLint("DiffUtilEquals")
-            override fun areContentsTheSame(
-                oldItem: HKeyframeType,
-                newItem: HKeyframeType,
-            ) = when {
-                oldItem is HKeyframeEntity && newItem is HKeyframeEntity -> {
-                    oldItem == newItem
-                }
-
-                oldItem is HKeyframeHeader && newItem is HKeyframeHeader -> {
-                    oldItem == newItem
-                }
-
-                else -> false
-
-            }
-        }
     }
 
     override fun getItemViewType(position: Int, list: List<HKeyframeType>): Int {
@@ -80,8 +76,12 @@ class SharedHKeyframesRvAdapter : BaseDifferAdapter<HKeyframeType, QuickViewHold
                     text = spannable {
                         context.getString(R.string.h_keyframe_title_prefix).text()
                         item.videoCode.span {
-                            clickable(color = context.getColor(R.color.video_code_link_text_color)) { _, videoCode ->
-                                context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
+                            clickable(
+                                color = context.getColor(R.color.video_code_link_text_color)
+                            ) { _, videoCode ->
+                                context.activity?.startActivity<VideoActivity>(
+                                    VIDEO_CODE to videoCode
+                                )
                             }
                             underline()
                         }
@@ -89,10 +89,11 @@ class SharedHKeyframesRvAdapter : BaseDifferAdapter<HKeyframeType, QuickViewHold
                 }
                 holder.getView<RecyclerView>(R.id.rv_h_keyframe).apply {
                     layoutManager = LinearLayoutManager(context)
-                    adapter = HKeyframeRvAdapter(item.videoCode, item).apply {
-                        isLocal = item.author == null
-                        isShared = true
-                    }
+                    adapter =
+                        HKeyframeRvAdapter(item.videoCode, item).apply {
+                            isLocal = item.author == null
+                            isShared = true
+                        }
                 }
                 holder.setText(R.id.tv_author, "@${item.author}")
             }

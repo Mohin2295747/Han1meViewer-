@@ -11,21 +11,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/23 023 16:47
  */
 class PreviewViewModel(application: Application) : YenalyViewModel(application) {
 
-    private val _previewFlow =
-        MutableStateFlow<WebsiteState<HanimePreview>>(WebsiteState.Loading)
+    private val _previewFlow = MutableStateFlow<WebsiteState<HanimePreview>>(WebsiteState.Loading)
     val previewFlow = _previewFlow.asStateFlow()
 
     fun getHanimePreview(date: String) {
         viewModelScope.launch {
-            NetworkRepo.getHanimePreview(date).collect { preview ->
-                _previewFlow.value = preview
-            }
+            NetworkRepo.getHanimePreview(date).collect { preview -> _previewFlow.value = preview }
         }
     }
 }

@@ -57,7 +57,7 @@ class SpannedTextGenerator private constructor() {
             isSuperscript: Boolean = false,
             isSubscript: Boolean = false,
             isQuote: Boolean = false,
-            onClick: OnClickListener? = null
+            onClick: OnClickListener? = null,
         ): KotlinBuilder {
 
             start = ssb.length
@@ -74,7 +74,7 @@ class SpannedTextGenerator private constructor() {
                 LeadingMarginSpan.Standard(firstLineMarginStart, restLineMarginStart),
                 start,
                 end,
-                flag
+                flag,
             )
             if (scaleX >= 0F) {
                 ssb.setSpan(ScaleXSpan(scaleX), start, end, flag)
@@ -112,21 +112,20 @@ class SpannedTextGenerator private constructor() {
                     YenalyQuoteSpan(quoteColor, quoteStripeWidth, quoteGapWidth),
                     start,
                     end,
-                    flag
+                    flag,
                 )
             }
             if (isNewLine) {
                 ssb.append(lineSeparator)
             }
-            url?.let {
-                ssb.setSpan(URLSpan(it), start, end, flag)
-            }
+            url?.let { ssb.setSpan(URLSpan(it), start, end, flag) }
             onClick?.let {
-                val clickableSpan = object : ClickableSpan() {
-                    override fun onClick(widget: View) {
-                        it.onClick(widget, url, text)
+                val clickableSpan =
+                    object : ClickableSpan() {
+                        override fun onClick(widget: View) {
+                            it.onClick(widget, url, text)
+                        }
                     }
-                }
                 ssb.setSpan(clickableSpan, start, end, flag)
             }
 
@@ -148,7 +147,7 @@ class SpannedTextGenerator private constructor() {
             marginLeft: Int = 0,
             marginRight: Int = 0,
             fontWidthMultiple: Float = -1F,
-            isNewLine: Boolean = false
+            isNewLine: Boolean = false,
         ): KotlinBuilder {
             val drawable = ContextCompat.getDrawable(applicationContext, resId)
             addImage(
@@ -161,7 +160,7 @@ class SpannedTextGenerator private constructor() {
                 marginLeft,
                 marginRight,
                 fontWidthMultiple,
-                isNewLine
+                isNewLine,
             )
             return this
         }
@@ -176,7 +175,7 @@ class SpannedTextGenerator private constructor() {
             marginLeft: Int = 0,
             marginRight: Int = 0,
             fontWidthMultiple: Float = -1F,
-            isNewLine: Boolean = false
+            isNewLine: Boolean = false,
         ): KotlinBuilder {
             val start = ssb.length
             ssb.append("[image]")
@@ -194,8 +193,11 @@ class SpannedTextGenerator private constructor() {
                         verticalAlignment,
                         fontWidthMultiple,
                         marginLeft,
-                        marginRight
-                    ), start, end, flag
+                        marginRight,
+                    ),
+                    start,
+                    end,
+                    flag,
                 )
             }
 
@@ -229,32 +231,24 @@ class SpannedTextGenerator private constructor() {
 
         private var url: String? = null
 
-        @Px
-        private var textSize: Int = -1
+        @Px private var textSize: Int = -1
 
         private var relativeSize: Float = -1F
 
-        @Px
-        private var firstLineMarginStart: Int = 0
+        @Px private var firstLineMarginStart: Int = 0
 
-        @Px
-        private var restLineMarginStart: Int = 0
+        @Px private var restLineMarginStart: Int = 0
         private var scaleX: Float = -1F
 
-        @ColorInt
-        private var backgroundColor: Int? = null
+        @ColorInt private var backgroundColor: Int? = null
 
-        @ColorInt
-        private var foregroundColor: Int? = null
+        @ColorInt private var foregroundColor: Int? = null
 
-        @ColorInt
-        private var quoteColor: Int = YenalyQuoteSpan.STANDARD_COLOR
+        @ColorInt private var quoteColor: Int = YenalyQuoteSpan.STANDARD_COLOR
 
-        @Px
-        private var quoteStripeWidth: Int = YenalyQuoteSpan.STANDARD_STRIPE_WIDTH_PX
+        @Px private var quoteStripeWidth: Int = YenalyQuoteSpan.STANDARD_STRIPE_WIDTH_PX
 
-        @Px
-        private var quoteGapWidth: Int = YenalyQuoteSpan.STANDARD_GAP_WIDTH_PX
+        @Px private var quoteGapWidth: Int = YenalyQuoteSpan.STANDARD_GAP_WIDTH_PX
         private var blurRadius: Float = -1F
         private var blurStyle: BlurMaskFilter.Blur = BlurMaskFilter.Blur.NORMAL
 
@@ -395,7 +389,7 @@ class SpannedTextGenerator private constructor() {
                 LeadingMarginSpan.Standard(firstLineMarginStart, restLineMarginStart),
                 start,
                 end,
-                flag
+                flag,
             )
             if (scaleX >= 0F) {
                 ssb.setSpan(ScaleXSpan(scaleX), start, end, flag)
@@ -442,7 +436,7 @@ class SpannedTextGenerator private constructor() {
                     YenalyQuoteSpan(quoteColor, quoteStripeWidth, quoteGapWidth),
                     start,
                     end,
-                    flag
+                    flag,
                 )
                 isQuote = false
             }
@@ -451,11 +445,12 @@ class SpannedTextGenerator private constructor() {
                 url = null
             }
             onClick?.let {
-                val clickableSpan = object : ClickableSpan() {
-                    override fun onClick(widget: View) {
-                        it.onClick(widget, url, text)
+                val clickableSpan =
+                    object : ClickableSpan() {
+                        override fun onClick(widget: View) {
+                            it.onClick(widget, url, text)
+                        }
                     }
-                }
                 ssb.setSpan(clickableSpan, start, end, flag)
             }
         }

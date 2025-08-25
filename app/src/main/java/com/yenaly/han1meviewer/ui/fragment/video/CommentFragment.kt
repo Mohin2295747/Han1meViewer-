@@ -38,8 +38,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/18 018 21:09
  */
 class CommentFragment : YenalyFragment<FragmentCommentBinding>(), StateLayoutMixin {
@@ -47,30 +47,24 @@ class CommentFragment : YenalyFragment<FragmentCommentBinding>(), StateLayoutMix
     val viewModel by activityViewModels<CommentViewModel>()
 
     private val commentTypePrefix by arguments(COMMENT_TYPE, VIDEO_COMMENT_PREFIX)
-    private val commentAdapter by unsafeLazy {
-        VideoCommentRvAdapter(this)
-    }
+    private val commentAdapter by unsafeLazy { VideoCommentRvAdapter(this) }
     private val replyPopup by unsafeLazy {
         ReplyPopup(requireContext()).also { it.hint = getString(R.string.comment) }
     }
 
-    /**
-     * 是否已经预加载了预览评论
-     */
+    /** 是否已经预加载了预览评论 */
     private var isPreviewCommentPrefetched = false
 
     override fun getViewBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?
+        container: ViewGroup?,
     ): FragmentCommentBinding {
         return FragmentCommentBinding.inflate(inflater, container, false)
     }
 
     override fun initData(savedInstanceState: Bundle?) {
         binding.state.init {
-            onEmpty {
-                findViewById<TextView>(R.id.tv_empty).setText(R.string.comment_not_found)
-            }
+            onEmpty { findViewById<TextView>(R.id.tv_empty).setText(R.string.comment_not_found) }
         }
 
         binding.rvComment.layoutManager = LinearLayoutManager(context)
@@ -95,23 +89,25 @@ class CommentFragment : YenalyFragment<FragmentCommentBinding>(), StateLayoutMix
         binding.btnComment.isVisible = isAlreadyLogin
         replyPopup.setOnSendListener {
             viewModel.currentUserId?.let { id ->
-                viewModel.postComment(
-                    id,
-                    viewModel.code, commentTypePrefix, replyPopup.comment
-                )
+                viewModel.postComment(id, viewModel.code, commentTypePrefix, replyPopup.comment)
             } ?: showShortToast(R.string.there_is_a_small_issue)
         }
         binding.btnComment.setOnClickListener {
-            XPopup.Builder(context).autoOpenSoftInput(true)
-                .setPopupCallback(object : SimpleCallback() {
-                    override fun beforeShow(popupView: BasePopupView?) {
-                        binding.btnComment.hide()
-                    }
+            XPopup.Builder(context)
+                .autoOpenSoftInput(true)
+                .setPopupCallback(
+                    object : SimpleCallback() {
+                        override fun beforeShow(popupView: BasePopupView?) {
+                            binding.btnComment.hide()
+                        }
 
-                    override fun onDismiss(popupView: BasePopupView?) {
-                        binding.btnComment.show()
+                        override fun onDismiss(popupView: BasePopupView?) {
+                            binding.btnComment.show()
+                        }
                     }
-                }).asCustom(replyPopup).show()
+                )
+                .asCustom(replyPopup)
+                .show()
         }
     }
 

@@ -45,23 +45,20 @@ class WatchLaterSubViewModel(application: Application) : YenalyViewModel(applica
         }
     }
 
-    private val _deleteMyWatchLaterFlow =
-        MutableSharedFlow<WebsiteState<Int>>()
+    private val _deleteMyWatchLaterFlow = MutableSharedFlow<WebsiteState<Int>>()
     val deleteMyWatchLaterFlow = _deleteMyWatchLaterFlow.asSharedFlow()
 
     fun deleteMyWatchLater(videoCode: String, position: Int) {
         viewModelScope.launch {
-            NetworkRepo.deleteMyListItems(
-                MyListType.WATCH_LATER, videoCode,
-                position, csrfToken
-            ).collect {
-                _deleteMyWatchLaterFlow.emit(it)
-                _watchLaterFlow.update { list ->
-                    if (it is WebsiteState.Success) {
-                        list.toMutableList().apply { removeAt(position) }
-                    } else list
+            NetworkRepo.deleteMyListItems(MyListType.WATCH_LATER, videoCode, position, csrfToken)
+                .collect {
+                    _deleteMyWatchLaterFlow.emit(it)
+                    _watchLaterFlow.update { list ->
+                        if (it is WebsiteState.Success) {
+                            list.toMutableList().apply { removeAt(position) }
+                        } else list
+                    }
                 }
-            }
         }
     }
 

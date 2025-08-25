@@ -5,8 +5,8 @@ import com.yenaly.han1meviewer.logic.entity.SearchHistoryEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/22 022 17:53
  */
 @Dao
@@ -15,11 +15,12 @@ abstract class SearchHistoryDao {
     @Query("SELECT * FROM SearchHistoryEntity ORDER BY id DESC")
     abstract fun loadAll(): Flow<MutableList<SearchHistoryEntity>>
 
-    @Query("SELECT * FROM SearchHistoryEntity WHERE `query` LIKE '%' || :keyword || '%' ORDER BY id DESC")
+    @Query(
+        "SELECT * FROM SearchHistoryEntity WHERE `query` LIKE '%' || :keyword || '%' ORDER BY id DESC"
+    )
     abstract fun loadAll(keyword: String): Flow<MutableList<SearchHistoryEntity>>
 
-    @Delete
-    abstract suspend fun delete(history: SearchHistoryEntity)
+    @Delete abstract suspend fun delete(history: SearchHistoryEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(history: SearchHistoryEntity)

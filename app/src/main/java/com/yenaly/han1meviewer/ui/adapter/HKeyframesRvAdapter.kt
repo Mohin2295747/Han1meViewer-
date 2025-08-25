@@ -31,8 +31,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 17:42
  */
 class HKeyframesRvAdapter : BaseDifferAdapter<HKeyframeEntity, QuickViewHolder>(COMPARATOR) {
@@ -42,24 +42,24 @@ class HKeyframesRvAdapter : BaseDifferAdapter<HKeyframeEntity, QuickViewHolder>(
     }
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<HKeyframeEntity>() {
-            override fun areItemsTheSame(
-                oldItem: HKeyframeEntity,
-                newItem: HKeyframeEntity,
-            ) = oldItem.videoCode == newItem.videoCode
+        val COMPARATOR =
+            object : DiffUtil.ItemCallback<HKeyframeEntity>() {
+                override fun areItemsTheSame(oldItem: HKeyframeEntity, newItem: HKeyframeEntity) =
+                    oldItem.videoCode == newItem.videoCode
 
-            override fun areContentsTheSame(
-                oldItem: HKeyframeEntity,
-                newItem: HKeyframeEntity,
-            ) = oldItem == newItem
-        }
+                override fun areContentsTheSame(
+                    oldItem: HKeyframeEntity,
+                    newItem: HKeyframeEntity,
+                ) = oldItem == newItem
+            }
 
         private val editResArray = intArrayOf(R.string.edit, R.string.delete, R.string.share)
-        private val editResIconArray = intArrayOf(
-            R.drawable.baseline_edit_24,
-            R.drawable.ic_baseline_delete_24,
-            R.drawable.ic_baseline_share_24
-        )
+        private val editResIconArray =
+            intArrayOf(
+                R.drawable.baseline_edit_24,
+                R.drawable.ic_baseline_delete_24,
+                R.drawable.ic_baseline_share_24,
+            )
     }
 
     override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: HKeyframeEntity?) {
@@ -71,7 +71,9 @@ class HKeyframesRvAdapter : BaseDifferAdapter<HKeyframeEntity, QuickViewHolder>(
             text = spannable {
                 context.getString(R.string.h_keyframe_title_prefix).text()
                 item.videoCode.span {
-                    clickable(color = context.getColor(R.color.video_code_link_text_color)) { _, videoCode ->
+                    clickable(color = context.getColor(R.color.video_code_link_text_color)) {
+                        _,
+                        videoCode ->
                         context.activity?.startActivity<VideoActivity>(VIDEO_CODE to videoCode)
                     }
                     underline()
@@ -80,9 +82,8 @@ class HKeyframesRvAdapter : BaseDifferAdapter<HKeyframeEntity, QuickViewHolder>(
         }
         holder.getView<RecyclerView>(R.id.rv_h_keyframe).apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = HKeyframeRvAdapter(item.videoCode, item).apply {
-                isLocal = item.author == null
-            }
+            adapter =
+                HKeyframeRvAdapter(item.videoCode, item).apply { isLocal = item.author == null }
         }
     }
 
@@ -96,18 +97,22 @@ class HKeyframesRvAdapter : BaseDifferAdapter<HKeyframeEntity, QuickViewHolder>(
                 setOnClickListener { view ->
                     val position = viewHolder.bindingAdapterPosition
                     val item = getItem(position) ?: return@setOnClickListener
-                    XPopup.Builder(view.context).atView(view).isDarkTheme(true).asAttachList(
-                        editResArray.map(view.context::getString).toTypedArray(),
-                        editResIconArray
-                    ) { pos, _ ->
-                        when (pos) {
-                            0 -> modify(item) // 修改
+                    XPopup.Builder(view.context)
+                        .atView(view)
+                        .isDarkTheme(true)
+                        .asAttachList(
+                            editResArray.map(view.context::getString).toTypedArray(),
+                            editResIconArray,
+                        ) { pos, _ ->
+                            when (pos) {
+                                0 -> modify(item) // 修改
 
-                            1 -> delete(item) // 刪除
+                                1 -> delete(item) // 刪除
 
-                            2 -> share(item)  // 分享
+                                2 -> share(item) // 分享
+                            }
                         }
-                    }.show()
+                        .show()
                 }
             }
         }
@@ -168,16 +173,15 @@ class HKeyframesRvAdapter : BaseDifferAdapter<HKeyframeEntity, QuickViewHolder>(
 }
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 17:42
  */
-class HKeyframeRvAdapter(
-    private val videoCode: String,
-    keyframe: HKeyframeEntity? = null,
-) : BaseDifferAdapter<HKeyframeEntity.Keyframe, QuickViewHolder>(
-    COMPARATOR, keyframe?.keyframes.orEmpty()
-) {
+class HKeyframeRvAdapter(private val videoCode: String, keyframe: HKeyframeEntity? = null) :
+    BaseDifferAdapter<HKeyframeEntity.Keyframe, QuickViewHolder>(
+        COMPARATOR,
+        keyframe?.keyframes.orEmpty(),
+    ) {
 
     init {
         isStateViewEnable = true
@@ -193,17 +197,18 @@ class HKeyframeRvAdapter(
     var isShared: Boolean = false
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<HKeyframeEntity.Keyframe>() {
-            override fun areItemsTheSame(
-                oldItem: HKeyframeEntity.Keyframe,
-                newItem: HKeyframeEntity.Keyframe,
-            ) = oldItem.position == newItem.position
+        val COMPARATOR =
+            object : DiffUtil.ItemCallback<HKeyframeEntity.Keyframe>() {
+                override fun areItemsTheSame(
+                    oldItem: HKeyframeEntity.Keyframe,
+                    newItem: HKeyframeEntity.Keyframe,
+                ) = oldItem.position == newItem.position
 
-            override fun areContentsTheSame(
-                oldItem: HKeyframeEntity.Keyframe,
-                newItem: HKeyframeEntity.Keyframe,
-            ) = oldItem == newItem
-        }
+                override fun areContentsTheSame(
+                    oldItem: HKeyframeEntity.Keyframe,
+                    newItem: HKeyframeEntity.Keyframe,
+                ) = oldItem == newItem
+            }
     }
 
     override fun onBindViewHolder(
@@ -253,20 +258,18 @@ class HKeyframeRvAdapter(
                             when (context) {
                                 is SettingsActivity -> {
                                     context.viewModel.modifyHKeyframe(
-                                        videoCode, item, HKeyframeEntity.Keyframe(
-                                            position = pos,
-                                            prompt = prompt
-                                        )
+                                        videoCode,
+                                        item,
+                                        HKeyframeEntity.Keyframe(position = pos, prompt = prompt),
                                     )
                                     showShortToast(R.string.modify_success)
                                 }
 
                                 is VideoActivity -> {
                                     context.viewModel.modifyHKeyframe(
-                                        videoCode, item, HKeyframeEntity.Keyframe(
-                                            position = pos,
-                                            prompt = prompt
-                                        )
+                                        videoCode,
+                                        item,
+                                        HKeyframeEntity.Keyframe(position = pos, prompt = prompt),
                                     )
                                     // showShortToast("修改成功") // 這裏不用提示，因為 VideoActivity 有 Flow 操控
                                 }

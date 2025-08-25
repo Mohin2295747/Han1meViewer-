@@ -5,8 +5,8 @@ import com.yenaly.han1meviewer.logic.entity.WatchHistoryEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/02 002 16:47
  */
 @Dao
@@ -15,11 +15,9 @@ abstract class WatchHistoryDao {
     @Query("SELECT * FROM WatchHistoryEntity ORDER BY id DESC")
     abstract fun loadAll(): Flow<MutableList<WatchHistoryEntity>>
 
-    @Delete
-    abstract suspend fun delete(history: WatchHistoryEntity)
+    @Delete abstract suspend fun delete(history: WatchHistoryEntity)
 
-    @Query("DELETE FROM WatchHistoryEntity")
-    abstract suspend fun deleteAll()
+    @Query("DELETE FROM WatchHistoryEntity") abstract suspend fun deleteAll()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insert(history: WatchHistoryEntity)

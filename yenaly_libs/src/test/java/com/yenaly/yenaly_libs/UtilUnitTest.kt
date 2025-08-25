@@ -4,9 +4,9 @@ import com.yenaly.yenaly_libs.utils.folderSize
 import com.yenaly.yenaly_libs.utils.formatFileSizeV2
 import com.yenaly.yenaly_libs.utils.md5
 import com.yenaly.yenaly_libs.utils.secondToTimeCase
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.io.File
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -23,11 +23,11 @@ class UtilUnitTest {
         // Test with different decimal places
         assertEquals(
             "1.00 kB",
-            1000L.formatFileSizeV2(useSi = true, decimalPlaces = 2, stripTrailingZeros = false)
+            1000L.formatFileSizeV2(useSi = true, decimalPlaces = 2, stripTrailingZeros = false),
         )
         assertEquals(
             "1.00 KiB",
-            1024L.formatFileSizeV2(decimalPlaces = 2, stripTrailingZeros = false)
+            1024L.formatFileSizeV2(decimalPlaces = 2, stripTrailingZeros = false),
         )
 
         // Test with stripTrailingZeros = false
@@ -37,12 +37,12 @@ class UtilUnitTest {
         // Test with different sizes
         assertEquals(
             "1.0 MB",
-            1_000_000L.formatFileSizeV2(useSi = true, stripTrailingZeros = false)
+            1_000_000L.formatFileSizeV2(useSi = true, stripTrailingZeros = false),
         )
         assertEquals("1.0 MiB", 1_048_576L.formatFileSizeV2(stripTrailingZeros = false))
         assertEquals(
             "1.0 GB",
-            1_000_000_000L.formatFileSizeV2(useSi = true, stripTrailingZeros = false)
+            1_000_000_000L.formatFileSizeV2(useSi = true, stripTrailingZeros = false),
         )
         assertEquals("1.0 GiB", 1_073_741_824L.formatFileSizeV2(stripTrailingZeros = false))
 
@@ -66,9 +66,7 @@ class UtilUnitTest {
 
     @Test
     fun md5_calculatesCorrectHashForNonEmptyFile() {
-        val file = File.createTempFile("testFile", ".txt").apply {
-            writeText("Hello, World!")
-        }
+        val file = File.createTempFile("testFile", ".txt").apply { writeText("Hello, World!") }
         assertEquals("65a8e27d8879283831b664bd8b7f0ad4", file.md5())
         file.delete()
     }
@@ -82,46 +80,48 @@ class UtilUnitTest {
 
     @Test
     fun md5_calculatesCorrectHashForLargeFile() {
-        val file = File.createTempFile("largeFile", ".txt").apply {
-            writeText("a".repeat(10_000_000))
-        }
+        val file =
+            File.createTempFile("largeFile", ".txt").apply { writeText("a".repeat(10_000_000)) }
         assertEquals("7095bae098259e0dda4b7acc624de4e2", file.md5())
         file.delete()
     }
 
     @Test
     fun folderSize_calculatesCorrectSizeForNonEmptyFolder() {
-        val folder = File.createTempFile("testFolder", "").apply {
-            delete()
-            mkdir()
-            File(this, "file1.txt").writeText("Hello")
-            File(this, "file2.txt").writeText("World")
-        }
+        val folder =
+            File.createTempFile("testFolder", "").apply {
+                delete()
+                mkdir()
+                File(this, "file1.txt").writeText("Hello")
+                File(this, "file2.txt").writeText("World")
+            }
         assertEquals(10L, folder.folderSize)
         folder.deleteRecursively()
     }
 
     @Test
     fun folderSize_calculatesCorrectSizeForEmptyFolder() {
-        val folder = File.createTempFile("emptyFolder", "").apply {
-            delete()
-            mkdir()
-        }
+        val folder =
+            File.createTempFile("emptyFolder", "").apply {
+                delete()
+                mkdir()
+            }
         assertEquals(0L, folder.folderSize)
         folder.deleteRecursively()
     }
 
     @Test
     fun folderSize_calculatesCorrectSizeForNestedFolders() {
-        val folder = File.createTempFile("nestedFolder", "").apply {
-            delete()
-            mkdir()
-            File(this, "file1.txt").writeText("Hello")
-            File(this, "subFolder").apply {
+        val folder =
+            File.createTempFile("nestedFolder", "").apply {
+                delete()
                 mkdir()
-                File(this, "file2.txt").writeText("World")
+                File(this, "file1.txt").writeText("Hello")
+                File(this, "subFolder").apply {
+                    mkdir()
+                    File(this, "file2.txt").writeText("World")
+                }
             }
-        }
         assertEquals(10L, folder.folderSize)
         folder.deleteRecursively()
     }

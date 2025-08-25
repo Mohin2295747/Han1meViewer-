@@ -17,7 +17,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.ProgressBar
@@ -32,7 +31,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.jzvd.JZDataSource
 import cn.jzvd.JZMediaInterface
-import cn.jzvd.JZTextureView
 import cn.jzvd.JZUtils
 import cn.jzvd.JzvdStd
 import com.itxca.spannablex.spannable
@@ -42,7 +40,6 @@ import com.yenaly.han1meviewer.logic.entity.HKeyframeEntity
 import com.yenaly.han1meviewer.ui.adapter.HKeyframeRvAdapter
 import com.yenaly.han1meviewer.ui.adapter.SuperResolutionAdapter
 import com.yenaly.han1meviewer.ui.adapter.VideoSpeedAdapter
-import com.yenaly.han1meviewer.util.Platform
 import com.yenaly.han1meviewer.util.setStateViewLayout
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.yenaly_libs.utils.OrientationManager
@@ -56,141 +53,98 @@ import java.util.Timer
 import kotlin.math.absoluteValue
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/18 018 15:54
  */
-class HJzvdStd @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) : JzvdStd(context, attrs), OnLongClickListener {
+class HJzvdStd @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    JzvdStd(context, attrs), OnLongClickListener {
 
     companion object {
         // 相當於重寫了
-        /**
-         * 滑动操作的阈值
-         */
+        /** 滑动操作的阈值 */
         const val THRESHOLD = 10
 
         // 相當於重寫了
-        /**
-         * 默認滑動調整進度條的靈敏度 越大播放进度条滑动越慢
-         */
+        /** 默認滑動調整進度條的靈敏度 越大播放进度条滑动越慢 */
         const val DEF_PROGRESS_SLIDE_SENSITIVITY = 5
 
         const val DEF_COUNTDOWN_SEC = 10
 
-        /**
-         * 默認速度
-         */
+        /** 默認速度 */
         const val DEF_SPEED = 1.0F
 
-        /**
-         * 默認速度的索引
-         */
+        /** 默認速度的索引 */
         const val DEF_SPEED_INDEX = 2
 
-        /**
-         * 默认的超分辨率的索引
-         */
+        /** 默认的超分辨率的索引 */
         const val DEF_SUPER_RESOLUTION_INDEX = 0
 
-        /**
-         * 默認長按速度是原先速度的幾倍
-         */
+        /** 默認長按速度是原先速度的幾倍 */
         const val DEF_LONG_PRESS_SPEED_TIMES = 2.5F
 
-        /**
-         * 速度列表
-         */
-        val speedArray = floatArrayOf(
-            0.5F, 0.75F,
-            1.0F, 1.25F, 1.5F, 1.75F,
-            2.0F, 2.25F, 2.5F, 2.75F,
-            3.0F,
-        )
+        /** 速度列表 */
+        val speedArray =
+            floatArrayOf(0.5F, 0.75F, 1.0F, 1.25F, 1.5F, 1.75F, 2.0F, 2.25F, 2.5F, 2.75F, 3.0F)
 
-        /**
-         * 速度列表的字符串
-         */
+        /** 速度列表的字符串 */
         val speedStringArray = Array(speedArray.size) { "${speedArray[it]}x" }
 
-        /**
-         * 超分辨率列表
-         */
-        val superResolutionArray = arrayOf(
-            "关闭", "速度", "质量"
-        )
+        /** 超分辨率列表 */
+        val superResolutionArray = arrayOf("关闭", "速度", "质量")
     }
 
     init {
-        gestureDetector = GestureDetector(context,
-            object : GestureDetector.SimpleOnGestureListener() {
-                override fun onDoubleTap(e: MotionEvent): Boolean {
-                    if (state == STATE_PLAYING || state == STATE_PAUSE) {
-                        Log.d(TAG, "doubleClick [" + this.hashCode() + "] ")
-                        startButton.performClick()
+        gestureDetector =
+            GestureDetector(
+                context,
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onDoubleTap(e: MotionEvent): Boolean {
+                        if (state == STATE_PLAYING || state == STATE_PAUSE) {
+                            Log.d(TAG, "doubleClick [" + this.hashCode() + "] ")
+                            startButton.performClick()
+                        }
+                        return super.onDoubleTap(e)
                     }
-                    return super.onDoubleTap(e)
-                }
 
-                override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                    if (!mChangeBrightness && !mChangeVolume) {
-                        onClickUiToggle()
+                    override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                        if (!mChangeBrightness && !mChangeVolume) {
+                            onClickUiToggle()
+                        }
+                        return super.onSingleTapConfirmed(e)
                     }
-                    return super.onSingleTapConfirmed(e)
-                }
-            })
+                },
+            )
     }
 
-    /**
-     * 用戶定義的是否顯示底部進度條
-     */
+    /** 用戶定義的是否顯示底部進度條 */
     private val showBottomProgress = Preferences.showBottomProgress
 
-    /**
-     * 用戶定義的默認速度
-     */
+    /** 用戶定義的默認速度 */
     private val userDefSpeed = Preferences.playerSpeed
 
-    /**
-     * 用戶定義的默認速度的索引
-     */
+    /** 用戶定義的默認速度的索引 */
     private val userDefSpeedIndex = speedArray.indexOfFirst { it == userDefSpeed }
 
-    /**
-     * 用戶定義的滑動調整進度條的靈敏度
-     */
+    /** 用戶定義的滑動調整進度條的靈敏度 */
     private val userDefSlideSensitivity = Preferences.slideSensitivity.toRealSensitivity()
 
-    /**
-     * 用戶定義的默認長按速度是原先速度的幾倍
-     */
+    /** 用戶定義的默認長按速度是原先速度的幾倍 */
     private val userDefLongPressSpeedTimes = Preferences.longPressSpeedTime
 
-    /**
-     * 用戶定義的倒數提醒毫秒數
-     */
+    /** 用戶定義的倒數提醒毫秒數 */
     private val userDefWhenCountdownRemind = Preferences.whenCountdownRemind
 
-    /**
-     * 用戶定義的是否在倒數時顯示評論
-     */
+    /** 用戶定義的是否在倒數時顯示評論 */
     private val userDefShowCommentWhenCountdown = Preferences.showCommentWhenCountdown
 
-    /**
-     * 用戶定義的是否啟用關鍵H幀
-     */
+    /** 用戶定義的是否啟用關鍵H幀 */
     private val isHKeyframeEnabled = Preferences.hKeyframesEnable
 
-    /**
-     * 用户选择的播放器内核
-     */
+    /** 用户选择的播放器内核 */
     private val switchPlayerKernel = Preferences.switchPlayerKernel
 
-    /**
-     * 當前速度的索引，如果设置速度的话，修改这个，别动 [videoSpeed]
-     */
+    /** 當前速度的索引，如果设置速度的话，修改这个，别动 [videoSpeed] */
     private var currentSpeedIndex = userDefSpeedIndex
         @SuppressLint("SetTextI18n")
         set(value) {
@@ -222,9 +176,7 @@ class HJzvdStd @JvmOverloads constructor(
             }
         }
 
-    /**
-     * 是否进入了垂直全屏模式
-     */
+    /** 是否进入了垂直全屏模式 */
     private var isVerticalFullscreen = false
 
     private lateinit var tvSpeed: TextView
@@ -253,9 +205,10 @@ class HJzvdStd @JvmOverloads constructor(
      * 但我還是最終用了 lazy，要不然首次 submitList 收不到
      */
     private fun initHKeyframeAdapter() = run {
-        val videoCode = checkNotNull(this.videoCode) {
-            "If you want to use HKeyframeAdapter, you must set videoCode first."
-        }
+        val videoCode =
+            checkNotNull(this.videoCode) {
+                "If you want to use HKeyframeAdapter, you must set videoCode first."
+            }
         HKeyframeRvAdapter(videoCode).apply {
             setOnItemClickListener { _, _, position ->
                 val keyframe = getItem(position) ?: return@setOnItemClickListener
@@ -298,31 +251,31 @@ class HJzvdStd @JvmOverloads constructor(
             }
         }
 
-    /**
-     * 是否觸發了長按快進
-     */
-    @Volatile
-    private var isSpeedGestureDetected = false
+    /** 是否觸發了長按快進 */
+    @Volatile private var isSpeedGestureDetected = false
 
-    /**
-     * 長按快進檢測
-     */
+    /** 長按快進檢測 */
     // #issue-20: 长按倍速功能添加
     private val speedGestureDetector =
-        GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onLongPress(e: MotionEvent) {
-                when (e.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        val mi: JZMediaInterface? = mediaInterface
-                        if (mi != null && mi.isPlaying) {
-                            setSpeedInternal(videoSpeed * userDefLongPressSpeedTimes)
-                            textureViewContainer.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                            isSpeedGestureDetected = true
+        GestureDetector(
+            context,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onLongPress(e: MotionEvent) {
+                    when (e.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            val mi: JZMediaInterface? = mediaInterface
+                            if (mi != null && mi.isPlaying) {
+                                setSpeedInternal(videoSpeed * userDefLongPressSpeedTimes)
+                                textureViewContainer.performHapticFeedback(
+                                    HapticFeedbackConstants.LONG_PRESS
+                                )
+                                isSpeedGestureDetected = true
+                            }
                         }
                     }
                 }
-            }
-        })
+            },
+        )
 
     override fun getLayoutId() = R.layout.layout_jzvd_with_speed
 
@@ -358,16 +311,19 @@ class HJzvdStd @JvmOverloads constructor(
     override fun setUp(jzDataSource: JZDataSource?, screen: Int, clazz: Class<*>) {
         Log.d(TAG, "setUp: 3")
         super.setUp(jzDataSource, screen, clazz)
-        Log.d("CustomJzvdStd-Settings", buildString {
-            append("showBottomProgress: ")
-            appendLine(showBottomProgress)
-            append("userDefSpeed: ")
-            appendLine(userDefSpeed)
-            append("userDefSpeedIndex: ")
-            appendLine(userDefSpeedIndex)
-            append("userDefSlideSensitivity: ")
-            appendLine(userDefSlideSensitivity)
-        })
+        Log.d(
+            "CustomJzvdStd-Settings",
+            buildString {
+                append("showBottomProgress: ")
+                appendLine(showBottomProgress)
+                append("userDefSpeed: ")
+                appendLine(userDefSpeed)
+                append("userDefSpeedIndex: ")
+                appendLine(userDefSpeedIndex)
+                append("userDefSlideSensitivity: ")
+                appendLine(userDefSlideSensitivity)
+            },
+        )
         titleTextView.isInvisible = true
         if (bottomProgressBar != null && !showBottomProgress) {
             bottomProgressBar.removeItself()
@@ -393,7 +349,9 @@ class HJzvdStd @JvmOverloads constructor(
     }
 
     fun autoFullscreen(orientation: OrientationManager.ScreenOrientation) {
-        autoFullscreen(if (orientation === OrientationManager.ScreenOrientation.LANDSCAPE) 1.0f else -1.0f)
+        autoFullscreen(
+            if (orientation === OrientationManager.ScreenOrientation.LANDSCAPE) 1.0f else -1.0f
+        )
     }
 
     override fun onClickUiToggle() {
@@ -450,8 +408,13 @@ class HJzvdStd @JvmOverloads constructor(
         when (screen) {
             SCREEN_FULLSCREEN -> {
                 setAllControlsVisiblity(
-                    INVISIBLE, INVISIBLE, INVISIBLE,
-                    VISIBLE, INVISIBLE, INVISIBLE, INVISIBLE
+                    INVISIBLE,
+                    INVISIBLE,
+                    INVISIBLE,
+                    VISIBLE,
+                    INVISIBLE,
+                    INVISIBLE,
+                    INVISIBLE,
                 )
                 updateStartImage()
             }
@@ -495,9 +458,7 @@ class HJzvdStd @JvmOverloads constructor(
         bottomProgressBar.updatePadding(left = statusBarHeight, right = navBarHeight)
     }
 
-    /**
-     * 主动改变播放器大小
-     */
+    /** 主动改变播放器大小 */
     private fun updateVideoPlayerSize(fullscreen: Boolean) {
         if (mediaInterface is MpvMediaKernel) {
             val kernel = mediaInterface as MpvMediaKernel
@@ -510,18 +471,21 @@ class HJzvdStd @JvmOverloads constructor(
             }
         }
     }
+
     override fun clickBack() {
         Log.i(TAG, "clickBack")
         when {
-            CONTAINER_LIST.isNotEmpty() && CURRENT_JZVD != null -> { //判断条件，因为当前所有goBack都是回到普通窗口
+            CONTAINER_LIST.isNotEmpty() && CURRENT_JZVD != null -> { // 判断条件，因为当前所有goBack都是回到普通窗口
                 CURRENT_JZVD.gotoNormalScreen()
             }
 
-            CONTAINER_LIST.isEmpty() && CURRENT_JZVD != null && CURRENT_JZVD.screen != SCREEN_NORMAL -> { //退出直接进入的全屏
+            CONTAINER_LIST.isEmpty() &&
+                CURRENT_JZVD != null &&
+                CURRENT_JZVD.screen != SCREEN_NORMAL -> { // 退出直接进入的全屏
                 CURRENT_JZVD.clearFloatScreen()
             }
 
-            else -> { //剩餘情況直接退出
+            else -> { // 剩餘情況直接退出
                 context.activity?.finish()
             }
         }
@@ -566,9 +530,10 @@ class HJzvdStd @JvmOverloads constructor(
         val absDeltaY = deltaY.absoluteValue
         // 此處進行了修改，未全屏也能調節進度
         if (screen != SCREEN_TINY && !isSpeedGestureDetected) {
-            //拖动的是NavigationBar和状态栏
-            if (mDownX > JZUtils.getScreenWidth(context)
-                || mDownY < JZUtils.getStatusBarHeight(context)
+            // 拖动的是NavigationBar和状态栏
+            if (
+                mDownX > JZUtils.getScreenWidth(context) ||
+                    mDownY < JZUtils.getStatusBarHeight(context)
             ) {
                 return
             }
@@ -583,31 +548,27 @@ class HJzvdStd @JvmOverloads constructor(
                             mGestureDownPosition = currentPositionWhenPlaying
                         }
                     } else {
-                        //如果y轴滑动距离超过设置的处理范围，那么进行滑动事件处理
-                        if (mDownX < appScreenWidth * 0.5f) { //左侧改变亮度
+                        // 如果y轴滑动距离超过设置的处理范围，那么进行滑动事件处理
+                        if (mDownX < appScreenWidth * 0.5f) { // 左侧改变亮度
                             mChangeBrightness = true
                             val lp = JZUtils.getWindow(context).attributes
                             if (lp.screenBrightness < 0) {
                                 try {
-                                    mGestureDownBrightness = Settings.System.getInt(
-                                        context.contentResolver,
-                                        Settings.System.SCREEN_BRIGHTNESS
-                                    ).toFloat()
-                                    Log.i(
-                                        TAG,
-                                        "current system brightness: $mGestureDownBrightness"
-                                    )
+                                    mGestureDownBrightness =
+                                        Settings.System.getInt(
+                                                context.contentResolver,
+                                                Settings.System.SCREEN_BRIGHTNESS,
+                                            )
+                                            .toFloat()
+                                    Log.i(TAG, "current system brightness: $mGestureDownBrightness")
                                 } catch (e: SettingNotFoundException) {
                                     e.printStackTrace()
                                 }
                             } else {
                                 mGestureDownBrightness = lp.screenBrightness * 255
-                                Log.i(
-                                    TAG,
-                                    "current activity brightness: $mGestureDownBrightness"
-                                )
+                                Log.i(TAG, "current activity brightness: $mGestureDownBrightness")
                             }
-                        } else { //右侧改变声音
+                        } else { // 右侧改变声音
                             mChangeVolume = true
                             if (mAudioManager == null) {
                                 mAudioManager = context.getSystemService()
@@ -623,7 +584,9 @@ class HJzvdStd @JvmOverloads constructor(
         if (mChangePosition) {
             val totalTimeDuration = duration
             mSeekTimePosition =
-                (mGestureDownPosition + deltaX * totalTimeDuration / (mScreenWidth * userDefSlideSensitivity)).toLong()
+                (mGestureDownPosition +
+                        deltaX * totalTimeDuration / (mScreenWidth * userDefSlideSensitivity))
+                    .toLong()
             if (mSeekTimePosition > totalTimeDuration) mSeekTimePosition = totalTimeDuration
             val seekTime = JZUtils.stringForTime(mSeekTimePosition)
             val totalTime = JZUtils.stringForTime(totalTimeDuration)
@@ -635,7 +598,7 @@ class HJzvdStd @JvmOverloads constructor(
             val max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             val deltaV = (max * deltaY * 3 / mScreenHeight).toInt()
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mGestureDownVolume + deltaV, 0)
-            //dialog中显示百分比
+            // dialog中显示百分比
             val volumePercent =
                 (mGestureDownVolume * 100 / max + deltaY * 3 * 100 / mScreenHeight).toInt()
             showVolumeDialog(-deltaY, volumePercent)
@@ -645,7 +608,7 @@ class HJzvdStd @JvmOverloads constructor(
             deltaY = -deltaY
             val deltaV = (255 * deltaY * 3 / mScreenHeight).toInt()
             val params = JZUtils.getWindow(context).attributes
-            if ((mGestureDownBrightness + deltaV) / 255 >= 1) { //这和声音有区别，必须自己过滤一下负值
+            if ((mGestureDownBrightness + deltaV) / 255 >= 1) { // 这和声音有区别，必须自己过滤一下负值
                 params.screenBrightness = 1f
             } else if ((mGestureDownBrightness + deltaV) / 255 <= 0) {
                 params.screenBrightness = 0.01f
@@ -653,11 +616,11 @@ class HJzvdStd @JvmOverloads constructor(
                 params.screenBrightness = (mGestureDownBrightness + deltaV) / 255
             }
             JZUtils.getWindow(context).attributes = params
-            //dialog中显示百分比
+            // dialog中显示百分比
             val brightnessPercent =
                 (mGestureDownBrightness * 100 / 255 + deltaY * 3 * 100 / mScreenHeight).toInt()
             showBrightnessDialog(brightnessPercent)
-//            mDownY = y;
+            //            mDownY = y;
         }
     }
 
@@ -730,41 +693,37 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun onProgress(progress: Int, position: Long, duration: Long) {
         super.onProgress(progress, position, duration)
-        if (screen == SCREEN_FULLSCREEN) hKeyframe?.let {
-            var match = false
-            for ((index, kf) in it.keyframes.withIndex()) {
-                val interval = kf.position - position
-                if (interval in 0L..<userDefWhenCountdownRemind) {
-                    val timeLong = interval / 1_000L
-                    val spannable = spannable {
-                        if (userDefShowCommentWhenCountdown) {
-                            "#${index + 1}".span {
-                                relativeSize(proportion = 0.7F)
-                            }
-                            if (!kf.prompt.isNullOrBlank()) {
-                                " ${kf.prompt}".span {
-                                    relativeSize(proportion = 0.7F)
+        if (screen == SCREEN_FULLSCREEN)
+            hKeyframe?.let {
+                var match = false
+                for ((index, kf) in it.keyframes.withIndex()) {
+                    val interval = kf.position - position
+                    if (interval in 0L..<userDefWhenCountdownRemind) {
+                        val timeLong = interval / 1_000L
+                        val spannable = spannable {
+                            if (userDefShowCommentWhenCountdown) {
+                                "#${index + 1}".span { relativeSize(proportion = 0.7F) }
+                                if (!kf.prompt.isNullOrBlank()) {
+                                    " ${kf.prompt}".span { relativeSize(proportion = 0.7F) }
                                 }
+                                newline()
                             }
-                            newline()
+                            val time =
+                                if (timeLong >= 1) {
+                                    (timeLong + 1).toString()
+                                } else {
+                                    val timeFloat = interval / 1_000F
+                                    "%.1f".format(timeFloat)
+                                }
+                            time.span { style(Typeface.BOLD) }
                         }
-                        val time = if (timeLong >= 1) {
-                            (timeLong + 1).toString()
-                        } else {
-                            val timeFloat = interval / 1_000F
-                            "%.1f".format(timeFloat)
-                        }
-                        time.span {
-                            style(Typeface.BOLD)
-                        }
+                        tvTimer.text = spannable
+                        match = true
+                        break
                     }
-                    tvTimer.text = spannable
-                    match = true
-                    break
                 }
-            }
-            tvTimer.isInvisible = !match
-        } ?: run { tvTimer.isInvisible = true }
+                tvTimer.isInvisible = !match
+            } ?: run { tvTimer.isInvisible = true }
     }
 
     override fun onStatePlaying() {
@@ -774,10 +733,16 @@ class HJzvdStd @JvmOverloads constructor(
 
     private fun changeUiToPreparingPlayingClear() {
         when (screen) {
-            SCREEN_NORMAL, SCREEN_FULLSCREEN -> {
+            SCREEN_NORMAL,
+            SCREEN_FULLSCREEN -> {
                 setAllControlsVisiblity(
-                    INVISIBLE, INVISIBLE, INVISIBLE,
-                    VISIBLE, INVISIBLE, INVISIBLE, INVISIBLE
+                    INVISIBLE,
+                    INVISIBLE,
+                    INVISIBLE,
+                    VISIBLE,
+                    INVISIBLE,
+                    INVISIBLE,
+                    INVISIBLE,
                 )
             }
         }
@@ -785,10 +750,16 @@ class HJzvdStd @JvmOverloads constructor(
 
     private fun changeUiToPreparingPlayingShow() {
         when (screen) {
-            SCREEN_NORMAL, SCREEN_FULLSCREEN -> {
+            SCREEN_NORMAL,
+            SCREEN_FULLSCREEN -> {
                 setAllControlsVisiblity(
-                    VISIBLE, VISIBLE, INVISIBLE,
-                    VISIBLE, INVISIBLE, VISIBLE, INVISIBLE
+                    VISIBLE,
+                    VISIBLE,
+                    INVISIBLE,
+                    VISIBLE,
+                    INVISIBLE,
+                    VISIBLE,
+                    INVISIBLE,
                 )
             }
         }
@@ -800,20 +771,25 @@ class HJzvdStd @JvmOverloads constructor(
         onCLickUiToggleToClear()
         val inflater = LayoutInflater.from(context).inflate(R.layout.jz_layout_speed, null)
         val rv = inflater.findViewById<RecyclerView>(R.id.rv_video_speed)
-        val popup = PopupWindow(
-            inflater, JZUtils.dip2px(jzvdContext, 240f),
-            LayoutParams.MATCH_PARENT, true
-        ).apply {
-            contentView = inflater
-            animationStyle = cn.jzvd.R.style.pop_animation
-        }
+        val popup =
+            PopupWindow(
+                    inflater,
+                    JZUtils.dip2px(jzvdContext, 240f),
+                    LayoutParams.MATCH_PARENT,
+                    true,
+                )
+                .apply {
+                    contentView = inflater
+                    animationStyle = cn.jzvd.R.style.pop_animation
+                }
         rv.layoutManager = LinearLayoutManager(context)
-        rv.adapter = VideoSpeedAdapter(currentSpeedIndex).apply {
-            setOnItemClickListener { _, _, position ->
-                currentSpeedIndex = position
-                popup.dismiss()
+        rv.adapter =
+            VideoSpeedAdapter(currentSpeedIndex).apply {
+                setOnItemClickListener { _, _, position ->
+                    currentSpeedIndex = position
+                    popup.dismiss()
+                }
             }
-        }
         popup.showAtLocation(textureViewContainer, Gravity.END, 0, 0)
     }
 
@@ -822,20 +798,25 @@ class HJzvdStd @JvmOverloads constructor(
         onCLickUiToggleToClear()
         val inflater = LayoutInflater.from(context).inflate(R.layout.jz_layout_speed, null)
         val rv = inflater.findViewById<RecyclerView>(R.id.rv_video_speed)
-        val popup = PopupWindow(
-            inflater, JZUtils.dip2px(jzvdContext, 240f),
-            LayoutParams.MATCH_PARENT, true
-        ).apply {
-            contentView = inflater
-            animationStyle = cn.jzvd.R.style.pop_animation
-        }
+        val popup =
+            PopupWindow(
+                    inflater,
+                    JZUtils.dip2px(jzvdContext, 240f),
+                    LayoutParams.MATCH_PARENT,
+                    true,
+                )
+                .apply {
+                    contentView = inflater
+                    animationStyle = cn.jzvd.R.style.pop_animation
+                }
         rv.layoutManager = LinearLayoutManager(context)
-        rv.adapter = SuperResolutionAdapter(superResolutionIndex).apply {
-            setOnItemClickListener { _, _, position ->
-                superResolutionIndex = position
-                popup.dismiss()
+        rv.adapter =
+            SuperResolutionAdapter(superResolutionIndex).apply {
+                setOnItemClickListener { _, _, position ->
+                    superResolutionIndex = position
+                    popup.dismiss()
+                }
             }
-        }
         popup.showAtLocation(textureViewContainer, Gravity.END, 0, 0)
     }
 
@@ -871,20 +852,25 @@ class HJzvdStd @JvmOverloads constructor(
         onCLickUiToggleToClear()
         val inflater = LayoutInflater.from(context).inflate(R.layout.jz_layout_speed, null)
         val rv = inflater.findViewById<RecyclerView>(R.id.rv_video_speed)
-        val popup = PopupWindow(
-            inflater, JZUtils.dip2px(jzvdContext, 240f),
-            LayoutParams.MATCH_PARENT, true
-        ).apply {
-            contentView = inflater
-            animationStyle = cn.jzvd.R.style.pop_animation
-        }
+        val popup =
+            PopupWindow(
+                    inflater,
+                    JZUtils.dip2px(jzvdContext, 240f),
+                    LayoutParams.MATCH_PARENT,
+                    true,
+                )
+                .apply {
+                    contentView = inflater
+                    animationStyle = cn.jzvd.R.style.pop_animation
+                }
         rv.layoutManager = LinearLayoutManager(v.context)
         val adapter = hKeyframeAdapter
         rv.adapter = adapter
         adapter.setStateViewLayout(
             inflate(v.context, R.layout.layout_empty_view, null),
-            this@HJzvdStd.context.getString(R.string.here_is_empty) + "\n"
-                    + this@HJzvdStd.context.getString(R.string.long_press_to_add_h_keyframe)
+            this@HJzvdStd.context.getString(R.string.here_is_empty) +
+                "\n" +
+                this@HJzvdStd.context.getString(R.string.long_press_to_add_h_keyframe),
         )
         popup.showAtLocation(textureViewContainer, Gravity.END, 0, 0)
     }
@@ -894,20 +880,20 @@ class HJzvdStd @JvmOverloads constructor(
      *
      * PS: 套 try-catch 没用，因为在 post 里面，所以还是会报错，只能在调用的地方 try-catch 了。
      *
-     * #issue-28 就是这个问题，如果我在 HJZMediaSystem 中 setSpeed 方法里加的判断不起作用，
-     * 那么那个机型就先别用这个功能了。
+     * #issue-28 就是这个问题，如果我在 HJZMediaSystem 中 setSpeed 方法里加的判断不起作用， 那么那个机型就先别用这个功能了。
      */
     private fun setSpeedInternal(speed: Float) {
         mediaInterface?.setSpeed(speed)
     }
 
-    /**
-     * 將靈敏度轉換為實際數值，很多用戶對滑動要求挺高，
-     * 靈敏度太高沒人在乎，所以高靈敏度照舊，低靈敏度差別大一點
-     */
+    /** 將靈敏度轉換為實際數值，很多用戶對滑動要求挺高， 靈敏度太高沒人在乎，所以高靈敏度照舊，低靈敏度差別大一點 */
     private fun @receiver:IntRange(from = 1, to = 9) Int.toRealSensitivity(): Int {
         return when (this) {
-            1, 2, 3, 4, 5 -> this
+            1,
+            2,
+            3,
+            4,
+            5 -> this
             6 -> 7
             7 -> 10
             8 -> 20

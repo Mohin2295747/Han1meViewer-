@@ -10,13 +10,12 @@ import com.chad.library.adapter4.viewholder.QuickViewHolder
 import com.yenaly.han1meviewer.ui.view.video.HJzvdStd
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 16:09
  */
-class VideoSpeedAdapter(private var currentIndex: Int) : BaseQuickAdapter<String, QuickViewHolder>(
-    HJzvdStd.speedStringArray.toMutableList()
-) {
+class VideoSpeedAdapter(private var currentIndex: Int) :
+    BaseQuickAdapter<String, QuickViewHolder>(HJzvdStd.speedStringArray.toMutableList()) {
 
     init {
         isStateViewEnable = true
@@ -27,7 +26,7 @@ class VideoSpeedAdapter(private var currentIndex: Int) : BaseQuickAdapter<String
         holder.setTextColor(
             android.R.id.text1,
             if (currentIndex == holder.bindingAdapterPosition) Color.parseColor("#fff85959")
-            else Color.parseColor("#ffffff")
+            else Color.parseColor("#ffffff"),
         )
     }
 

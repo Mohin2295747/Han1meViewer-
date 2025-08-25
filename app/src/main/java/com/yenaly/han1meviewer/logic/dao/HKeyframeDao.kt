@@ -10,8 +10,8 @@ import com.yenaly.han1meviewer.logic.entity.HKeyframeEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/12 012 12:39
  */
 @Dao
@@ -20,7 +20,9 @@ abstract class HKeyframeDao {
     @Query("SELECT * FROM HKeyframeEntity ORDER BY createdTime DESC")
     abstract fun loadAll(): Flow<MutableList<HKeyframeEntity>>
 
-    @Query("SELECT * FROM HKeyframeEntity WHERE `title` LIKE '%' || :keyword || '%' OR `videoCode` == :keyword ORDER BY createdTime DESC")
+    @Query(
+        "SELECT * FROM HKeyframeEntity WHERE `title` LIKE '%' || :keyword || '%' OR `videoCode` == :keyword ORDER BY createdTime DESC"
+    )
     abstract fun loadAll(keyword: String): Flow<MutableList<HKeyframeEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -29,8 +31,7 @@ abstract class HKeyframeDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun update(entity: HKeyframeEntity)
 
-    @Delete
-    abstract suspend fun delete(entity: HKeyframeEntity)
+    @Delete abstract suspend fun delete(entity: HKeyframeEntity)
 
     @Query("SELECT * FROM HKeyframeEntity WHERE `videoCode` == :videoCode LIMIT 1")
     abstract suspend fun findBy(videoCode: String): HKeyframeEntity?
@@ -40,7 +41,8 @@ abstract class HKeyframeDao {
 
     open suspend fun modifyKeyframe(
         videoCode: String,
-        oldKeyframe: HKeyframeEntity.Keyframe, keyframe: HKeyframeEntity.Keyframe,
+        oldKeyframe: HKeyframeEntity.Keyframe,
+        keyframe: HKeyframeEntity.Keyframe,
     ) {
         val entity = findBy(videoCode)
         entity?.let {
@@ -52,7 +54,8 @@ abstract class HKeyframeDao {
     }
 
     open suspend fun appendKeyframe(
-        videoCode: String, title: String,
+        videoCode: String,
+        title: String,
         keyframe: HKeyframeEntity.Keyframe,
     ) {
         val entity = findBy(videoCode)
@@ -64,7 +67,7 @@ abstract class HKeyframeDao {
                     mutableListOf(keyframe),
                     lastModifiedTime = System.currentTimeMillis(),
                     createdTime = System.currentTimeMillis(),
-                    author = null
+                    author = null,
                 )
             )
         } else {
@@ -74,10 +77,7 @@ abstract class HKeyframeDao {
         }
     }
 
-    open suspend fun removeKeyframe(
-        videoCode: String,
-        keyframe: HKeyframeEntity.Keyframe,
-    ) {
+    open suspend fun removeKeyframe(videoCode: String, keyframe: HKeyframeEntity.Keyframe) {
         val entity = findBy(videoCode)
         if (entity != null) {
             entity.keyframes -= keyframe

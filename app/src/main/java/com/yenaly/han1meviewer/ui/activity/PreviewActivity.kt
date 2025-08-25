@@ -70,8 +70,8 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/23 023 16:46
  */
 class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
@@ -86,10 +86,7 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
     private val dateUtils = DateUtils()
     private val badgeDrawable by unsafeLazy { BadgeDrawable.create(this@PreviewActivity) }
 
-    /**
-     * 左右滑动 VP 时，不触发 onScrollStateChanged，防止触发两次 binding.vpNews.setCurrentItem
-     * 导致滑动不流畅。
-     */
+    /** 左右滑动 VP 时，不触发 onScrollStateChanged，防止触发两次 binding.vpNews.setCurrentItem 导致滑动不流畅。 */
     private var shouldTriggerScroll = false
 
     private val tourSimplifiedAdapter = HanimePreviewTourRvAdapter()
@@ -129,15 +126,13 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
     override fun initData(savedInstanceState: Bundle?) {
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
         supportActionBar?.let {
             it.title = null
             it.setDisplayHomeAsUpEnabled(true)
@@ -174,28 +169,29 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
             adapter = tourSimplifiedAdapter
             clipToPadding = false
             ViewCompat.setOnApplyWindowInsetsListener(this) { view, _ ->
-                val elementWidth = view.resources.getDimension(
-                    R.dimen.video_cover_simplified_width_small
-                )
+                val elementWidth =
+                    view.resources.getDimension(R.dimen.video_cover_simplified_width_small)
                 val padding = appScreenWidth / 2f - elementWidth / 2f
                 view.updatePadding(left = padding.toInt(), right = padding.toInt())
                 WindowInsetsCompat.CONSUMED
             }
             linearSnapHelper.attachToRecyclerView(this)
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        if (shouldTriggerScroll) {
-                            val view = linearSnapHelper.findSnapView(tourLayoutManager)
-                            val position = view?.let(::getChildAdapterPosition)
-                                ?: RecyclerView.NO_POSITION
-                            binding.vpNews.setCurrentItem(position, false)
+            addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        super.onScrollStateChanged(recyclerView, newState)
+                        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                            if (shouldTriggerScroll) {
+                                val view = linearSnapHelper.findSnapView(tourLayoutManager)
+                                val position =
+                                    view?.let(::getChildAdapterPosition) ?: RecyclerView.NO_POSITION
+                                binding.vpNews.setCurrentItem(position, false)
+                            }
+                            shouldTriggerScroll = true
                         }
-                        shouldTriggerScroll = true
                     }
                 }
-            })
+            )
         }
 
         tourSimplifiedAdapter.setOnItemClickListener { _, _, position ->
@@ -213,19 +209,21 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
             }
         }
         binding.vpNews.offscreenPageLimit = 1
-        binding.vpNews.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                shouldTriggerScroll = false
-                binding.rvTourSimplified.smoothScrollToPosition(position)
-                handleToolbarColor(position)
+        binding.vpNews.registerOnPageChangeCallback(
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    shouldTriggerScroll = false
+                    binding.rvTourSimplified.smoothScrollToPosition(position)
+                    handleToolbarColor(position)
+                }
             }
-        })
+        )
 
         initAnimation()
 
-        //binding.srlPreview.setOnRefreshListener {
+        // binding.srlPreview.setOnRefreshListener {
         //    viewModel.getHanimePreview(dateUtils.current.second)
-        //}
+        // }
     }
 
     @OptIn(ExperimentalBadgeUtils::class)
@@ -238,23 +236,24 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
                     binding.appBar.setExpanded(state is WebsiteState.Success, true)
                     when (state) {
                         is WebsiteState.Error -> {
-                            //binding.srlPreview.finishRefresh()
+                            // binding.srlPreview.finishRefresh()
                             supportActionBar?.title = state.throwable.pienization
                         }
 
                         is WebsiteState.Loading -> {
-                            //binding.srlPreview.autoRefresh()
+                            // binding.srlPreview.autoRefresh()
                             binding.fabPrevious.isEnabled = false
                             binding.fabNext.isEnabled = false
                         }
 
                         is WebsiteState.Success -> {
-                            //binding.srlPreview.finishRefresh()
+                            // binding.srlPreview.finishRefresh()
                             binding.vpNews.setCurrentItem(0, false)
-                            supportActionBar?.title = getString(
-                                R.string.latest_hanime_list_monthly,
-                                dateUtils.current.format(DateUtils.NORMAL_FORMAT)
-                            )
+                            supportActionBar?.title =
+                                getString(
+                                    R.string.latest_hanime_list_monthly,
+                                    dateUtils.current.format(DateUtils.NORMAL_FORMAT),
+                                )
                             binding.fabPrevious.apply {
                                 isVisible = state.info.hasPrevious
                                 isEnabled = state.info.hasPrevious
@@ -276,7 +275,7 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
                                         it.toBitmapOrNull()?.let(Palette::Builder)?.generate { p ->
                                             p?.let(::handleHeaderPalette)
                                         }
-                                    }
+                                    },
                                 )
                             }
                             tourSimplifiedAdapter.submitList(state.info.latestHanime)
@@ -317,7 +316,7 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
             R.id.tb_comment -> {
                 startActivity<PreviewCommentActivity>(
                     "date" to dateUtils.current.format(DateUtils.NORMAL_FORMAT),
-                    DATE_CODE to dateUtils.current.format(DateUtils.FORMATTED_FORMAT)
+                    DATE_CODE to dateUtils.current.format(DateUtils.FORMATTED_FORMAT),
                 )
             }
         }
@@ -325,36 +324,37 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
     }
 
     private fun loadComments(currentFormat: String) {
-        PreviewCommentPrefetcher.here()
-            .fetch(PREVIEW_COMMENT_PREFIX, currentFormat)
+        PreviewCommentPrefetcher.here().fetch(PREVIEW_COMMENT_PREFIX, currentFormat)
     }
 
     private fun handleToolbarColor(index: Int) {
         val data = tourSimplifiedAdapter.getItem(index)?.coverUrl
-        val request = ImageRequest.Builder(this)
-            .data(data)
-            .allowHardware(false)
-            .target(
-                onError = {
-
-                },
-                onSuccess = {
-                    it.toBitmapOrNull()?.let(Palette::Builder)?.generate { p ->
-                        p?.let(::handleToolbarPalette)
-                    }
-                }
-            )
-            .build()
+        val request =
+            ImageRequest.Builder(this)
+                .data(data)
+                .allowHardware(false)
+                .target(
+                    onError = {},
+                    onSuccess = {
+                        it.toBitmapOrNull()?.let(Palette::Builder)?.generate { p ->
+                            p?.let(::handleToolbarPalette)
+                        }
+                    },
+                )
+                .build()
         this.imageLoader.enqueue(request)
     }
 
     private fun handleToolbarPalette(p: Palette) {
         val darkMuted =
-            p.darkMutedSwatch?.rgb ?: p.darkVibrantSwatch?.rgb ?: p.lightVibrantSwatch?.rgb
-            ?: p.lightMutedSwatch?.rgb ?: Color.BLACK
+            p.darkMutedSwatch?.rgb
+                ?: p.darkVibrantSwatch?.rgb
+                ?: p.lightVibrantSwatch?.rgb
+                ?: p.lightMutedSwatch?.rgb
+                ?: Color.BLACK
         colorTransition(
             fromColor = (binding.collapsingToolbar.contentScrim as ColorDrawable).color,
-            toColor = ColorUtils.blendARGB(darkMuted, Color.BLACK, 0.3f)
+            toColor = ColorUtils.blendARGB(darkMuted, Color.BLACK, 0.3f),
         ) {
             duration = ANIM_DURATION
             interpolator = animInterpolator
@@ -365,7 +365,7 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
         }
         colorTransition(
             fromColor = (binding.llTour.background as? ColorDrawable)?.color ?: Color.TRANSPARENT,
-            toColor = darkMuted
+            toColor = darkMuted,
         ) {
             duration = ANIM_DURATION
             interpolator = animInterpolator
@@ -392,50 +392,65 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
     }
 
     private fun initAnimation() {
-        binding.appBar.addOnOffsetChangedListener(object : AppBarLayoutStateChangeListener() {
-            override fun onStateChanged(appBarLayout: AppBarLayout, state: State) {
-                when (state) {
-                    State.EXPANDED -> {
-                        binding.fabPrevious.animate().translationX(0F).setDuration(ANIM_DURATION)
-                            .setInterpolator(animInterpolator).start()
-                        binding.fabNext.animate().translationX(0F).setDuration(ANIM_DURATION)
-                            .setInterpolator(animInterpolator).start()
-                    }
+        binding.appBar.addOnOffsetChangedListener(
+            object : AppBarLayoutStateChangeListener() {
+                override fun onStateChanged(appBarLayout: AppBarLayout, state: State) {
+                    when (state) {
+                        State.EXPANDED -> {
+                            binding.fabPrevious
+                                .animate()
+                                .translationX(0F)
+                                .setDuration(ANIM_DURATION)
+                                .setInterpolator(animInterpolator)
+                                .start()
+                            binding.fabNext
+                                .animate()
+                                .translationX(0F)
+                                .setDuration(ANIM_DURATION)
+                                .setInterpolator(animInterpolator)
+                                .start()
+                        }
 
-                    State.INTERMEDIATE -> {
-                        binding.fabPrevious.animate().translationX(-500F).setDuration(ANIM_DURATION)
-                            .setInterpolator(animInterpolator).start()
-                        binding.fabNext.animate().translationX(500F).setDuration(ANIM_DURATION)
-                            .setInterpolator(animInterpolator).start()
-                    }
+                        State.INTERMEDIATE -> {
+                            binding.fabPrevious
+                                .animate()
+                                .translationX(-500F)
+                                .setDuration(ANIM_DURATION)
+                                .setInterpolator(animInterpolator)
+                                .start()
+                            binding.fabNext
+                                .animate()
+                                .translationX(500F)
+                                .setDuration(ANIM_DURATION)
+                                .setInterpolator(animInterpolator)
+                                .start()
+                        }
 
-                    State.COLLAPSED -> {
-
+                        State.COLLAPSED -> {}
                     }
                 }
             }
-        })
+        )
     }
 
-    /**
-     * 单纯给这个用的DateUtils
-     */
+    /** 单纯给这个用的DateUtils */
     private class DateUtils {
 
         companion object {
-            /**
-             * 2022/2
-             */
-            val NORMAL_FORMAT = LocalDateTime.Format {
-                year(); char('/'); monthNumber(Padding.NONE)
-            }
+            /** 2022/2 */
+            val NORMAL_FORMAT =
+                LocalDateTime.Format {
+                    year()
+                    char('/')
+                    monthNumber(Padding.NONE)
+                }
 
-            /**
-             * 202202
-             */
-            val FORMATTED_FORMAT = LocalDateTime.Format {
-                year(); monthNumber()
-            }
+            /** 202202 */
+            val FORMATTED_FORMAT =
+                LocalDateTime.Format {
+                    year()
+                    monthNumber()
+                }
         }
 
         // 當前顯示的日期
@@ -448,14 +463,16 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
         val prevDate: LocalDateTime
             get() {
                 val instant = current.toInstant(TimeZone.currentSystemDefault())
-                return instant.minus(1, DateTimeUnit.MONTH, TimeZone.currentSystemDefault())
+                return instant
+                    .minus(1, DateTimeUnit.MONTH, TimeZone.currentSystemDefault())
                     .toLocalDateTime(TimeZone.currentSystemDefault())
             }
 
         val nextDate: LocalDateTime
             get() {
                 val instant = current.toInstant(TimeZone.currentSystemDefault())
-                return instant.plus(1, DateTimeUnit.MONTH, TimeZone.currentSystemDefault())
+                return instant
+                    .plus(1, DateTimeUnit.MONTH, TimeZone.currentSystemDefault())
                     .toLocalDateTime(TimeZone.currentSystemDefault())
             }
 

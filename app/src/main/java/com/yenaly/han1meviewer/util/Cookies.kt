@@ -4,16 +4,11 @@ import android.util.Log
 import com.yenaly.han1meviewer.Preferences
 import okhttp3.Cookie
 
-@JvmInline
-value class CookieString(val cookie: String)
+@JvmInline value class CookieString(val cookie: String)
 
-/**
- * 主要用於 [HCookieJar][com.yenaly.han1meviewer.logic.network.HCookieJar]，最好不要用到其他地方。
- */
+/** 主要用於 [HCookieJar][com.yenaly.han1meviewer.logic.network.HCookieJar]，最好不要用到其他地方。 */
 fun CookieString.toLoginCookieList(domain: String): List<Cookie> {
-    val cookieList = mutableListOf<Cookie>().also {
-        it += preferencesCookieList(domain)
-    }
+    val cookieList = mutableListOf<Cookie>().also { it += preferencesCookieList(domain) }
     cookie.split(';').forEach { cookie ->
         if (cookie.isNotBlank()) {
             val name = cookie.substringBefore('=').trim()
@@ -21,9 +16,7 @@ fun CookieString.toLoginCookieList(domain: String): List<Cookie> {
             cookieList += Cookie.Builder().domain(domain).name(name).value(value).build()
         }
     }
-    return cookieList.also {
-        Log.d("CookieString", "toCookieList: $it")
-    }
+    return cookieList.also { Log.d("CookieString", "toCookieList: $it") }
 }
 
 /**
@@ -33,9 +26,7 @@ fun CookieString.toLoginCookieList(domain: String): List<Cookie> {
  */
 private fun preferencesCookieList(domain: String): List<Cookie> {
     val videoLanguage = Preferences.videoLanguage
-    val videoLanguageCookie = Cookie.Builder().domain(domain)
-        .name("user_lang")
-        .value(videoLanguage)
-        .build()
+    val videoLanguageCookie =
+        Cookie.Builder().domain(domain).name("user_lang").value(videoLanguage).build()
     return listOf(videoLanguageCookie)
 }

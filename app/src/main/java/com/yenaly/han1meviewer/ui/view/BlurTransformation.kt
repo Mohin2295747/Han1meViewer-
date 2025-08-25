@@ -19,10 +19,12 @@ import coil.transform.Transformation
  *
  * @param context The [Context] used to create a [RenderScript] instance.
  * @param radius The radius of the blur.
- * @param sampling The sampling multiplier used to scale the image. Values > 1
- *  will downscale the image. Values between 0 and 1 will upscale the image.
+ * @param sampling The sampling multiplier used to scale the image. Values > 1 will downscale the
+ *   image. Values between 0 and 1 will upscale the image.
  */
-class BlurTransformation @JvmOverloads constructor(
+class BlurTransformation
+@JvmOverloads
+constructor(
     private val context: Context,
     private val radius: Float = DEFAULT_RADIUS,
     private val sampling: Float = DEFAULT_SAMPLING,
@@ -54,12 +56,13 @@ class BlurTransformation @JvmOverloads constructor(
         var blur: ScriptIntrinsicBlur? = null
         try {
             script = RenderScript.create(context)
-            tmpInt = Allocation.createFromBitmap(
-                script,
-                output,
-                Allocation.MipmapControl.MIPMAP_NONE,
-                Allocation.USAGE_SCRIPT
-            )
+            tmpInt =
+                Allocation.createFromBitmap(
+                    script,
+                    output,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SCRIPT,
+                )
             tmpOut = Allocation.createTyped(script, tmpInt.type)
             blur = ScriptIntrinsicBlur.create(script, Element.U8_4(script))
             blur.setRadius(radius)

@@ -5,14 +5,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2024/03/21 021 09:03
  */
 @Serializable
-data class WorkflowRuns(
-    @SerialName("workflow_runs") val workflowRuns: List<WorkflowRun>,
-) {
+data class WorkflowRuns(@SerialName("workflow_runs") val workflowRuns: List<WorkflowRun>) {
     @Serializable
     data class WorkflowRun(
         @SerialName("head_sha") val headSha: String,
@@ -21,15 +19,18 @@ data class WorkflowRuns(
     )
 }
 
-
 @Serializable
-data class Artifacts(
-    @SerialName("artifacts") val artifacts: List<Artifact>,
-) {
-    val artifact get() = artifacts.firstOrNull { it.name.contains(Build.SUPPORTED_ABIS[0]) }
-        ?: artifacts.first { it.name.contains("universal") }
-    val downloadLink: String get() = artifact.downloadLink
-    val nodeId: String get() = artifact.nodeId
+data class Artifacts(@SerialName("artifacts") val artifacts: List<Artifact>) {
+    val artifact
+        get() =
+            artifacts.firstOrNull { it.name.contains(Build.SUPPORTED_ABIS[0]) }
+                ?: artifacts.first { it.name.contains("universal") }
+
+    val downloadLink: String
+        get() = artifact.downloadLink
+
+    val nodeId: String
+        get() = artifact.nodeId
 
     @Serializable
     data class Artifact(

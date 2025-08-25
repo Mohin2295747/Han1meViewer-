@@ -1,8 +1,6 @@
 package com.yenaly.han1meviewer.logic.model
 
-/**
- * @since 2024/09/11
- */
+/** @since 2024/09/11 */
 data class Subscription(
     val name: String,
     val avatarUrl: String?,

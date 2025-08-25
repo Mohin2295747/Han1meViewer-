@@ -8,8 +8,8 @@ import com.yenaly.han1meviewer.ui.viewmodel.mylist.WatchLaterSubViewModel
 import com.yenaly.yenaly_libs.base.YenalyViewModel
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/04 004 22:46
  */
 class MyListViewModel(application: Application) : YenalyViewModel(application) {

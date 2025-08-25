@@ -6,24 +6,24 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/08/25 025 23:26
  */
-open class LongClickablePreference @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
-) : Preference(context, attrs) {
+open class LongClickablePreference
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) : Preference(context, attrs) {
 
     private var onPreferenceLongClickListener: OnPreferenceLongClickListener? = null
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
-        holder.itemView.setOnLongClickListener {
-            performLongClick()
-        }
+        holder.itemView.setOnLongClickListener { performLongClick() }
     }
 
-    fun setOnPreferenceLongClickListener(onPreferenceLongClickListener: OnPreferenceLongClickListener) {
+    fun setOnPreferenceLongClickListener(
+        onPreferenceLongClickListener: OnPreferenceLongClickListener
+    ) {
         this.onPreferenceLongClickListener = onPreferenceLongClickListener
     }
 

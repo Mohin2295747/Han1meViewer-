@@ -13,13 +13,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 /**
  * 将文字复制到剪切板
  *
- * @param text    要复制的文字
- * @param label   为此文字设置的用户可见的标签 (optional)
+ * @param text 要复制的文字
+ * @param label 为此文字设置的用户可见的标签 (optional)
  */
-fun copyTextToClipboard(
-    text: CharSequence?,
-    label: CharSequence? = null,
-) {
+fun copyTextToClipboard(text: CharSequence?, label: CharSequence? = null) {
     val clipboardManager = applicationContext.getSystemService<ClipboardManager>()
     val clipData = ClipData.newPlainText(label, text)
     clipboardManager?.setPrimaryClip(clipData)
@@ -34,9 +31,7 @@ val textsFromClipboard: Sequence<CharSequence?>
         val clipboardManager = context.getSystemService<ClipboardManager>()
         val clipData = clipboardManager?.primaryClip ?: return@sequence
         for (i in 0..<clipData.itemCount) {
-            clipData.getItemAt(i)?.coerceToText(context)?.let { str ->
-                yield(str)
-            }
+            clipData.getItemAt(i)?.coerceToText(context)?.let { str -> yield(str) }
         }
     }
 
@@ -58,40 +53,36 @@ val textFromClipboard: CharSequence?
         return null
     }
 
-/**
- * 清除剪切板内容
- */
+/** 清除剪切板内容 */
 fun clearClipboard() {
     val clipboardManager = applicationContext.getSystemService<ClipboardManager>()
     val clipData = ClipData.newPlainText(null, null)
     clipboardManager?.setPrimaryClip(clipData)
 }
 
-/**
- * 监听剪切板内容变化
- */
+/** 监听剪切板内容变化 */
 fun clipboardFlow(distinct: Boolean): Flow<Sequence<CharSequence?>> {
     return callbackFlow {
-        val clipboardManager = applicationContext.getSystemService<ClipboardManager>()
-        val listener = ClipboardManager.OnPrimaryClipChangedListener {
-            trySend(textsFromClipboard)
+            val clipboardManager = applicationContext.getSystemService<ClipboardManager>()
+            val listener =
+                ClipboardManager.OnPrimaryClipChangedListener { trySend(textsFromClipboard) }
+            clipboardManager?.addPrimaryClipChangedListener(listener)
+            awaitClose { clipboardManager?.removePrimaryClipChangedListener(listener) }
         }
-        clipboardManager?.addPrimaryClipChangedListener(listener)
-        awaitClose { clipboardManager?.removePrimaryClipChangedListener(listener) }
-    }.run {
-        if (distinct) {
-            distinctUntilChanged { old, new ->
-                val oldIterator = old.iterator()
-                val newIterator = new.iterator()
-                while (oldIterator.hasNext() && newIterator.hasNext()) {
-                    if (oldIterator.next() != newIterator.next()) {
-                        return@distinctUntilChanged false
+        .run {
+            if (distinct) {
+                distinctUntilChanged { old, new ->
+                    val oldIterator = old.iterator()
+                    val newIterator = new.iterator()
+                    while (oldIterator.hasNext() && newIterator.hasNext()) {
+                        if (oldIterator.next() != newIterator.next()) {
+                            return@distinctUntilChanged false
+                        }
                     }
+                    oldIterator.hasNext() == newIterator.hasNext()
                 }
-                oldIterator.hasNext() == newIterator.hasNext()
+            } else {
+                this
             }
-        } else {
-            this
         }
-    }
 }

@@ -1,17 +1,16 @@
 package com.yenaly.yenaly_libs.utils
 
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 /**
- * For ViewModelScope.
- * Avoid triggering request multiple times when activity recreates and
- * you call `viewModelScope.launch` function in activity or fragment.
+ * For ViewModelScope. Avoid triggering request multiple times when activity recreates and you call
+ * `viewModelScope.launch` function in activity or fragment.
  *
  * For example:
  * ```kotlin
@@ -33,13 +32,13 @@ class SingleFlowLaunch {
     private val jobMap = mutableMapOf<SuspendCoroutineScopeBlock, AtomicInteger>()
 
     /**
-     * Single [CoroutineScope.launch] only for ViewModelScope,
-     * avoid triggering request multiple times when activity recreates and
-     * you call `viewModelScope.launch` function in activity or fragment.
+     * Single [CoroutineScope.launch] only for ViewModelScope, avoid triggering request multiple
+     * times when activity recreates and you call `viewModelScope.launch` function in activity or
+     * fragment.
      *
-     * If you use [SharedFlow][kotlinx.coroutines.flow.SharedFlow] with [singleLaunch],
-     * you should set the param `replay` to 1 or higher to cache the latest data.
-     * Otherwise, you might not get the data.
+     * If you use [SharedFlow][kotlinx.coroutines.flow.SharedFlow] with [singleLaunch], you should
+     * set the param `replay` to 1 or higher to cache the latest data. Otherwise, you might not get
+     * the data.
      */
     fun singleLaunch(
         viewModelScope: CoroutineScope,

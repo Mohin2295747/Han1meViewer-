@@ -20,7 +20,8 @@ abstract class YenalyBottomSheetDialogFragment<DB : ViewDataBinding> :
     BottomSheetDialogFragment(), IViewBinding<DB> {
 
     private var _binding: DB? = null
-    override val binding get() = _binding!!
+    override val binding
+        get() = _binding!!
 
     final override fun getViewBinding(inflater: LayoutInflater, container: ViewGroup?): DB {
         return getViewBinding(inflater)
@@ -56,14 +57,10 @@ abstract class YenalyBottomSheetDialogFragment<DB : ViewDataBinding> :
 
     abstract fun getViewBinding(layoutInflater: LayoutInflater): DB
 
-    /**
-     * 初始化数据
-     */
+    /** 初始化数据 */
     abstract fun initData(savedInstanceState: Bundle?, dialog: Dialog)
 
-    /**
-     * 简化fragment内唤出该dialog的方式
-     */
+    /** 简化fragment内唤出该dialog的方式 */
     fun showIn(fragment: Fragment) {
         val fragmentManager = fragment.requireActivity().supportFragmentManager
         if (fragmentManager.findFragmentByTag(this.javaClass.name) != null) {
@@ -72,9 +69,7 @@ abstract class YenalyBottomSheetDialogFragment<DB : ViewDataBinding> :
         show(fragmentManager, this.javaClass.name)
     }
 
-    /**
-     * 简化activity内唤出该dialog的方式
-     */
+    /** 简化activity内唤出该dialog的方式 */
     fun showIn(activity: FragmentActivity) {
         val fragmentManager = activity.supportFragmentManager
         if (fragmentManager.findFragmentByTag(this.javaClass.name) != null) {

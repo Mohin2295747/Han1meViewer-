@@ -1,8 +1,8 @@
 package com.yenaly.han1meviewer.logic.model
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/20 020 21:56
  */
 data class VideoComments(
@@ -31,16 +31,17 @@ data class VideoComments(
         val post: POST,
     ) {
 
-        val realReplyId get() = post.foreignId ?: checkNotNull(id)
-        val realLikesCount get() = thumbUp
+        val realReplyId
+            get() = post.foreignId ?: checkNotNull(id)
+
+        val realLikesCount
+            get() = thumbUp
+
         fun incLikesCount(cancel: Boolean = false): VideoComment {
             return thumbUp?.let {
                 copy(
                     thumbUp = it + if (cancel) -1 else 1,
-                    post = post.copy(
-                        likeCommentStatus = !cancel,
-                        unlikeCommentStatus = false
-                    )
+                    post = post.copy(likeCommentStatus = !cancel, unlikeCommentStatus = false),
                 )
             } ?: this
         }
@@ -49,10 +50,7 @@ data class VideoComments(
             return thumbUp?.let {
                 copy(
                     thumbUp = it - if (cancel) -1 else 1,
-                    post = post.copy(
-                        likeCommentStatus = false,
-                        unlikeCommentStatus = !cancel
-                    )
+                    post = post.copy(likeCommentStatus = false, unlikeCommentStatus = !cancel),
                 )
             } ?: this
         }
@@ -74,9 +72,7 @@ data class VideoComments(
     }
 }
 
-/**
- * 用於 評論交互 Flow 的返回值
- */
+/** 用於 評論交互 Flow 的返回值 */
 data class VideoCommentArgs(
     // 當前評論所處adapter位置
     val commentPosition: Int,

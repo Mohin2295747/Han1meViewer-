@@ -10,8 +10,8 @@ import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.logic.entity.SearchHistoryEntity
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 16:42
  */
 class HanimeSearchHistoryRvAdapter :
@@ -22,21 +22,22 @@ class HanimeSearchHistoryRvAdapter :
     }
 
     companion object {
-        val COMPARATOR = object : DiffUtil.ItemCallback<SearchHistoryEntity>() {
-            override fun areItemsTheSame(
-                oldItem: SearchHistoryEntity,
-                newItem: SearchHistoryEntity,
-            ): Boolean {
-                return oldItem.id == newItem.id
-            }
+        val COMPARATOR =
+            object : DiffUtil.ItemCallback<SearchHistoryEntity>() {
+                override fun areItemsTheSame(
+                    oldItem: SearchHistoryEntity,
+                    newItem: SearchHistoryEntity,
+                ): Boolean {
+                    return oldItem.id == newItem.id
+                }
 
-            override fun areContentsTheSame(
-                oldItem: SearchHistoryEntity,
-                newItem: SearchHistoryEntity,
-            ): Boolean {
-                return oldItem == newItem
+                override fun areContentsTheSame(
+                    oldItem: SearchHistoryEntity,
+                    newItem: SearchHistoryEntity,
+                ): Boolean {
+                    return oldItem == newItem
+                }
             }
-        }
     }
 
     var listener: OnItemViewClickListener? = null
@@ -58,20 +59,17 @@ class HanimeSearchHistoryRvAdapter :
         return QuickViewHolder(R.layout.item_search_history, parent).also { viewHolder ->
             viewHolder.getView<View>(R.id.btn_remove).setOnClickListener {
                 // #issue-142: 部分机型调用 getItem().notNull() 可能会报错
-                listener?.onItemRemoveListener(
-                    it, getItem(viewHolder.bindingAdapterPosition)
-                )
+                listener?.onItemRemoveListener(it, getItem(viewHolder.bindingAdapterPosition))
             }
             viewHolder.getView<View>(R.id.root).setOnClickListener {
-                listener?.onItemClickListener(
-                    it, getItem(viewHolder.bindingAdapterPosition)
-                )
+                listener?.onItemClickListener(it, getItem(viewHolder.bindingAdapterPosition))
             }
         }
     }
 
     interface OnItemViewClickListener {
         fun onItemClickListener(v: View, history: SearchHistoryEntity?)
+
         fun onItemRemoveListener(v: View, history: SearchHistoryEntity?)
     }
 }

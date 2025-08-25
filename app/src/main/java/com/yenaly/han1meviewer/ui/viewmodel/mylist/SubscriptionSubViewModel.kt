@@ -26,8 +26,7 @@ class SubscriptionSubViewModel(application: Application) : YenalyViewModel(appli
         MutableStateFlow<PageLoadingState<MyListItems<Subscription>>>(PageLoadingState.Loading)
     val subscriptionStateFlow = _subscriptionStateFlow.asStateFlow()
 
-    private val _subscriptionFlow =
-        MutableStateFlow(emptyList<Subscription>())
+    private val _subscriptionFlow = MutableStateFlow(emptyList<Subscription>())
     val subscriptionFlow = _subscriptionFlow.asStateFlow()
 
     // 暂时就加载一页，不做分页

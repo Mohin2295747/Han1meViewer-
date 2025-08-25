@@ -27,22 +27,14 @@ fun TabLayout.getOrCreateBadgeOnTextViewAt(
     targetView: View?,
     @GravityInt gravity: Int,
     @Px spacing: Int = 0,
-    action: BadgeDrawable.() -> Unit
+    action: BadgeDrawable.() -> Unit,
 ) {
     val tab = getTabAt(position) ?: return
     val target = targetView ?: getTextViewAt(position)
-    target?.post {
-        tab.orCreateBadge.apply(action).apply {
-            setGravity(target, gravity, spacing)
-        }
-    }
+    target?.post { tab.orCreateBadge.apply(action).apply { setGravity(target, gravity, spacing) } }
 }
 
-fun BadgeDrawable.setGravity(
-    targetView: View,
-    @GravityInt gravity: Int,
-    @Px spacing: Int = 0
-) {
+fun BadgeDrawable.setGravity(targetView: View, @GravityInt gravity: Int, @Px spacing: Int = 0) {
     badgeGravity = BadgeDrawable.TOP_END
     when (gravity) {
         Gravity.START -> {

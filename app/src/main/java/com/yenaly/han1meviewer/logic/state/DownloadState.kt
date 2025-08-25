@@ -4,8 +4,9 @@ import androidx.annotation.IntDef
 
 /**
  * 下载任务状态
- * @project Han1meViewer
+ *
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2025/3/3 21:11
  */
 enum class DownloadState(@Mask val mask: Int) {
@@ -20,24 +21,18 @@ enum class DownloadState(@Mask val mask: Int) {
     companion object {
         const val STATE = "state"
 
-        fun from(@Mask mask: Int): DownloadState = when (mask) {
-            Mask.QUEUED -> Queued
-            Mask.DOWNLOADING -> Downloading
-            Mask.PAUSED -> Paused
-            Mask.FINISHED -> Finished
-            Mask.FAILED -> Failed
-            else -> Unknown
-        }
+        fun from(@Mask mask: Int): DownloadState =
+            when (mask) {
+                Mask.QUEUED -> Queued
+                Mask.DOWNLOADING -> Downloading
+                Mask.PAUSED -> Paused
+                Mask.FINISHED -> Finished
+                Mask.FAILED -> Failed
+                else -> Unknown
+            }
     }
 
-    @IntDef(
-        Mask.UNKNOWN,
-        Mask.QUEUED,
-        Mask.DOWNLOADING,
-        Mask.PAUSED,
-        Mask.FINISHED,
-        Mask.FAILED
-    )
+    @IntDef(Mask.UNKNOWN, Mask.QUEUED, Mask.DOWNLOADING, Mask.PAUSED, Mask.FINISHED, Mask.FAILED)
     annotation class Mask {
         companion object {
             const val UNKNOWN = 0

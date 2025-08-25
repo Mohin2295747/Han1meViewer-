@@ -24,13 +24,11 @@ class MainViewModel(application: Application) : YenalyViewModel(application) {
             _homeStateFlow.value = WebsiteState.Loading
 
             NetworkRepo.getHome()
-                .catch { exception ->
-                    _homeStateFlow.value = WebsiteState.Error(exception)
-                }
+                .catch { exception -> _homeStateFlow.value = WebsiteState.Error(exception) }
                 .collectLatest { homePage ->
                     // Collect all translatable text fields from home page
                     val textsToTranslate = mutableListOf<TranslatableText>()
-                    
+
                     // Collect from all sections
                     homePage.latestHanime?.forEach { textsToTranslate.add(it.title) }
                     homePage.latestRelease?.forEach { textsToTranslate.add(it.title) }
@@ -39,7 +37,7 @@ class MainViewModel(application: Application) : YenalyViewModel(application) {
                     homePage.hanimeTheyWatched?.forEach { textsToTranslate.add(it.title) }
                     homePage.hanimeCurrent?.forEach { textsToTranslate.add(it.title) }
                     homePage.hotHanimeMonthly?.forEach { textsToTranslate.add(it.title) }
-                    
+
                     // Collect banner title if available
                     homePage.banner?.title?.let { bannerTitle ->
                         textsToTranslate.add(TranslatableText.fromRaw(bannerTitle))
@@ -51,7 +49,7 @@ class MainViewModel(application: Application) : YenalyViewModel(application) {
                     // Trigger batch translation in background
                     launch {
                         TranslationManager.translateBatch(textsToTranslate)
-                        
+
                         // Update flow again when translations complete
                         // This will trigger UI recomposition with translated text
                         _homeStateFlow.value = WebsiteState.Success(homePage)
@@ -64,7 +62,7 @@ class MainViewModel(application: Application) : YenalyViewModel(application) {
     fun refreshTranslations(homePage: HomePage) {
         viewModelScope.launch {
             val textsToTranslate = mutableListOf<TranslatableText>()
-            
+
             // Collect from all sections
             homePage.latestHanime?.forEach { textsToTranslate.add(it.title) }
             homePage.latestRelease?.forEach { textsToTranslate.add(it.title) }
@@ -73,14 +71,14 @@ class MainViewModel(application: Application) : YenalyViewModel(application) {
             homePage.hanimeTheyWatched?.forEach { textsToTranslate.add(it.title) }
             homePage.hanimeCurrent?.forEach { textsToTranslate.add(it.title) }
             homePage.hotHanimeMonthly?.forEach { textsToTranslate.add(it.title) }
-            
+
             // Collect banner title if available
             homePage.banner?.title?.let { bannerTitle ->
                 textsToTranslate.add(TranslatableText.fromRaw(bannerTitle))
             }
 
             TranslationManager.translateBatch(textsToTranslate)
-            
+
             // Update state to trigger UI refresh
             _homeStateFlow.value = WebsiteState.Success(homePage)
         }

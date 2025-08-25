@@ -9,23 +9,26 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 
 /**
- * Add an update listener to the [ValueAnimator] and remove it when the [LifecycleOwner] is destroyed.
+ * Add an update listener to the [ValueAnimator] and remove it when the [LifecycleOwner] is
+ * destroyed.
  */
 fun ValueAnimator.addUpdateListener(
     lifecycle: Lifecycle?,
     listener: ValueAnimator.AnimatorUpdateListener?,
 ) {
     addUpdateListener(listener)
-    lifecycle?.addObserver(object : DefaultLifecycleObserver {
-        override fun onDestroy(owner: LifecycleOwner) {
-            this@addUpdateListener.removeUpdateListener(listener)
+    lifecycle?.addObserver(
+        object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                this@addUpdateListener.removeUpdateListener(listener)
+            }
         }
-    })
+    )
 }
 
 fun ValueAnimator.addUpdateListener(
     fragment: Fragment,
-    listener: ValueAnimator.AnimatorUpdateListener?
+    listener: ValueAnimator.AnimatorUpdateListener?,
 ) {
     if (fragment.isDetached || fragment.view == null) return
     addUpdateListener(fragment.viewLifecycleOwner.lifecycle, listener)

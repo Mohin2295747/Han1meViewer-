@@ -20,8 +20,8 @@ import com.yenaly.han1meviewer.util.logScreenViewEvent
 import com.yenaly.yenaly_libs.base.YenalyActivity
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/01 001 13:40
  */
 class SettingsActivity : YenalyActivity<ActivitySettingsBinding>() {
@@ -31,7 +31,8 @@ class SettingsActivity : YenalyActivity<ActivitySettingsBinding>() {
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
 
-    val currentFragment get() = navHostFragment.childFragmentManager.primaryNavigationFragment
+    val currentFragment
+        get() = navHostFragment.childFragmentManager.primaryNavigationFragment
 
     override fun getViewBinding(layoutInflater: LayoutInflater): ActivitySettingsBinding =
         ActivitySettingsBinding.inflate(layoutInflater)
@@ -43,7 +44,7 @@ class SettingsActivity : YenalyActivity<ActivitySettingsBinding>() {
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
@@ -64,16 +65,8 @@ class SettingsActivity : YenalyActivity<ActivitySettingsBinding>() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            overrideActivityTransition(
-                OVERRIDE_TRANSITION_OPEN,
-                R.anim.fade_in,
-                R.anim.fade_out
-            )
-            overrideActivityTransition(
-                OVERRIDE_TRANSITION_CLOSE,
-                R.anim.fade_in,
-                R.anim.fade_out
-            )
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.fade_in, R.anim.fade_out)
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.fcvSettings) { v, insets ->

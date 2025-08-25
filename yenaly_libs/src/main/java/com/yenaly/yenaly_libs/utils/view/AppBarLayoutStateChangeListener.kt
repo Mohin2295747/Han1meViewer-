@@ -1,16 +1,15 @@
 package com.yenaly.yenaly_libs.utils.view
 
 import com.google.android.material.appbar.AppBarLayout
+import kotlin.math.abs
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlin.math.abs
 
 fun AppBarLayout.offsetChanges(): Flow<Int> {
     return callbackFlow {
-        val listener = AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-            trySend(verticalOffset)
-        }
+        val listener =
+            AppBarLayout.OnOffsetChangedListener { _, verticalOffset -> trySend(verticalOffset) }
         addOnOffsetChangedListener(listener)
         awaitClose { removeOnOffsetChangedListener(listener) }
     }
@@ -29,7 +28,8 @@ abstract class AppBarLayoutStateChangeListener : AppBarLayout.OnOffsetChangedLis
     enum class State {
         EXPANDED, // 展开
         COLLAPSED, // 折叠
-        INTERMEDIATE; // 中间态
+        INTERMEDIATE,
+        // 中间态
     }
 
     private var mCurrentState: State = State.INTERMEDIATE

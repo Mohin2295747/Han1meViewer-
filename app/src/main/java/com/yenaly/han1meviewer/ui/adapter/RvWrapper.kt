@@ -5,10 +5,8 @@ import android.graphics.Outline
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
-import androidx.annotation.StringRes
 import androidx.core.view.minusAssign
 import androidx.core.view.plusAssign
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -20,8 +18,8 @@ import com.yenaly.han1meviewer.util.dpToPx
 /**
  * RecyclerView Wrapper，为了让多 LayoutManager 布局能够在 ConcatAdapter 中使用。
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/27 027 17:00
  */
 class RvWrapper<VH : ViewHolder>(
@@ -54,10 +52,11 @@ class RvWrapper<VH : ViewHolder>(
     ): QuickViewHolder {
         return QuickViewHolder(R.layout.item_rv_wrapper, parent).also { viewHolder ->
             val frame = viewHolder.itemView as ViewGroup
-            var rv = this@RvWrapper.customRv?.invoke(context)?.apply {
-                id = R.id.rv
-                isNestedScrollingEnabled = false
-            }
+            var rv =
+                this@RvWrapper.customRv?.invoke(context)?.apply {
+                    id = R.id.rv
+                    isNestedScrollingEnabled = false
+                }
             val prevRv = viewHolder.getView<RecyclerView>(R.id.rv)
             if (rv != null) {
                 frame -= prevRv
@@ -71,11 +70,12 @@ class RvWrapper<VH : ViewHolder>(
                 this@wr.adapter = this@RvWrapper.adapter
                 this@RvWrapper.wrapper = this@wr
                 onWrap?.invoke(this@wr)
-                outlineProvider = object : ViewOutlineProvider() {
-                    override fun getOutline(view: View, outline: Outline) {
-                        outline.setRoundRect(0, 0, view.width, view.height, 8f.dpToPx())
+                outlineProvider =
+                    object : ViewOutlineProvider() {
+                        override fun getOutline(view: View, outline: Outline) {
+                            outline.setRoundRect(0, 0, view.width, view.height, 8f.dpToPx())
+                        }
                     }
-                }
                 clipToOutline = true
             }
         }

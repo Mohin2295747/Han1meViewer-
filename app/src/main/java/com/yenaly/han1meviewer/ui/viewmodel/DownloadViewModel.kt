@@ -16,14 +16,13 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/08/02 002 12:05
  */
 class DownloadViewModel(application: Application) : YenalyViewModel(application) {
 
-    @IdRes
-    var currentSortOptionId = R.id.sm_sort_by_date_descending
+    @IdRes var currentSortOptionId = R.id.sm_sort_by_date_descending
 
     private val _downloaded = MutableStateFlow(mutableListOf<VideoWithCategories>())
     val downloaded = _downloaded.asStateFlow()
@@ -46,16 +45,12 @@ class DownloadViewModel(application: Application) : YenalyViewModel(application)
             DatabaseRepo.HanimeDownload.loadAllDownloadedHanime(sortedBy, ascending)
                 .catch { e -> e.printStackTrace() }
                 .flowOn(Dispatchers.IO)
-                .collect {
-                    _downloaded.value = it
-                }
+                .collect { _downloaded.value = it }
         }
     }
 
     fun updateDownloadHanime(entity: HanimeDownloadEntity) {
-        viewModelScope.launch {
-            DatabaseRepo.HanimeDownload.update(entity)
-        }
+        viewModelScope.launch { DatabaseRepo.HanimeDownload.update(entity) }
     }
 
     fun deleteDownloadHanimeBy(videoCode: String, quality: String) {

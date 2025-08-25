@@ -16,9 +16,10 @@ import com.yenaly.han1meviewer.R
 import com.yenaly.yenaly_libs.utils.dp
 import kotlinx.parcelize.Parcelize
 
-class HOptionChip @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleRes: Int = 0
-) : AppCompatTextView(context, attrs, defStyleRes), Checkable {
+class HOptionChip
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null, defStyleRes: Int = 0) :
+    AppCompatTextView(context, attrs, defStyleRes), Checkable {
 
     private val cornerRadius = 12.dp.toFloat()
     private val unselectedColor = context.getColor(R.color.adv_search_unselected_color)
@@ -35,10 +36,11 @@ class HOptionChip @JvmOverloads constructor(
         updatePadding(top = 12.dp, bottom = 12.dp)
         setTextColor(Color.WHITE)
         // corner radius drawable
-        background = GradientDrawable().apply {
-            cornerRadius = this@HOptionChip.cornerRadius
-            setColor(unselectedColor)
-        }
+        background =
+            GradientDrawable().apply {
+                cornerRadius = this@HOptionChip.cornerRadius
+                setColor(unselectedColor)
+            }
     }
 
     private fun animateChipByColorTransition(enable: Boolean) {
@@ -47,10 +49,11 @@ class HOptionChip @JvmOverloads constructor(
 
         val animator = ValueAnimator.ofArgb(startColor, endColor)
         animator.addUpdateListener { animation ->
-            background = GradientDrawable().apply {
-                cornerRadius = this@HOptionChip.cornerRadius
-                setColor(animation.animatedValue as Int)
-            }
+            background =
+                GradientDrawable().apply {
+                    cornerRadius = this@HOptionChip.cornerRadius
+                    setColor(animation.animatedValue as Int)
+                }
         }
         animator.interpolator = FastOutSlowInInterpolator()
         animator.duration = 300
@@ -96,8 +99,5 @@ class HOptionChip @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class SavedState(
-        val ss: Parcelable?,
-        val isChecked: Boolean
-    ) : BaseSavedState(ss)
+    data class SavedState(val ss: Parcelable?, val isChecked: Boolean) : BaseSavedState(ss)
 }

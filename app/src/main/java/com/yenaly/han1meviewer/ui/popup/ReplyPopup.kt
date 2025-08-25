@@ -8,8 +8,8 @@ import com.yenaly.han1meviewer.R
 import com.yenaly.yenaly_libs.utils.unsafeLazy
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/09/20 020 09:48
  */
 class ReplyPopup(context: Context) : BottomPopupView(context) {
@@ -29,14 +29,11 @@ class ReplyPopup(context: Context) : BottomPopupView(context) {
         sendListener?.let(btnSend::setOnClickListener)
     }
 
-    /**
-     * 得到你输入的内容
-     */
-    val comment get() = editText.text.toString()
+    /** 得到你输入的内容 */
+    val comment
+        get() = editText.text.toString()
 
-    /**
-     * 设置提示
-     */
+    /** 设置提示 */
     var hint: CharSequence? = null
 
     /**
@@ -48,9 +45,7 @@ class ReplyPopup(context: Context) : BottomPopupView(context) {
         commentPrefix = "@$username "
     }
 
-    /**
-     * 设置发送按钮监听器
-     */
+    /** 设置发送按钮监听器 */
     fun setOnSendListener(listener: OnClickListener) {
         this.sendListener = listener
     }

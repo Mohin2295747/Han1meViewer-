@@ -19,8 +19,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/22 022 23:00
  */
 object DatabaseRepo {
@@ -29,63 +29,58 @@ object DatabaseRepo {
         private val hKeyframeDao = MiscellanyDatabase.instance.hKeyframeDao
 
         fun loadAll(keyword: String? = null) =
-            if (keyword != null) hKeyframeDao.loadAll(keyword)
-            else hKeyframeDao.loadAll()
+            if (keyword != null) hKeyframeDao.loadAll(keyword) else hKeyframeDao.loadAll()
 
         // #issue-106: 剧集分类
         @OptIn(ExperimentalSerializationApi::class)
         fun loadAllShared(): Flow<List<HKeyframeType>> = flow {
-            val res = applicationContext.assets.let { assets ->
-                assets.list("h_keyframes")?.asSequence()
-                    ?.filter { it.endsWith(".json") }
-                    ?.mapNotNull { fileName ->
-                        try {
-                            assets.open("h_keyframes/$fileName").use { inputStream ->
-                                Json.decodeFromStream<HKeyframeEntity>(inputStream)
+            val res =
+                applicationContext.assets.let { assets ->
+                    assets
+                        .list("h_keyframes")
+                        ?.asSequence()
+                        ?.filter { it.endsWith(".json") }
+                        ?.mapNotNull { fileName ->
+                            try {
+                                assets.open("h_keyframes/$fileName").use { inputStream ->
+                                    Json.decodeFromStream<HKeyframeEntity>(inputStream)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                null
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
                         }
-                    }
-                    ?.sortedWith(
-                        compareBy<HKeyframeEntity> { it.group }.thenBy { it.episode }
-                    )
-                    ?.groupBy { it.group ?: "???" }
-                    ?.flatMap { (group, entities) ->
-                        listOf(HKeyframeHeader(title = group, attached = entities)) + entities
-                    }
-                    .orEmpty()
-            }
+                        ?.sortedWith(compareBy<HKeyframeEntity> { it.group }.thenBy { it.episode })
+                        ?.groupBy { it.group ?: "???" }
+                        ?.flatMap { (group, entities) ->
+                            listOf(HKeyframeHeader(title = group, attached = entities)) + entities
+                        }
+                        .orEmpty()
+                }
             emit(res)
         }
 
-        suspend fun findBy(videoCode: String) =
-            hKeyframeDao.findBy(videoCode)
+        suspend fun findBy(videoCode: String) = hKeyframeDao.findBy(videoCode)
 
         @OptIn(ExperimentalSerializationApi::class)
         fun observe(videoCode: String): Flow<HKeyframeEntity?> {
             if (Preferences.sharedHKeyframesEnable) {
                 return flow t@{
-                    val find = hKeyframeDao.findBy(videoCode)
-                    if (find == null || Preferences.sharedHKeyframesUseFirst) {
-                        applicationContext.assets
-                            .open("h_keyframes/$videoCode.json")
-                            .use { inputStream ->
+                        val find = hKeyframeDao.findBy(videoCode)
+                        if (find == null || Preferences.sharedHKeyframesUseFirst) {
+                            applicationContext.assets.open("h_keyframes/$videoCode.json").use {
+                                inputStream ->
                                 val entity = Json.decodeFromStream<HKeyframeEntity>(inputStream)
                                 this@t.emit(entity)
                             }
-                    } else {
-                        hKeyframeDao.observe(videoCode).collect {
-                            this@t.emit(it)
+                        } else {
+                            hKeyframeDao.observe(videoCode).collect { this@t.emit(it) }
                         }
                     }
-                }.catch t@{ e ->
-                    e.printStackTrace()
-                    hKeyframeDao.observe(videoCode).collect {
-                        this@t.emit(it)
+                    .catch t@{ e ->
+                        e.printStackTrace()
+                        hKeyframeDao.observe(videoCode).collect { this@t.emit(it) }
                     }
-                }
             }
             return hKeyframeDao.observe(videoCode)
         }
@@ -94,23 +89,22 @@ object DatabaseRepo {
 
         suspend fun update(entity: HKeyframeEntity) = hKeyframeDao.update(entity)
 
-        suspend fun delete(entity: HKeyframeEntity) =
-            hKeyframeDao.delete(entity)
+        suspend fun delete(entity: HKeyframeEntity) = hKeyframeDao.delete(entity)
 
         suspend fun modifyKeyframe(
             videoCode: String,
-            oldKeyframe: HKeyframeEntity.Keyframe, keyframe: HKeyframeEntity.Keyframe,
+            oldKeyframe: HKeyframeEntity.Keyframe,
+            keyframe: HKeyframeEntity.Keyframe,
         ) = hKeyframeDao.modifyKeyframe(videoCode, oldKeyframe, keyframe)
 
         suspend fun appendKeyframe(
-            videoCode: String, title: String,
+            videoCode: String,
+            title: String,
             keyframe: HKeyframeEntity.Keyframe,
         ) = hKeyframeDao.appendKeyframe(videoCode, title, keyframe)
 
-        suspend fun removeKeyframe(
-            videoCode: String,
-            keyframe: HKeyframeEntity.Keyframe,
-        ) = hKeyframeDao.removeKeyframe(videoCode, keyframe)
+        suspend fun removeKeyframe(videoCode: String, keyframe: HKeyframeEntity.Keyframe) =
+            hKeyframeDao.removeKeyframe(videoCode, keyframe)
     }
 
     object SearchHistory {
@@ -121,85 +115,64 @@ object DatabaseRepo {
             if (keyword.isNullOrBlank()) searchHistoryDao.loadAll()
             else searchHistoryDao.loadAll(keyword)
 
-        suspend fun delete(history: SearchHistoryEntity) =
-            searchHistoryDao.delete(history)
+        suspend fun delete(history: SearchHistoryEntity) = searchHistoryDao.delete(history)
 
-        suspend fun insert(history: SearchHistoryEntity) =
-            searchHistoryDao.insertOrUpdate(history)
+        suspend fun insert(history: SearchHistoryEntity) = searchHistoryDao.insertOrUpdate(history)
 
-        suspend fun deleteByKeyword(query: String) =
-            searchHistoryDao.deleteByKeyword(query)
+        suspend fun deleteByKeyword(query: String) = searchHistoryDao.deleteByKeyword(query)
     }
 
     object WatchHistory {
         private val watchHistoryDao = HistoryDatabase.instance.watchHistory
 
-        fun loadAll() =
-            watchHistoryDao.loadAll()
+        fun loadAll() = watchHistoryDao.loadAll()
 
-        suspend fun delete(history: WatchHistoryEntity) =
-            watchHistoryDao.delete(history)
+        suspend fun delete(history: WatchHistoryEntity) = watchHistoryDao.delete(history)
 
-        suspend fun deleteAll() =
-            watchHistoryDao.deleteAll()
+        suspend fun deleteAll() = watchHistoryDao.deleteAll()
 
-        suspend fun update(history: WatchHistoryEntity) =
-            watchHistoryDao.update(history)
+        suspend fun update(history: WatchHistoryEntity) = watchHistoryDao.update(history)
 
-        suspend fun insert(history: WatchHistoryEntity) =
-            watchHistoryDao.insertOrUpdate(history)
+        suspend fun insert(history: WatchHistoryEntity) = watchHistoryDao.insertOrUpdate(history)
     }
 
     object HanimeDownload {
         private val hanimeDownloadDao = DownloadDatabase.instance.hanimeDownloadDao
         private val hanimeUpdateDao = DownloadDatabase.instance.hUpdateDao
 
-        fun loadAllDownloadingHanime() =
-            hanimeDownloadDao.loadAllDownloadingHanime()
+        fun loadAllDownloadingHanime() = hanimeDownloadDao.loadAllDownloadingHanime()
 
-        fun loadloadUpdating() =
-            hanimeUpdateDao.loadUpdating()
+        fun loadloadUpdating() = hanimeUpdateDao.loadUpdating()
 
-        /**
-         * 查询所有视频，并且每个视频要有当前他在的分类
-         */
-        fun loadAllDownloadedHanime(
-            sortedBy: HanimeDownloadEntity.SortedBy,
-            ascending: Boolean,
-        ) = when (sortedBy) {
-            HanimeDownloadEntity.SortedBy.TITLE ->
-                hanimeDownloadDao.loadAllDownloadedHanimeByTitle(ascending)
+        /** 查询所有视频，并且每个视频要有当前他在的分类 */
+        fun loadAllDownloadedHanime(sortedBy: HanimeDownloadEntity.SortedBy, ascending: Boolean) =
+            when (sortedBy) {
+                HanimeDownloadEntity.SortedBy.TITLE ->
+                    hanimeDownloadDao.loadAllDownloadedHanimeByTitle(ascending)
 
-            HanimeDownloadEntity.SortedBy.ID ->
-                hanimeDownloadDao.loadAllDownloadedHanimeById(ascending)
-        }
+                HanimeDownloadEntity.SortedBy.ID ->
+                    hanimeDownloadDao.loadAllDownloadedHanimeById(ascending)
+            }
 
         suspend fun delete(videoCode: String, quality: String) =
             hanimeDownloadDao.delete(videoCode, quality)
 
-        suspend fun delete(videoCode: String) =
-            hanimeDownloadDao.delete(videoCode)
+        suspend fun delete(videoCode: String) = hanimeDownloadDao.delete(videoCode)
 
-        suspend fun pauseAll() =
-            hanimeDownloadDao.pauseAll()
+        suspend fun pauseAll() = hanimeDownloadDao.pauseAll()
 
-        suspend fun delete(entity: HanimeDownloadEntity) =
-            hanimeDownloadDao.delete(entity)
+        suspend fun delete(entity: HanimeDownloadEntity) = hanimeDownloadDao.delete(entity)
 
-        suspend fun insert(entity: HanimeDownloadEntity) =
-            hanimeDownloadDao.insert(entity)
+        suspend fun insert(entity: HanimeDownloadEntity) = hanimeDownloadDao.insert(entity)
 
-        suspend fun update(entity: HanimeDownloadEntity) =
-            hanimeDownloadDao.update(entity)
+        suspend fun update(entity: HanimeDownloadEntity) = hanimeDownloadDao.update(entity)
 
         suspend fun find(videoCode: String, quality: String) =
             hanimeDownloadDao.find(videoCode, quality)
 
-        suspend fun find(videoCode: String) =
-            hanimeDownloadDao.find(videoCode)
+        suspend fun find(videoCode: String) = hanimeDownloadDao.find(videoCode)
 
         @Deprecated("查屁")
-        suspend fun countBy(videoCode: String) =
-            hanimeDownloadDao.countBy(videoCode)
+        suspend fun countBy(videoCode: String) = hanimeDownloadDao.countBy(videoCode)
     }
 }

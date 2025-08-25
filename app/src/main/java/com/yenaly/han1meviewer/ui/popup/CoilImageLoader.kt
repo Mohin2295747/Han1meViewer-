@@ -19,8 +19,8 @@ import com.lxj.xpopup.photoview.PhotoView
 import java.io.File
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/08/26 026 22:00
  */
 class CoilImageLoader(@DrawableRes private val errImgRes: Int = 0) : XPopupImageLoader {
@@ -37,40 +37,41 @@ class CoilImageLoader(@DrawableRes private val errImgRes: Int = 0) : XPopupImage
         progressBar: ProgressBar,
     ): View {
         progressBar.isVisible = true
-        val photoView = PhotoView(popupView.context).apply {
-            isZoomable = false
-            setOnMatrixChangeListener {
-                val matrix = Matrix()
-                this.getSuppMatrix(matrix)
-                snapshot.setSuppMatrix(matrix)
-            }
-            this.setOnClickListener {
-                popupView.dismiss()
-            }
-            popupView.longPressListener?.let {
-                this.setOnLongClickListener {
-                    popupView.longPressListener.onLongPressed(popupView, position)
-                    return@setOnLongClickListener false
+        val photoView =
+            PhotoView(popupView.context).apply {
+                isZoomable = false
+                setOnMatrixChangeListener {
+                    val matrix = Matrix()
+                    this.getSuppMatrix(matrix)
+                    snapshot.setSuppMatrix(matrix)
+                }
+                this.setOnClickListener { popupView.dismiss() }
+                popupView.longPressListener?.let {
+                    this.setOnLongClickListener {
+                        popupView.longPressListener.onLongPressed(popupView, position)
+                        return@setOnLongClickListener false
+                    }
                 }
             }
-        }
 
         if (snapshot.drawable != null && (snapshot.tag as Int) == position) {
             photoView.setImageDrawable(snapshot.drawable.constantState?.newDrawable())
         }
         photoView.load(uri) {
             error(errImgRes)
-            listener(object : ImageRequest.Listener {
-                override fun onError(request: ImageRequest, result: ErrorResult) {
-                    progressBar.isVisible = false
-                    photoView.isZoomable = false
-                }
+            listener(
+                object : ImageRequest.Listener {
+                    override fun onError(request: ImageRequest, result: ErrorResult) {
+                        progressBar.isVisible = false
+                        photoView.isZoomable = false
+                    }
 
-                override fun onSuccess(request: ImageRequest, result: SuccessResult) {
-                    progressBar.isVisible = false
-                    photoView.isZoomable = true
+                    override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+                        progressBar.isVisible = false
+                        photoView.isZoomable = true
+                    }
                 }
-            })
+            )
         }
 
         return photoView

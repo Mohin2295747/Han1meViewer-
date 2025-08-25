@@ -15,8 +15,7 @@ abstract class HUpdateDao {
     @Query("SELECT * FROM HUpdateEntity WHERE state != ${DownloadState.Mask.FINISHED} AND id = 1")
     abstract fun loadUpdating(): Flow<HUpdateEntity>
 
-    @Query("DELETE FROM HUpdateEntity WHERE id = 1")
-    abstract suspend fun delete()
+    @Query("DELETE FROM HUpdateEntity WHERE id = 1") abstract suspend fun delete()
 
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     abstract suspend fun insert(entity: HUpdateEntity)
@@ -24,8 +23,7 @@ abstract class HUpdateDao {
     @Update(onConflict = OnConflictStrategy.Companion.REPLACE)
     abstract suspend fun update(entity: HUpdateEntity): Int
 
-    @Query("SELECT * FROM HUpdateEntity WHERE id = 1")
-    abstract suspend fun get(): HUpdateEntity?
+    @Query("SELECT * FROM HUpdateEntity WHERE id = 1") abstract suspend fun get(): HUpdateEntity?
 
     @Query("UPDATE HUpdateEntity SET state = :state WHERE id = 1")
     abstract suspend fun updateState(state: DownloadState)

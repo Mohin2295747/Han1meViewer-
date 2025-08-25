@@ -28,7 +28,8 @@ class YenalyCrashDialogActivity : FrameActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.yenaly_activity_crash_dialog)
         val info =
-            """<span style="color: #FF0000; font-size: ${18.sp}px;">These errors occurred:</span><br><br>$yenalyThrowable""".parseAsHtml()
+            """<span style="color: #FF0000; font-size: ${18.sp}px;">These errors occurred:</span><br><br>$yenalyThrowable"""
+                .parseAsHtml()
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.yenaly_error_title)
             .setMessage(info)
@@ -39,9 +40,7 @@ class YenalyCrashDialogActivity : FrameActivity() {
             .setNegativeButton(R.string.yenaly_exit_app) { _, _ ->
                 ActivityManager.exit(killProcess = true)
             }
-            .setNeutralButton(R.string.yenaly_copy) { _, _ ->
-                yenalyThrowable.copyToClipboard()
-            }
+            .setNeutralButton(R.string.yenaly_copy) { _, _ -> yenalyThrowable.copyToClipboard() }
             .show()
     }
 }

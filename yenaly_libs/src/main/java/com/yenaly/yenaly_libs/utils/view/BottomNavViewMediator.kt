@@ -24,8 +24,9 @@ class BottomNavViewMediator(
     private val interfaceCombine: ICombineItemIdWithFragment,
 ) {
 
-    private val fragmentActivity = bottomNavigationView.context.activity as? FragmentActivity
-        ?: throw IllegalStateException("context cannot be cast to FragmentActivity!")
+    private val fragmentActivity =
+        bottomNavigationView.context.activity as? FragmentActivity
+            ?: throw IllegalStateException("context cannot be cast to FragmentActivity!")
 
     private var currentFragment: Fragment? = null
     private var onFragmentChangedListener: OnFragmentChangedListener? = null
@@ -44,27 +45,31 @@ class BottomNavViewMediator(
 
         itemIds.forEachIndexed { index, itemId -> itemIdsSparseArray[itemId] = index }
 
-        viewPager2Adapter = object : FragmentStateAdapter(fragmentActivity) {
-            override fun getItemCount() = itemIds.size
-            override fun createFragment(position: Int): Fragment {
-                return interfaceCombine.combine(itemIds[position])
-                    ?: throw IllegalStateException("Do you actually set the proper fragment?")
+        viewPager2Adapter =
+            object : FragmentStateAdapter(fragmentActivity) {
+                override fun getItemCount() = itemIds.size
+
+                override fun createFragment(position: Int): Fragment {
+                    return interfaceCombine.combine(itemIds[position])
+                        ?: throw IllegalStateException("Do you actually set the proper fragment?")
+                }
             }
-        }
         attached = true
 
-        onItemSelectedListener = NavigationBarView.OnItemSelectedListener { item ->
-            val currentIndex = itemIdsSparseArray[item.itemId]
-            viewPager2.setCurrentItem(currentIndex, smoothScroll)
-            currentFragment = interfaceCombine.combine(item.itemId)
-            onFragmentChangedListener?.onFragmentChanged(currentFragment!!)
-            return@OnItemSelectedListener true
-        }
-        onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                bottomNavigationView.selectedItemId = itemIds[position]
+        onItemSelectedListener =
+            NavigationBarView.OnItemSelectedListener { item ->
+                val currentIndex = itemIdsSparseArray[item.itemId]
+                viewPager2.setCurrentItem(currentIndex, smoothScroll)
+                currentFragment = interfaceCombine.combine(item.itemId)
+                onFragmentChangedListener?.onFragmentChanged(currentFragment!!)
+                return@OnItemSelectedListener true
             }
-        }
+        onPageChangeCallback =
+            object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    bottomNavigationView.selectedItemId = itemIds[position]
+                }
+            }
 
         viewPager2.adapter = viewPager2Adapter
         bottomNavigationView.setOnItemSelectedListener(onItemSelectedListener!!)
@@ -81,8 +86,8 @@ class BottomNavViewMediator(
     }
 
     /**
-     * Set on a callback interface that is optionally
-     * implemented to listen the latest selected fragment.
+     * Set on a callback interface that is optionally implemented to listen the latest selected
+     * fragment.
      */
     fun setOnFragmentChangedListener(listener: OnFragmentChangedListener) {
         this.onFragmentChangedListener = listener

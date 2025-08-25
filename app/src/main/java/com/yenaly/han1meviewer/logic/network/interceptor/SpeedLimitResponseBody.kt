@@ -7,15 +7,11 @@ import okio.buffer
 
 class SpeedLimitResponseBody(
     private val responseBody: ResponseBody,
-    /**
-     * 0 means no limit
-     */
-    private val maxSpeed: Long
+    /** 0 means no limit */
+    private val maxSpeed: Long,
 ) : ResponseBody() {
 
-    private val throttler by unsafeLazy {
-        Throttler().apply { bytesPerSecond(maxSpeed) }
-    }
+    private val throttler by unsafeLazy { Throttler().apply { bytesPerSecond(maxSpeed) } }
 
     override fun contentLength(): Long = responseBody.contentLength()
 

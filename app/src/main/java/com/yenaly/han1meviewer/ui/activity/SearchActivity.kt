@@ -13,7 +13,6 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.util.size
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
@@ -63,8 +62,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
- * @project Hanime1
  * @author Yenaly Liew
+ * @project Hanime1
  * @time 2022/06/13 013 22:29
  */
 class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin {
@@ -79,9 +78,7 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
             }
         }
 
-    /**
-     * 判断adapter是否已经加载，防止多次加载导致滑动浏览总是跳到顶部。
-     */
+    /** 判断adapter是否已经加载，防止多次加载导致滑动浏览总是跳到顶部。 */
     private var hasAdapterLoaded = false
 
     private val searchAdapter by unsafeLazy { HanimeVideoRvAdapter() }
@@ -101,13 +98,11 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
-    /**
-     * 初始化数据
-     */
+    /** 初始化数据 */
     override fun initData(savedInstanceState: Bundle?) {
         advancedSearchMap?.let(::loadAdvancedSearch)
 
@@ -117,24 +112,23 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
         binding.state.init()
 
         binding.searchRv.apply {
-            layoutManager = FixedGridLayoutManager(
-                this@SearchActivity, VideoCoverSize.Normal.videoInOneLine
-            )
+            layoutManager =
+                FixedGridLayoutManager(this@SearchActivity, VideoCoverSize.Normal.videoInOneLine)
             adapter = searchAdapter
             clipToPadding = false
-            addOnScrollListener(object : OnScrollListener() {
+            addOnScrollListener(
+                object : OnScrollListener() {
 
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    if (newState != RecyclerView.SCROLL_STATE_IDLE) {
-                        binding.searchBar.hideHistory()
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        if (newState != RecyclerView.SCROLL_STATE_IDLE) {
+                            binding.searchBar.hideHistory()
+                        }
                     }
                 }
-            })
+            )
         }
         binding.searchSrl.apply {
-            setOnLoadMoreListener {
-                getHanimeSearchResult()
-            }
+            setOnLoadMoreListener { getHanimeSearchResult() }
             setOnRefreshListener {
                 // will enter here firstly. cuz the flow's def value is Loading.
                 getNewHanimeSearchResult()
@@ -153,9 +147,7 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
         }
         ViewCompat.setOnApplyWindowInsetsListener(binding.searchHeader) { v, insets ->
             val sysBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.updateLayoutParams<MarginLayoutParams> {
-                topMargin = sysBars.top + 68.dp
-            }
+            v.updateLayoutParams<MarginLayoutParams> { topMargin = sysBars.top + 68.dp }
             WindowInsetsCompat.CONSUMED
         }
     }
@@ -168,7 +160,8 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
                     binding.searchRv.isGone = state is PageLoadingState.Error
                     when (state) {
                         is PageLoadingState.Loading -> {
-                            if (viewModel.searchFlow.value.isEmpty()) binding.searchSrl.autoRefresh()
+                            if (viewModel.searchFlow.value.isEmpty())
+                                binding.searchSrl.autoRefresh()
                         }
 
                         is PageLoadingState.Success -> {
@@ -204,9 +197,7 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.searchFlow.collectLatest {
-                    searchAdapter.submitList(it)
-                }
+                viewModel.searchFlow.collectLatest { searchAdapter.submitList(it) }
             }
         }
     }
@@ -214,29 +205,41 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val dataState = viewModel.searchStateFlow.value
-        binding.searchRv.layoutManager = if (dataState is PageLoadingState.Success) {
-            dataState.info.buildFlexibleGridLayoutManager()
-        } else FixedGridLayoutManager(this, VideoCoverSize.Normal.videoInOneLine)
+        binding.searchRv.layoutManager =
+            if (dataState is PageLoadingState.Success) {
+                dataState.info.buildFlexibleGridLayoutManager()
+            } else FixedGridLayoutManager(this, VideoCoverSize.Normal.videoInOneLine)
     }
 
     private fun getHanimeSearchResult() {
-        Log.d("SearchActivity", buildString {
-            appendLine("page: ${viewModel.page}, query: ${viewModel.query}, genre: ${viewModel.genre}, ")
-            appendLine("sort: ${viewModel.sort}, broad: ${viewModel.broad}, year: ${viewModel.year}, ")
-            appendLine("month: ${viewModel.month}, duration: ${viewModel.duration}, ")
-            appendLine("tagMap: ${viewModel.tagMap}, brandMap: ${viewModel.brandMap}")
-        })
+        Log.d(
+            "SearchActivity",
+            buildString {
+                appendLine(
+                    "page: ${viewModel.page}, query: ${viewModel.query}, genre: ${viewModel.genre}, "
+                )
+                appendLine(
+                    "sort: ${viewModel.sort}, broad: ${viewModel.broad}, year: ${viewModel.year}, "
+                )
+                appendLine("month: ${viewModel.month}, duration: ${viewModel.duration}, ")
+                appendLine("tagMap: ${viewModel.tagMap}, brandMap: ${viewModel.brandMap}")
+            },
+        )
         viewModel.getHanimeSearchResult(
             viewModel.page,
-            viewModel.query, viewModel.genre, viewModel.sort, viewModel.broad,
-            viewModel.year, viewModel.month, viewModel.duration,
-            viewModel.tagMap.flatten(), viewModel.brandMap.flatten()
+            viewModel.query,
+            viewModel.genre,
+            viewModel.sort,
+            viewModel.broad,
+            viewModel.year,
+            viewModel.month,
+            viewModel.duration,
+            viewModel.tagMap.flatten(),
+            viewModel.brandMap.flatten(),
         )
     }
 
-    /**
-     * 獲取最新結果，清除之前保存的所有數據
-     */
+    /** 獲取最新結果，清除之前保存的所有數據 */
     private fun getNewHanimeSearchResult() {
         viewModel.page = 1
         hasAdapterLoaded = false
@@ -252,23 +255,20 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
             }
             finish()
         }
-        historyAdapter.listener = object : HanimeSearchHistoryRvAdapter.OnItemViewClickListener {
-            override fun onItemClickListener(v: View, history: SearchHistoryEntity?) {
-                binding.searchBar.searchText = history?.query
-            }
+        historyAdapter.listener =
+            object : HanimeSearchHistoryRvAdapter.OnItemViewClickListener {
+                override fun onItemClickListener(v: View, history: SearchHistoryEntity?) {
+                    binding.searchBar.searchText = history?.query
+                }
 
-            override fun onItemRemoveListener(v: View, history: SearchHistoryEntity?) {
-                history?.let(viewModel::deleteSearchHistory)
+                override fun onItemRemoveListener(v: View, history: SearchHistoryEntity?) {
+                    history?.let(viewModel::deleteSearchHistory)
+                }
             }
-        }
         binding.searchBar.apply hsb@{
             historyAdapter = this@SearchActivity.historyAdapter
-            onTagClickListener = {
-                optionsPopupFragment.showIn(this@SearchActivity)
-            }
-            onBackClickListener = {
-                finish()
-            }
+            onTagClickListener = { optionsPopupFragment.showIn(this@SearchActivity) }
+            onBackClickListener = { finish() }
             onSearchClickListener = { _, text ->
                 viewModel.query = text
                 if (text.isNotBlank()) {
@@ -281,11 +281,11 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
             // 搜索框文字改变走这里
             textChangeFlow()
                 .debounce(300)
-                .flatMapLatest {
-                    viewModel.loadAllSearchHistories(it)
-                }.flowOn(Dispatchers.IO).onEach {
-                    this@SearchActivity.historyAdapter.submitList(it)
-                }.flowWithLifecycle(lifecycle).launchIn(lifecycleScope)
+                .flatMapLatest { viewModel.loadAllSearchHistories(it) }
+                .flowOn(Dispatchers.IO)
+                .onEach { this@SearchActivity.historyAdapter.submitList(it) }
+                .flowWithLifecycle(lifecycle)
+                .launchIn(lifecycleScope)
         }
 
         optionsPopupFragment.onSearchListener = {
@@ -299,8 +299,9 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
     }
 
     private fun List<HanimeInfo>.buildFlexibleGridLayoutManager(): GridLayoutManager {
-        val counts = if (any { it.itemType == HanimeInfo.NORMAL })
-            VideoCoverSize.Normal.videoInOneLine else VideoCoverSize.Simplified.videoInOneLine
+        val counts =
+            if (any { it.itemType == HanimeInfo.NORMAL }) VideoCoverSize.Normal.videoInOneLine
+            else VideoCoverSize.Simplified.videoInOneLine
         return FixedGridLayoutManager(this@SearchActivity, counts)
     }
 
@@ -310,7 +311,8 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
         binding.searchBar.canTextChange = canTextChange
     }
 
-    val searchText: String? get() = binding.searchBar.searchText
+    val searchText: String?
+        get() = binding.searchBar.searchText
 
     /**
      * 分析该 any 并加载给相应 ViewModel 中的参数
@@ -326,9 +328,7 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
             return
         }
         val map = any as AdvancedSearchMap
-        (map[HAdvancedSearch.QUERY] as? String)?.let {
-            setSearchText(it)
-        }
+        (map[HAdvancedSearch.QUERY] as? String)?.let { setSearchText(it) }
         viewModel.genre = map[HAdvancedSearch.GENRE] as? String
         viewModel.sort = map[HAdvancedSearch.SORT] as? String
         viewModel.year = map[HAdvancedSearch.YEAR] as? Int
@@ -358,11 +358,12 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
             is String -> {
                 kotlin.run t@{
                     viewModel.tags.forEach { (k, v) ->
-                        v.find { it.searchKey == tags }?.let { so ->
-                            val scopeKey = SearchOption.toScopeKey(k)
-                            viewModel.tagMap[scopeKey] = setOf(so)
-                            return@t
-                        }
+                        v.find { it.searchKey == tags }
+                            ?.let { so ->
+                                val scopeKey = SearchOption.toScopeKey(k)
+                                viewModel.tagMap[scopeKey] = setOf(so)
+                                return@t
+                            }
                     }
                 }
             }

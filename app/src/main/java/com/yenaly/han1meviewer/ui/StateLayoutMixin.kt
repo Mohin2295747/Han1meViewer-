@@ -9,19 +9,16 @@ import com.yenaly.han1meviewer.pienization
 /**
  * 用於初始化 StateLayout。
  *
- * 但是不是説實現了這個接口就代表有 StateLayout 了，有些我還是直接用的 BRVAH 自帶的 StateLayoutVH，
- * 因爲用 StateLayout 稍稍有點麻煩。
+ * 但是不是説實現了這個接口就代表有 StateLayout 了，有些我還是直接用的 BRVAH 自帶的 StateLayoutVH， 因爲用 StateLayout 稍稍有點麻煩。
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/30 030 15:24
  */
 @JvmDefaultWithoutCompatibility
 interface StateLayoutMixin {
 
-    /**
-     * 初始化 StateLayout
-     */
+    /** 初始化 StateLayout */
     @SuppressLint("SetTextI18n")
     fun StateLayout.init(apply: StateLayout.() -> Unit = {}) {
         errorLayout = R.layout.layout_empty_view

@@ -8,13 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yenaly.han1meviewer.R
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
  * @since 2025/3/11 22:02
+ * @project Han1meViewer
  */
-class Hanidock @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
-) : FrameLayout(context, attrs, defStyleAttr) {
+class Hanidock
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+    FrameLayout(context, attrs, defStyleAttr) {
 
     private val recyclerView: RecyclerView
     private val hanidapter = Hanidapter()

@@ -79,8 +79,8 @@ import com.yenaly.yenaly_libs.utils.view.setUpFragmentStateAdapter
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
-    OrientationManager.OrientationChangeListener {
+class VideoActivity :
+    YenalyActivity<ActivityVideoBinding>(), OrientationManager.OrientationChangeListener {
     companion object {
         private const val ACTION_PLAY = "com.yenaly.han1meviewer.ACTION_PLAY"
         private const val ACTION_PAUSE = "com.yenaly.han1meviewer.ACTION_PAUSE"
@@ -110,16 +110,14 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
     override fun setUiStyle() {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
     }
 
     override fun initData(savedInstanceState: Bundle?) {
         if (intent.action == Intent.ACTION_VIEW) {
             val uri = intent.data
-            uri?.let {
-                videoCodeByWebsite = it.getQueryParameter("v")
-            }
+            uri?.let { videoCodeByWebsite = it.getQueryParameter("v") }
         }
 
         onBackPressedDispatcher.addCallback(this) {
@@ -139,9 +137,7 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.videoPlayer) { v, insets ->
             val navBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            v.updateLayoutParams<MarginLayoutParams> {
-                topMargin = navBar.top
-            }
+            v.updateLayoutParams<MarginLayoutParams> { topMargin = navBar.top }
             WindowInsetsCompat.CONSUMED
         }
 
@@ -164,9 +160,7 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
                             finish()
                         }
 
-                        is VideoLoadingState.Loading -> {
-
-                        }
+                        is VideoLoadingState.Loading -> {}
 
                         is VideoLoadingState.Success -> {
                             videoTitle = state.info.title
@@ -179,7 +173,8 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
                             } else {
                                 binding.videoPlayer.setUp(
                                     HanimeDataSource(state.info.title, state.info.videoUrls),
-                                    Jzvd.SCREEN_NORMAL, kernel
+                                    Jzvd.SCREEN_NORMAL,
+                                    kernel,
                                 )
                             }
                             binding.videoPlayer.posterImageView.load(state.info.coverUrl) {
@@ -187,13 +182,14 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
                             }
                             // 將觀看記錄保存數據庫
                             if (!fromDownload) {
-                                val entity = WatchHistoryEntity(
-                                    state.info.coverUrl,
-                                    state.info.title,
-                                    state.info.uploadTimeMillis,
-                                    Clock.System.now().toEpochMilliseconds(),
-                                    viewModel.videoCode
-                                )
+                                val entity =
+                                    WatchHistoryEntity(
+                                        state.info.coverUrl,
+                                        state.info.title,
+                                        state.info.uploadTimeMillis,
+                                        Clock.System.now().toEpochMilliseconds(),
+                                        viewModel.videoCode,
+                                    )
                                 viewModel.insertWatchHistoryWithCover(entity)
                             }
                         }
@@ -215,9 +211,7 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
         }
 
         lifecycleScope.launch {
-            viewModel.modifyHKeyframeFlow.collect { (_, reason) ->
-                showShortToast(reason)
-            }
+            viewModel.modifyHKeyframeFlow.collect { (_, reason) -> showShortToast(reason) }
         }
     }
 
@@ -233,35 +227,34 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
     }
 
     override fun onOrientationChanged(orientation: OrientationManager.ScreenOrientation) {
-        if (Jzvd.CURRENT_JZVD != null
-            && (binding.videoPlayer.state == Jzvd.STATE_PLAYING || binding.videoPlayer.state == Jzvd.STATE_PAUSE)
-            && binding.videoPlayer.screen != Jzvd.SCREEN_TINY
-            && Jzvd.FULLSCREEN_ORIENTATION != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (
+            Jzvd.CURRENT_JZVD != null &&
+                (binding.videoPlayer.state == Jzvd.STATE_PLAYING ||
+                    binding.videoPlayer.state == Jzvd.STATE_PAUSE) &&
+                binding.videoPlayer.screen != Jzvd.SCREEN_TINY &&
+                Jzvd.FULLSCREEN_ORIENTATION != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         ) {
             if (orientation.isLandscape && binding.videoPlayer.screen == Jzvd.SCREEN_NORMAL) {
                 changeScreenFullLandscape(orientation)
-            } else if (orientation === OrientationManager.ScreenOrientation.PORTRAIT
-                && binding.videoPlayer.screen == Jzvd.SCREEN_FULLSCREEN
+            } else if (
+                orientation === OrientationManager.ScreenOrientation.PORTRAIT &&
+                    binding.videoPlayer.screen == Jzvd.SCREEN_FULLSCREEN
             ) {
                 changeScreenNormal()
             }
         }
     }
 
-    /**
-     * 竖屏并退出全屏
-     */
+    /** 竖屏并退出全屏 */
     private fun changeScreenNormal() {
         if (binding.videoPlayer.screen == Jzvd.SCREEN_FULLSCREEN) {
             binding.videoPlayer.gotoNormalScreen()
         }
     }
 
-    /**
-     * 横屏
-     */
+    /** 横屏 */
     private fun changeScreenFullLandscape(orientation: OrientationManager.ScreenOrientation) {
-        //从竖屏状态进入横屏
+        // 从竖屏状态进入横屏
         if (binding.videoPlayer.screen != Jzvd.SCREEN_FULLSCREEN) {
             if (System.currentTimeMillis() - Jzvd.lastAutoFullscreenTime > 2000) {
                 binding.videoPlayer.autoFullscreen(orientation)
@@ -290,37 +283,34 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
             // singleTask 直接把所有 VideoActivity 都 finish 掉
             startActivity<MainActivity>()
         }
-        binding.videoPlayer.onKeyframeClickListener = { v ->
-            binding.videoPlayer.clickHKeyframe(v)
-        }
+        binding.videoPlayer.onKeyframeClickListener = { v -> binding.videoPlayer.clickHKeyframe(v) }
         binding.videoPlayer.onKeyframeLongClickListener = {
             val mi: JZMediaInterface? = binding.videoPlayer.mediaInterface
             if (mi != null && !mi.isPlaying) {
                 val currentPosition = binding.videoPlayer.currentPositionWhenPlaying
                 it.context.showAlertDialog {
                     setTitle(R.string.add_to_h_keyframe)
-                    setMessage(buildString {
-                        appendLine(getString(R.string.sure_to_add_to_h_keyframe))
-                        append(getString(R.string.current_position_d_ms, currentPosition))
-                    })
+                    setMessage(
+                        buildString {
+                            appendLine(getString(R.string.sure_to_add_to_h_keyframe))
+                            append(getString(R.string.current_position_d_ms, currentPosition))
+                        }
+                    )
                     setPositiveButton(R.string.confirm) { _, _ ->
                         viewModel.appendHKeyframe(
                             viewModel.videoCode,
                             videoTitle ?: "Untitled",
                             HKeyframeEntity.Keyframe(
                                 position = currentPosition,
-                                prompt = null // 這裏不要給太多負擔，保存就行了沒必要寫comment
-                            )
+                                prompt = null, // 這裏不要給太多負擔，保存就行了沒必要寫comment
+                            ),
                         )
                         // 使用到这里说明用户可能是关键H帧目标用户
                         Firebase.analytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
-                            param(
-                                FirebaseAnalytics.Param.ITEM_ID,
-                                FirebaseConstants.H_KEYFRAMES
-                            )
+                            param(FirebaseAnalytics.Param.ITEM_ID, FirebaseConstants.H_KEYFRAMES)
                             param(
                                 FirebaseAnalytics.Param.CONTENT_TYPE,
-                                FirebaseConstants.H_KEYFRAMES
+                                FirebaseConstants.H_KEYFRAMES,
                             )
                         }
                     }
@@ -357,37 +347,40 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
         updateVideoPlayerSize(isInPictureInPictureMode)
     }
 
-    private val playbackReceiver = object : BroadcastReceiver() {
+    private val playbackReceiver =
+        object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                ACTION_PLAY -> binding.videoPlayer.startButton.performClick()
-                ACTION_PAUSE -> goOnPlayOnPause()
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                updatePIPAction()
-            }
+            override fun onReceive(context: Context, intent: Intent) {
+                when (intent.action) {
+                    ACTION_PLAY -> binding.videoPlayer.startButton.performClick()
+                    ACTION_PAUSE -> goOnPlayOnPause()
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    updatePIPAction()
+                }
 
-            // 暂停时隐藏UI
-            binding.videoPlayer.topContainer.isVisible = false
-            binding.videoPlayer.bottomContainer.isVisible = false
+                // 暂停时隐藏UI
+                binding.videoPlayer.topContainer.isVisible = false
+                binding.videoPlayer.bottomContainer.isVisible = false
+            }
         }
-    }
 
     private fun registerReceiver() {
-        val filter = IntentFilter().apply {
-            addAction(ACTION_PLAY)
-            addAction(ACTION_PAUSE)
-        }
+        val filter =
+            IntentFilter().apply {
+                addAction(ACTION_PLAY)
+                addAction(ACTION_PAUSE)
+            }
         activity?.let {
             ContextCompat.registerReceiver(
                 it,
                 playbackReceiver,
                 filter,
-                ContextCompat.RECEIVER_EXPORTED
+                ContextCompat.RECEIVER_EXPORTED,
             )
         }
     }
+
     private fun unregisterReceiver() {
         try {
             unregisterReceiver(playbackReceiver)
@@ -398,23 +391,26 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updatePIPAction() {
-        val (iconRes, titleRes, actionRes) = if (binding.videoPlayer.state == Jzvd.STATE_PLAYING) {
-            Triple(R.drawable.pause_circle_24px, R.string.pause, ACTION_PAUSE)
-        } else {
-            Triple(R.drawable.play_circle_24px, R.string.continues, ACTION_PLAY)
-        }
-        val pauseIntent = PendingIntent.getBroadcast(
-            activity,
-            0,
-            Intent(actionRes).setPackage(activity?.packageName),
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val action = RemoteAction(
-            Icon.createWithResource(activity, iconRes),
-            getString(titleRes),
-            getString(titleRes),
-            pauseIntent
-        )
+        val (iconRes, titleRes, actionRes) =
+            if (binding.videoPlayer.state == Jzvd.STATE_PLAYING) {
+                Triple(R.drawable.pause_circle_24px, R.string.pause, ACTION_PAUSE)
+            } else {
+                Triple(R.drawable.play_circle_24px, R.string.continues, ACTION_PLAY)
+            }
+        val pauseIntent =
+            PendingIntent.getBroadcast(
+                activity,
+                0,
+                Intent(actionRes).setPackage(activity?.packageName),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+        val action =
+            RemoteAction(
+                Icon.createWithResource(activity, iconRes),
+                getString(titleRes),
+                getString(titleRes),
+                pauseIntent,
+            )
         builder?.setActions(listOf(action))
     }
 
@@ -425,9 +421,10 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
             binding.videoPlayer.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                 val sourceRectHint = Rect()
                 binding.videoPlayer.getGlobalVisibleRect(sourceRectHint)
-                builder = PictureInPictureParams.Builder()
-                    .setAspectRatio(aspectRatio)
-                    .setSourceRectHint(sourceRectHint)
+                builder =
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(aspectRatio)
+                        .setSourceRectHint(sourceRectHint)
                 updatePIPAction()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     builder?.setAutoEnterEnabled(true)
@@ -447,7 +444,9 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
     fun showRedDotCount(count: Int) {
         binding.videoTl.getOrCreateBadgeOnTextViewAt(
             tabNameArray.indexOf(R.string.comment),
-            null, Gravity.START, 2.dp
+            null,
+            Gravity.START,
+            2.dp,
         ) {
             isVisible = count > 0
             number = count

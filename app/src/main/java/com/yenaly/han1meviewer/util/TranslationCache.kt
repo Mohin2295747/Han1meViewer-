@@ -30,7 +30,9 @@ object TranslationCache {
 
     fun get(text: String): String? {
         // 1️⃣ Try memory
-        memoryCache[text]?.let { return it }
+        memoryCache[text]?.let {
+            return it
+        }
 
         // 2️⃣ Try disk
         val snapshot = diskCache?.get(key(text)) ?: return null
@@ -47,9 +49,7 @@ object TranslationCache {
 
         // Save in disk
         val editor = diskCache?.edit(key(text)) ?: return
-        editor.newOutputStream(0).bufferedWriter().use {
-            it.write(translated)
-        }
+        editor.newOutputStream(0).bufferedWriter().use { it.write(translated) }
         editor.commit()
     }
 

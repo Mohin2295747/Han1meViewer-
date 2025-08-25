@@ -41,8 +41,6 @@ abstract class YenalySettingsActivity : FrameActivity() {
         }
     }
 
-    /**
-     * 初始化设置的Fragment
-     */
+    /** 初始化设置的Fragment */
     abstract fun initFragmentContainer(): YenalySettingsFragment
 }

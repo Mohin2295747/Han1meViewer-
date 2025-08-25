@@ -1,7 +1,6 @@
 package com.yenaly.han1meviewer.logic.network
 
 import com.yenaly.han1meviewer.Preferences
-import okhttp3.internal.proxy.NullProxySelector
 import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -9,13 +8,15 @@ import java.net.Proxy
 import java.net.ProxySelector
 import java.net.SocketAddress
 import java.net.URI
+import okhttp3.internal.proxy.NullProxySelector
 
 /**
- * 受 [EhViewer_CN_SXJ 中 EhProxySelector](https://github.com/xiaojieonly/Ehviewer_CN_SXJ/blob/BiLi_PC_Gamer/app/src/main/java/com/hippo/ehviewer/EhProxySelector.java)
+ * 受
+ * [EhViewer_CN_SXJ 中 EhProxySelector](https://github.com/xiaojieonly/Ehviewer_CN_SXJ/blob/BiLi_PC_Gamer/app/src/main/java/com/hippo/ehviewer/EhProxySelector.java)
  * 的启发，Han1meViewer 也将使用 [HProxySelector] 来实现代理功能。
  *
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/10/07 007 17:32
  */
 // #issue-15: 添加系统代理功能
@@ -49,7 +50,8 @@ class HProxySelector : ProxySelector() {
         fun rebuildNetwork() {
             val properties = System.getProperties()
             when (Preferences.proxyType) {
-                TYPE_HTTP, TYPE_SOCKS -> {
+                TYPE_HTTP,
+                TYPE_SOCKS -> {
                     properties["proxySet"] = true.toString()
                     properties["proxyHost"] = Preferences.proxyIp
                     properties["proxyPort"] = Preferences.proxyPort.toString()
@@ -65,12 +67,14 @@ class HProxySelector : ProxySelector() {
     }
 
     private fun updateProxy() {
-        delegation = when (Preferences.proxyType) {
-            TYPE_DIRECT -> NullProxySelector
-            TYPE_SYSTEM -> alternative
-            TYPE_HTTP, TYPE_SOCKS -> null
-            else -> NullProxySelector
-        }
+        delegation =
+            when (Preferences.proxyType) {
+                TYPE_DIRECT -> NullProxySelector
+                TYPE_SYSTEM -> alternative
+                TYPE_HTTP,
+                TYPE_SOCKS -> null
+                else -> NullProxySelector
+            }
     }
 
     override fun select(uri: URI?): MutableList<Proxy> {
@@ -84,7 +88,7 @@ class HProxySelector : ProxySelector() {
                 return mutableListOf(
                     Proxy(
                         if (type == TYPE_HTTP) Proxy.Type.HTTP else Proxy.Type.SOCKS,
-                        socketAddress
+                        socketAddress,
                     )
                 )
             }

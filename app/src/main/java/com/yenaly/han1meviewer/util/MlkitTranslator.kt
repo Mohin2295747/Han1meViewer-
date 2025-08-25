@@ -2,11 +2,11 @@ package com.yenaly.han1meviewer.util
 
 import android.content.Context
 import com.google.mlkit.nl.translate.TranslateLanguage
+import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
-import com.google.mlkit.nl.translate.Translation
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 object MLKitTranslator {
     private var jaToEn: Translator? = null
@@ -14,19 +14,21 @@ object MLKitTranslator {
 
     fun init(context: Context) {
         if (jaToEn == null) {
-            val jaOptions = TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.JAPANESE)
-                .setTargetLanguage(TranslateLanguage.ENGLISH)
-                .build()
+            val jaOptions =
+                TranslatorOptions.Builder()
+                    .setSourceLanguage(TranslateLanguage.JAPANESE)
+                    .setTargetLanguage(TranslateLanguage.ENGLISH)
+                    .build()
             jaToEn = Translation.getClient(jaOptions)
             jaToEn!!.downloadModelIfNeeded()
         }
 
         if (zhToEn == null) {
-            val zhOptions = TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.CHINESE)
-                .setTargetLanguage(TranslateLanguage.ENGLISH)
-                .build()
+            val zhOptions =
+                TranslatorOptions.Builder()
+                    .setSourceLanguage(TranslateLanguage.CHINESE)
+                    .setTargetLanguage(TranslateLanguage.ENGLISH)
+                    .build()
             zhToEn = Translation.getClient(zhOptions)
             zhToEn!!.downloadModelIfNeeded()
         }
@@ -43,28 +45,29 @@ object MLKitTranslator {
         }
     }
 
-    suspend fun translate(text: String): String =
-        suspendCancellableCoroutine { cont ->
-            // ✅ Check cache first (memory + disk)
-            TranslationCache.get(text)?.let {
-                cont.resume(it)
-                return@suspendCancellableCoroutine
-            }
-
-            val translator = detectLanguage(text)
-            if (translator == null) {
-                cont.resume(text)
-                return@suspendCancellableCoroutine
-            }
-
-            translator.translate(text)
-                .addOnSuccessListener { translated ->
-                    // ✅ Save to cache
-                    TranslationCache.put(text, translated)
-                    cont.resume(translated)
-                }
-                .addOnFailureListener { cont.resume(text) }
+    suspend fun translate(text: String): String = suspendCancellableCoroutine { cont ->
+        // ✅ Check cache first (memory + disk)
+        TranslationCache.get(text)?.let {
+            cont.resume(it)
+            return@suspendCancellableCoroutine
         }
+
+        val translator = detectLanguage(text)
+        if (translator == null) {
+            cont.resume(text)
+            return@suspendCancellableCoroutine
+        }
+
+        translator
+            .translate(text)
+            .addOnSuccessListener { translated ->
+                // ✅ Save to cache
+                TranslationCache.put(text, translated)
+                cont.resume(translated)
+            }
+            .addOnFailureListener { cont.resume(text) }
+    }
+
     suspend fun translate(text: TranslatableText) {
         if (!text.isTranslated()) {
             text.translated = translate(text.raw)

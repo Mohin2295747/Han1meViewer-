@@ -21,12 +21,15 @@ import com.yenaly.han1meviewer.ui.view.BlurTransformation
 import com.yenaly.yenaly_libs.utils.startActivity
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2023/11/26 026 16:48
  */
 class HanimePreviewNewsRvAdapter :
-    BaseQuickAdapter<HanimePreview.PreviewInfo, DataBindingHolder<ItemHanimePreviewNewsV2Binding>>() {
+    BaseQuickAdapter<
+        HanimePreview.PreviewInfo,
+        DataBindingHolder<ItemHanimePreviewNewsV2Binding>,
+    >() {
 
     init {
         isStateViewEnable = true
@@ -64,30 +67,27 @@ class HanimePreviewNewsRvAdapter :
         viewType: Int,
     ): DataBindingHolder<ItemHanimePreviewNewsV2Binding> {
         return DataBindingHolder(
-            ItemHanimePreviewNewsV2Binding.inflate(
-                LayoutInflater.from(context), parent, false
+                ItemHanimePreviewNewsV2Binding.inflate(LayoutInflater.from(context), parent, false)
             )
-        ).also { viewHolder ->
-            viewHolder.binding.tags.lifecycle = (context as? PreviewActivity)?.lifecycle
-            viewHolder.binding.tags.isCollapsedEnabled = true
-            viewHolder.itemView.apply {
-                setOnClickListener {
-                    val position = viewHolder.bindingAdapterPosition
-                    val item = getItem(position) ?: return@setOnClickListener
-                    if (context is PreviewActivity) {
-                        context.startActivity<VideoActivity>(VIDEO_CODE to item.videoCode)
+            .also { viewHolder ->
+                viewHolder.binding.tags.lifecycle = (context as? PreviewActivity)?.lifecycle
+                viewHolder.binding.tags.isCollapsedEnabled = true
+                viewHolder.itemView.apply {
+                    setOnClickListener {
+                        val position = viewHolder.bindingAdapterPosition
+                        val item = getItem(position) ?: return@setOnClickListener
+                        if (context is PreviewActivity) {
+                            context.startActivity<VideoActivity>(VIDEO_CODE to item.videoCode)
+                        }
                     }
                 }
             }
-        }
     }
 
     private inner class PreviewPicRvAdapter(private val item: HanimePreview.PreviewInfo) :
         BaseQuickAdapter<String, QuickViewHolder>(item.relatedPicsUrl) {
         override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: String?) {
-            holder.getView<ImageView>(R.id.iv_preview_news_pic).load(item) {
-                crossfade(true)
-            }
+            holder.getView<ImageView>(R.id.iv_preview_news_pic).load(item) { crossfade(true) }
         }
 
         override fun onCreateViewHolder(
@@ -95,16 +95,21 @@ class HanimePreviewNewsRvAdapter :
             parent: ViewGroup,
             viewType: Int,
         ): QuickViewHolder {
-            return QuickViewHolder(
-                R.layout.item_hanime_preview_news_pic, parent
-            ).also { viewHolder ->
+            return QuickViewHolder(R.layout.item_hanime_preview_news_pic, parent).also { viewHolder
+                ->
                 viewHolder.itemView.setOnClickListener {
                     val position = viewHolder.bindingAdapterPosition
-                    XPopup.Builder(context).asImageViewer(
-                        it as? ImageView, position, item.relatedPicsUrl, { popupView, pos ->
-                            popupView.updateSrcView(recyclerView.getChildAt(pos) as? ImageView)
-                        }, imageLoader
-                    ).show()
+                    XPopup.Builder(context)
+                        .asImageViewer(
+                            it as? ImageView,
+                            position,
+                            item.relatedPicsUrl,
+                            { popupView, pos ->
+                                popupView.updateSrcView(recyclerView.getChildAt(pos) as? ImageView)
+                            },
+                            imageLoader,
+                        )
+                        .show()
                 }
             }
         }

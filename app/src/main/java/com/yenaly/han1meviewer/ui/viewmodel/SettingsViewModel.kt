@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 /**
- * @project Han1meViewer
  * @author Yenaly Liew
+ * @project Han1meViewer
  * @time 2022/07/01 001 13:40
  */
 class SettingsViewModel(application: Application) : YenalyViewModel(application) {
@@ -25,10 +25,10 @@ class SettingsViewModel(application: Application) : YenalyViewModel(application)
         }
     }
 
-
     fun modifyHKeyframe(
         videoCode: String,
-        oldKeyframe: HKeyframeEntity.Keyframe, keyframe: HKeyframeEntity.Keyframe,
+        oldKeyframe: HKeyframeEntity.Keyframe,
+        keyframe: HKeyframeEntity.Keyframe,
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, keyframe)
@@ -36,23 +36,16 @@ class SettingsViewModel(application: Application) : YenalyViewModel(application)
     }
 
     fun insertHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.insert(entity)
-        }
+        viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.insert(entity) }
     }
 
     fun deleteHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.delete(entity)
-        }
+        viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.delete(entity) }
     }
 
     fun updateHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.update(entity)
-        }
+        viewModelScope.launch(Dispatchers.IO) { DatabaseRepo.HKeyframe.update(entity) }
     }
 
-    fun loadAllSharedHKeyframes() =
-        DatabaseRepo.HKeyframe.loadAllShared().flowOn(Dispatchers.IO)
+    fun loadAllSharedHKeyframes() = DatabaseRepo.HKeyframe.loadAllShared().flowOn(Dispatchers.IO)
 }
